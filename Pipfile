@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 thehive4py = "*"
 python-magic-bin="*"
+cortexutils = "*"
 
 [requires]
 python_version = "3.8"
