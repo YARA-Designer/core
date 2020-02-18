@@ -1,0 +1,11 @@
+# Python itself
+# PYC
+__pycache__/
+*/__pycache__/
+
+# IDEs
+# -- PyCharm
+.idea/
+
+# Virtual envs
+Pipfile.lock
