@@ -2,9 +2,26 @@
 # encoding: utf-8
 
 from cortexutils.responder import Responder
-from yara.rules import YaraWhitelistAlertRule
 
 TH_DATATYPE_ALERT = "thehive:alert"
+
+
+class YaraWhitelistAlertRule:
+    def __init__(self, name):
+        self.json_data = {
+            "name": "Whitelist_{}".format(name), "type": "email",
+            "meta": {
+                "description ": "Whitelist rules for the alert: {}".format(name)
+            },
+            "strings": {
+                "alertname": name, "remove_me": "String to enable empty whitelistingrules - DELETE when adding "
+                                                "whitelisting rules"
+            },
+            "condition": "$alertname and ($remove_me)"
+        }
+
+    def get_json(self):
+        return self.json_data
 
 
 class YaraWhitelistRuleCreator(Responder):

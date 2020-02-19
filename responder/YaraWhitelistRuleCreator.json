@@ -1,0 +1,16 @@
+{
+  "name": "YaraWhitelistRuleCreator",
+  "version": "1.0",
+  "author": "Aleksander Berge Kjellsen",
+  "url": "https://github.com/TheHive-Project/Cortex-Analyzers",
+  "license": "AGPL-V3",
+  "description": "Create a Yara whitelist rule from a TheHive alert",
+  "dataTypeList": ["thehive:alert"],
+  "command": "YaraWhitelistRuleCreator/yara_whitelist_rule_creator.py",
+  "baseConfig": "YaraWhitelistRuleCreator",
+  "config": {
+
+  },
+  "configurationItems": [
+  ]
+}
