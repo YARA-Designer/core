@@ -31,19 +31,23 @@ class YaraWhitelistRuleCreator(Responder):
         Responder.__init__(self)
 
     def run(self):
-        Responder.run(self)
+        # self.report({"message": "DEBUG: Self ran"})
+        # Responder.run(self)
+        self.report({"message": "DEBUG: Responder ran"})
 
         if self.data_type != TH_DATATYPE_CASE:
-            self.error("Invalid dataType!")
+            self.error({"message": "Invalid dataType: got '{}', expected '{}'!".format(self.data_type,
+                                                                                       TH_DATATYPE_CASE)})
 
-        alertname = self.get_param("title", None, "Missing title/name!")
+        # alertname = self.get_param("title", None, "Missing title/name!")
+        #
+        # rule = YaraWhitelistAlertRule(alertname)
+        # # FIXME: Log debug into syslog (dumping to file seems to fail)debug to a file.
+        # print(json.dumps(rule.get_json(), indent=4))
+        # with open("/opt/debug/YaraWhitelistRuleCreator.json", "w") as f:
+        #     json.dump(rule.get_json(), f, indent=4)
 
-        rule = YaraWhitelistAlertRule(alertname)
-        # FIXME: Dump debug to a file.
-        with open("debug.json", "w") as f:
-            json.dump(rule.get_json(), f, indent=4)
-
-        self.report("message", "FIXME")
+        self.report({"message": "FIXME"})
 
     def operations(self, raw):
         return [self.build_operation('AddTagToCase', tag='FIXME')]  # FIXME: Apply a proper relevant operation
