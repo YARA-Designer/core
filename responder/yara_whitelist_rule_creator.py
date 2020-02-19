@@ -35,9 +35,8 @@ class YaraWhitelistRuleCreator(Responder):
             self.error("Invalid dataType!")
 
         alertname = self.get_param("details_title", None, "Missing alert title/name!")
-        meta_desc = "Whitelist rules for the alert: {}".format(alertname)
 
-        rule = YaraWhitelistAlertRule(alertname, meta_desc)
+        rule = YaraWhitelistAlertRule(alertname)
         print(rule)
 
         self.report("test message", "FIXME")
