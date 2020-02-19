@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # encoding: utf-8
+import json
 
 from cortexutils.responder import Responder
 
 TH_DATATYPE_ALERT = "thehive:alert"
+TH_DATATYPE_CASE = "thehive:case"
 
 
 class YaraWhitelistAlertRule:
@@ -31,15 +33,17 @@ class YaraWhitelistRuleCreator(Responder):
     def run(self):
         Responder.run(self)
 
-        if self.data_type != TH_DATATYPE_ALERT:
+        if self.data_type != TH_DATATYPE_CASE:
             self.error("Invalid dataType!")
 
-        alertname = self.get_param("details_title", None, "Missing alert title/name!")
+        alertname = self.get_param("title", None, "Missing title/name!")
 
         rule = YaraWhitelistAlertRule(alertname)
-        print(rule)
+        # FIXME: Dump debug to a file.
+        with open("debug.json", "w") as f:
+            json.dump(rule.get_json(), f, indent=4)
 
-        self.report("test message", "FIXME")
+        self.report("message", "FIXME")
 
     def operations(self, raw):
         return [self.build_operation('AddTagToCase', tag='FIXME')]  # FIXME: Apply a proper relevant operation
