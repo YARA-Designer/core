@@ -13,11 +13,7 @@ def create_yara_whitelist_rule():
         if request.form is None:
             return "ERROR: Received data was NoneType!"
 
-        print(request.form)
-
         rule = YaraWhitelistAlertRule(request.form['title'], description=request.form['description'])
-        # print(rule)
-        print(rule.get_dict())
         js = json.loads(json.dumps(rule.get_dict()))
         return js
 

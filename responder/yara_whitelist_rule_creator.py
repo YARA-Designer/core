@@ -26,20 +26,12 @@ class YaraWhitelistRuleCreator(Responder):
             self.error("POST Request to {} failed with status: {} {}!".format(endpoint, r.status_code,
                                                                               r.reason))
 
-        # dct = {"name": js["name"],
-        #        "type": js["type"],
-        #        "meta": js["meta"],
-        #        "strings": js["strings"],
-        #        "condition": js["condition"]
-        #        }
-        # self.report(dct)
-
         js = json.loads(r.text)
         self.report(js)
 
     def operations(self, raw):
-        # FIXME: Apply a proper relevant operation (like mark read)
-        return [self.build_operation('AddTagToCase', tag='FIXME')]
+        # FIXME: Apply a proper relevant operation (like mark alert read and delete case?)
+        return [self.build_operation('AddTagToCase', tag='FIXME 1')]
 
 
 if __name__ == "__main__":

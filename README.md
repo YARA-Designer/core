@@ -1,7 +1,8 @@
 # Yara Whitelist Rule Creator
 #### _A TheHive/Cortex responder_ 
 
-The YWRC responder sends a `thehve:case` to a listener.
+This responder sends a `thehve:case` to a listener which then creates 
+a Yara rule based on it.
 
 ### Set up on thehive and cortex host:
 
@@ -16,6 +17,6 @@ pip3 install cortexutils
 (Assuming `$cortexResponders = /opt/Cortex-Analyzers/responders/`)
 1. Upload the `responder` directory as `$cortexResponders/` on the remote host.
 2. Restart cortex and thehive
-3. Enable the YaraWhitelistRuleCreator responder in cortex.
+3. Enable the responder in cortex.
 4. Start the listener.
 5. Use the responder on a case.
