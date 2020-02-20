@@ -9,6 +9,7 @@ verify_ssl = true
 thehive4py = "*"
 python-magic-bin="*"
 cortexutils = "*"
+flask = "*"
 
 [requires]
 python_version = "3.8"
