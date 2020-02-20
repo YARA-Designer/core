@@ -1,6 +1,6 @@
 {
   "name": "YaraWhitelistRuleCreator",
-  "version": "0.0.6",
+  "version": "0.0.12",
   "author": "Aleksander Berge Kjellsen",
   "url": "https://github.com/TheHive-Project/Cortex-Analyzers",
   "license": "AGPL-V3",
