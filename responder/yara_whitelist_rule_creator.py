@@ -35,9 +35,7 @@ class YaraWhitelistRuleCreator(Responder):
             self.error({"message": "Invalid dataType: got '{}', expected '{}'!".format(self.data_type,
                                                                                        TH_DATATYPE_CASE)})
 
-        # self.report({"title": self.get_param("title", None, "Missing title/name!")})
-        self.report({"title": self.get_data()["title"],
-                     "self": self.get_data()})
+        self.report({"title": self.get_param("data.title", None, "Missing title/name!")})
 
     def operations(self, raw):
         return [self.build_operation('AddTagToCase', tag='FIXME')]  # FIXME: Apply a proper relevant operation
