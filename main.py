@@ -2,6 +2,7 @@ from flask import Flask
 
 from handlers import config_handler
 from listener import api
+import webserver
 
 if __name__ == "__main__":
     # Get config
@@ -10,6 +11,10 @@ if __name__ == "__main__":
     app = Flask(__name__)
     app.config["DEBUG"] = True
 
+    # Add TheHive listener endpoint
     app.add_url_rule(config["hive_listener_endpoint"], methods=['POST'], view_func=api.create_yara_whitelist_rule)
+
+    # Add root endpoint for frontend Web GUI
+    app.add_url_rule('/', view_func=webserver.home)
 
     app.run(host=config["listener_bind_host"], port=config["listener_bind_port"])
