@@ -17,4 +17,8 @@ if __name__ == "__main__":
     # Add root endpoint for frontend Web GUI
     app.add_url_rule('/', view_func=webserver.home)
 
+    # Add other useful routes
+    app.add_url_rule('/list', view_func=webserver.list_content)
+    app.add_url_rule('/new_yara_rule', view_func=webserver.new_yara_rule)
+
     app.run(host=config["listener_bind_host"], port=config["listener_bind_port"])

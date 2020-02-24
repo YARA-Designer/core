@@ -1,4 +1,7 @@
 import json
+import os
+
+from flask import render_template
 
 content = []
 tab_character = "&nbsp;"
@@ -23,5 +26,11 @@ def list_content():
     return line
 
 
+def new_yara_rule():
+    # return render_template('new_yara_rule.html', **locals())
+    return render_template('new_yara_rule.html', thehive_cases=content)
+
+
 def home():
-    return list_content()
+    return new_yara_rule()
+

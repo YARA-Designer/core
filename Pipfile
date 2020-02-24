@@ -10,6 +10,7 @@ thehive4py = "*"
 python-magic-bin="*"
 cortexutils = "*"
 flask = "*"
+yara-python = "*"
 
 [requires]
 python_version = "3.8"

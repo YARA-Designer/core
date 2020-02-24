@@ -1,0 +1,8 @@
+&#123;% extends "layout.html" %&#125;
+&#123;% block body %&#125;
+<div class="block1">
+    {% for case in thehive_cases %}
+        <h1> Case: {{ case.title }} [ID: {{ case.id }}] </h1>
+    {% endfor %}
+</div>
+&#123;% endblock %&#125;
