@@ -13,6 +13,17 @@ class YaraWhitelistRuleCreator(Responder):
     def __init__(self):
         Responder.__init__(self)
 
+    # def get_data_as_json(self):
+    #     """
+    #     Convert get_data()'s python dict to JSON object.
+    #
+    #     First convert the dict to a JSON-compatible string, then load it as JSON input,
+    #     resulting in a JSON object.
+    #     :return:
+    #     """
+    #     # return json.loads(json.dumps(self.get_data()))
+    #     return json.JSONEncoder.encode(json.dumps(self.get_data()))
+
     def run(self):
         if self.data_type != TH_DATATYPE_CASE:
             self.error("Invalid dataType: got '{}', expected '{}'!".format(self.data_type, TH_DATATYPE_CASE))
@@ -21,7 +32,9 @@ class YaraWhitelistRuleCreator(Responder):
         port = 5001
         route = "YaraWhitelistRuleCreator"
         endpoint = "http://{}:{}/{}".format(server, port, route)
-        r = requests.post(endpoint, data=self.get_data())
+        print(type(self.get_data()))
+        print(self.get_data())
+        r = requests.post(endpoint, json=self.get_data(), headers={'Content-type': 'application/json'})
         if r.status_code != 200:
             self.error("POST Request to {} failed with status: {} {}!".format(endpoint, r.status_code,
                                                                               r.reason))
