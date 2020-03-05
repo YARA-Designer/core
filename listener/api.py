@@ -1,13 +1,17 @@
 import json
 
 from flask import request, jsonify
+from sqlalchemy.orm import sessionmaker
 from thehive4py.api import TheHiveApi
 from werkzeug.datastructures import ImmutableMultiDict
 
+from database.operations import add_row
 from handlers import config_handler
 
 from yara.rules import YaraWhitelistAlertRule
 import webserver
+from database import engine
+from database.tables.pending_rule import PendingRule
 
 
 def get_json_returnable_observables_list(observables: json):
@@ -23,6 +27,7 @@ def imd_to_dict(imd: ImmutableMultiDict):
     dct = {}
     for key, value in imd.items():
         print("{}: {}".format(key, value))
+        dct[key] = value
 
     return dct
 
@@ -55,7 +60,12 @@ def create_yara_whitelist_rule():
         # print("Case with observables:\n{}".format(json.dumps(thehive_case, indent=4)))
 
         # Send the modified thehive:case to the webserver
-        webserver.update_content(thehive_case)
+        # webserver.update_content(thehive_case)
+
+        # Store the modified thehive:case JSON to database.
+        rule = PendingRule(data=thehive_case)
+
+        add_row(rule)
 
         return jsonify(thehive_case)
 

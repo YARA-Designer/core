@@ -11,6 +11,7 @@ python-magic-bin="*"
 cortexutils = "*"
 flask = "*"
 yara-python = "*"
+sqlalchemy = "*"
 
 [requires]
 python_version = "3.8"

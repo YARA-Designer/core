@@ -3,11 +3,16 @@ from flask import Flask
 from handlers import config_handler
 from listener import api
 import webserver
+from database import init_db
 
 if __name__ == "__main__":
     # Get config
     config = config_handler.load_config()
 
+    # Initialize database
+    init_db()
+
+    # Set up Flask
     app = Flask(__name__)
     app.config["DEBUG"] = True
 
