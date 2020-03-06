@@ -1,3 +1,5 @@
+from sqlalchemy.exc import SQLAlchemyError
+
 from database import db_session
 
 
@@ -7,7 +9,7 @@ def add_row(db_row):
     try:
         session.add(db_row)
         session.commit()
-    except:
+    except SQLAlchemyError:
         session.rollback()
         raise
     finally:
