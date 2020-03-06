@@ -1,32 +1,88 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 <div class="block1">
-    <table style="border: 1px solid black;">
+    <h1> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </h1>
+    <h2>Severity: {{ case.data.severity }}</h2>
+    <h4>Tags: {{ case.data.tags }}</h4>
+    {% if case.data.customFields %}
+        <h5>Custom fields: {{ case.data.customFields }}</h5>
+    {% endif %}
+
+    <form>
+        <table>
+            <tr>
+                <th>Operator</th>
+                <th>Artifact</th>
+                <th>Type</th>
+                <th>ID</th>
+            </tr>
+                {% for key, value in case.data.items() %}
+                    {% if key == "observables" %}
+                            <td>
+
+                                {% for observable in case.data.observables %}
+                                    <tr>
+                                      <td>
+                                          <label for="operator"></label>
+                                          <input type="text" id="operator" name="operator">
+                                      </td>
+                                      <td>
+                                          <p id="artifact">
+                                              {{ observable.data }}
+                                          </p>
+                                      </td>
+                                      <td>
+                                          <p id="artifactType">
+                                              {{ observable.dataType }}
+                                          </p>
+                                      </td>
+                                      <td>
+                                          <p id="artifactId">
+                                              {{ observable.id }}
+                                          </p>
+                                      </td>
+                                    </tr>
+                                {% endfor %}
+                            </td>
+                    {% endif %}
+                {% endfor %}
+        </table>
+        <input type="submit" value="Submit">
+    </form>
+</div>
+
+<!-- DETAILS SECTION //-->
+<button type="button" class="caseDetailsCollapsible">Show case details</button>
+<div class="caseDetailsContent">
+    <table>
         <tr>
             <th>Key</th>
             <th>Value</th>
         </tr>
-            <h1> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </h1>
-            {% for key, value in case.data.items() %}
-                {% if key == "observables" %}
-                    <p>Observables:</p>
-                    <ul>
-                        {% for observable in case.data.observables %}
-                                <li>
-                                    {{ observable.id }}
-                                    <ul>
-                                        {% for k, v in observable.items() %}
-                                            <li> {{ k }}: {{ v }}] </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                        <tr>
-                            <td> {{ key }} </td>
-                            <td>{{ value }}</td>
-                        </tr>
-
-                {% endif %}
-            {% endfor %}
+        {% for key, value in case.data.items() %}
+            {% if key != "observables" %}
+                <tr>
+                    <td> {{ key }} </td>
+                    <td>{{ value }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
     </table>
 </div>
+{% block javascript %}
+    <script type="text/javascript">
+        var coll = document.getElementsByClassName("caseDetailsCollapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+          coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+              content.style.display = "none";
+            } else {
+              content.style.display = "block";
+            }
+          });
+        }
+    </script>
+{% endblock %}
