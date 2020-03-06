@@ -1,0 +1,38 @@
+html {
+    /*background-color: #8ac640;*/
+}
+
+.caseDetailsCollapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .caseDetailsCollapsible:hover {
+  background-color: #555;
+}
+
+.caseDetailsContent {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 4px;
+}
+
+tr:nth-child(even) {background-color: #f2f2f2;}
