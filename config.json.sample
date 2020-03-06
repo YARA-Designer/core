@@ -1,0 +1,10 @@
+{
+    "debug": "False",
+    "hive_server": "192.168.136.129",
+    "hive_port": 9000,
+    "hive_listener_endpoint": "/YaraWhitelistRuleCreator",
+    "hive_api_key": "SuGd5Aj4NNudH8unh5CpWLm4U/MYDeVc",
+    "listener_bind_host": "0.0.0.0",
+    "listener_bind_port": 5001,
+    "datetime_format": "%Y-%m-%d %H:%M:%SZ"
+}
