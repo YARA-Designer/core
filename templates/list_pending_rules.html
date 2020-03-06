@@ -5,12 +5,12 @@
             <th>Key</th>
             <th>Value</th>
         </tr>
-            <h1> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </h1>
-            {% for key, value in case.data.items() %}
+            <h1> Case: {{ case.title }} [ID: {{ case.id }}] </h1>
+            {% for key, value in case.items() %}
                 {% if key == "observables" %}
                     <p>Observables:</p>
                     <ul>
-                        {% for observable in case.data.observables %}
+                        {% for observable in case.observables %}
                                 <li>
                                     {{ observable.id }}
                                     <ul>

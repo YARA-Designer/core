@@ -1,1 +1,0 @@
-pending_yara_rules = []

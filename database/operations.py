@@ -1,6 +1,4 @@
-# from sqlalchemy.orm import sessionmaker
-
-from database import engine, db_session
+from database import db_session
 
 
 def add_row(db_row):

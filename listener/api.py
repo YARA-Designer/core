@@ -11,7 +11,7 @@ from handlers import config_handler
 from yara.rules import YaraWhitelistAlertRule
 import webserver
 from database import engine
-from database.tables.pending_rule import PendingRule
+from database.models import PendingRule
 
 
 def get_json_returnable_observables_list(observables: json):
@@ -59,13 +59,8 @@ def create_yara_whitelist_rule():
         thehive_case['observables'] = observables_response.json()
         # print("Case with observables:\n{}".format(json.dumps(thehive_case, indent=4)))
 
-        # Send the modified thehive:case to the webserver
-        # webserver.update_content(thehive_case)
-
         # Store the modified thehive:case JSON to database.
-        rule = PendingRule(data=thehive_case)
-
-        add_row(rule)
+        add_row(PendingRule(data=thehive_case))
 
         return jsonify(thehive_case)
 
