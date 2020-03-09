@@ -5,18 +5,12 @@
     {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
 {% endif %}
 
-<div class="yara_rule_designer" id="yara_rule_designer_div" ondrop="drop(event)" ondragover="allowDrop(event)">
-<!--    Add artifacts as individual draggable objects-->
-    {% set artifact_counter = 1 %}
-    {% for artifact in artifacts %}
-        <span id="artifact_{{ artifact_counter }}" draggable="true" ondragstart="drag(event)">{{ artifact.data }}</span>
-        {% set artifact_counter = artifact_counter + 1 %}
-    {% endfor %}
+<div class="yara_rule_designer" id="yara_rule_designer_div1" ondrop="drop(event)" ondragover="allowDrop(event)">
 <!--    Add conditional keywords-->
 <!--    Boolean-->
     <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">AND</span>
     <span id="condition_keyword_or" class="condition_keyword" draggable="true" ondragstart="drag(event)">OR</span>
-    <span id="condition_keyword_not" class="condition_keyword" draggable="true" ondragstart="drag(event)">==</span>
+    <span id="condition_keyword_not" class="condition_keyword" draggable="true" ondragstart="drag(event)">NOT</span>
 <!--    Arithmetic-->
     <span id="condition_keyword_equal" class="condition_keyword" draggable="true" ondragstart="drag(event)">==</span>
     <span id="condition_keyword_lt" class="condition_keyword" draggable="true" ondragstart="drag(event)"><</span>
@@ -38,11 +32,21 @@
     <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)">^</span>
     <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"><<</span>
     <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)">>></span>
+<!--    Add artifacts as individual draggable objects-->
+    {% set artifact_counter = 1 %}
+    {% for artifact in artifacts %}
+        <span id="artifact_{{ artifact_counter }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }}</span>
+        {% set artifact_counter = artifact_counter + 1 %}
+    {% endfor %}
 </div>
 
-<div id="content" style="height: 400px;">
-  <div id="makeMeDraggable"> </div>
+<div class="yara_rule_designer" id="yara_rule_designer_div2" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <span id="test" class="draggable_artifact" draggable="true" ondragstart="drag(event)">TEST AREA</span>
 </div>
+
+<!--<div id="content" style="height: 400px;">-->
+<!--  <div id="makeMeDraggable"> </div>-->
+<!--</div>-->
 
 {% block javascript %}
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
@@ -57,13 +61,13 @@
 
         function drag(ev)
         {
-            console.log('drag');
+            console.log('drag ' + $(ev.target).text());
             ev.dataTransfer.setData("Text",ev.target.id);
         }
 
         function drop(ev)
         {
-            console.log('drop');
+            console.log('drop ' + $(ev.target).text());
             ev.preventDefault();
             var data=ev.dataTransfer.getData("Text");
 
@@ -77,15 +81,15 @@
 <script src="https://fb.me/react-dom-15.1.0.js"></script>
 
 
-    <script type="text/javascript">
-        $( init );
+<!--    <script type="text/javascript">-->
+<!--        $( init );-->
 
-        function init() {
-          $('#makeMeDraggable').draggable({
-              containment: '#content',
-              cursor: 'move',
-              snap: '#content'
-            });
-        }
-    </script>
+<!--        function init() {-->
+<!--          $('#makeMeDraggable').draggable({-->
+<!--              containment: '#content',-->
+<!--              cursor: 'move',-->
+<!--              snap: '#content'-->
+<!--            });-->
+<!--        }-->
+<!--    </script>-->
 {% endblock %}
