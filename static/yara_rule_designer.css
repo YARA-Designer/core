@@ -1,0 +1,43 @@
+/*body {*/
+/*    background-color: black;*/
+/*}*/
+
+#yara_rule_designer_div {
+    margin-left: 0px;
+    width:720px;
+    height:200px;
+    padding:50px;
+    border:1px solid #aaaaaa;
+    background-color: LightBlue;
+}
+
+span {
+    margin: 20px;
+    padding: 20px;
+    background-color:#FFFF88;
+    font-size: 20px;
+    border: 0px solid;
+    border-radius: 25px;
+    box-shadow: 5px 5px 5px grey;
+}
+
+#quiz {
+    margin-left: 0px;
+    width:720px;
+    height:200px;
+    padding:40px;
+    border:1px solid #aaaaaa;
+    background-color: #FFFF88;
+}
+
+#quiz1 {
+    border-radius: 0px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: moz-none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#makeMeDraggable { width: 100px; height: 100px; background: red; }

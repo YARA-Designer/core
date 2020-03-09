@@ -1,53 +1,22 @@
-<div class="yara_rule_designer">
-    verbs
-    <div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)" style="width:350px;height:70px;padding:10px;border:1px solid #aaaaaa;"></div>
-    <br>
-    adjetives
-    <div id="div2" ondrop="drop(event)" ondragover="allowDrop(event)" style="width:350px;height:70px;padding:10px;border:1px solid #aaaaaa;"></div>
-    <br>
-    <div id="draggable_artifacts" class="draggable">"I play the guitar"</div>
-    <div id="drag2" class="draggable">The piano is black</div>
+<link rel="stylesheet" href="{{ url_for('static', filename='yara_rule_designer.css') }}">
+
+<div class="yara_rule_designer" id="yara_rule_designer_div" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <span id="word1" draggable="true" ondragstart="drag(event)">The sentence</span>
+    <span id="word2" draggable="true" ondragstart="drag(event)">piano</span>
+    <span id="word3" draggable="true" ondragstart="drag(event)">play</span>
+    <span id="word4" draggable="true" ondragstart="drag(event)">I</span>
+</div>
+
+<div id="content" style="height: 400px;">
+  <div id="makeMeDraggable"> </div>
 </div>
 
 {% block javascript %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-2.1.0.min.js"></script>
+
     <script type="text/javascript">
-          window.addEventListener('DOMContentLoaded', splitWords, false);
-
-          function splitWords() {
-
-            var elems = document.querySelectorAll('.draggable'),
-                text,
-                textNode,
-                words,
-                elem;
-
-            // iterate through all .draggable elements
-            for (var i = 0, l = elems.length; i < l; i++) {
-
-                elem = elems[i];
-                textNode = elem.childNodes[0];
-                text = textNode.nodeValue;
-
-                // remove current text node
-                elem.removeChild(textNode);
-                words = text.split(' ');
-
-              // iterate through words
-              for (var k = 0, ll = words.length; k < ll; k++) {
-                 // create node for all words
-                 textNode = document.createElement('span');
-                 textNode.id = 'word_' + i + k;
-                 // allow dragging for words
-                 textNode.draggable = true;
-                 textNode.ondragstart = drag;
-                 textNode.appendChild(document.createTextNode(words[k] + ' '));
-                 elem.appendChild(textNode)
-              }
-
-            }
-
-          }
-
         function allowDrop(ev)
         {
             ev.preventDefault();
@@ -55,15 +24,35 @@
 
         function drag(ev)
         {
+            console.log('drag');
             ev.dataTransfer.setData("Text",ev.target.id);
-              console.log('targetid: ' + ev.target.id);
         }
 
         function drop(ev)
         {
+            console.log('drop');
             ev.preventDefault();
             var data=ev.dataTransfer.getData("Text");
-            ev.target.appendChild(document.getElementById(data));
+
+            var currentText = $(ev.target).text();
+            $(ev.target).text($('#' + data).text() + ' ' + currentText);
+            $('#' + data).remove();
+        }
+    </script>
+
+<script src="https://fb.me/react-with-addons-15.1.0.js"></script>
+<script src="https://fb.me/react-dom-15.1.0.js"></script>
+
+
+    <script type="text/javascript">
+        $( init );
+
+        function init() {
+          $('#makeMeDraggable').draggable({
+              containment: '#content',
+              cursor: 'move',
+              snap: '#content'
+            });
         }
     </script>
 {% endblock %}
