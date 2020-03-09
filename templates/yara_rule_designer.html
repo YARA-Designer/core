@@ -72,7 +72,7 @@
             var data=ev.dataTransfer.getData("Text");
 
             var currentText = $(ev.target).text();
-            $(ev.target).text($('#' + data).text() + ' ' + currentText);
+            $(ev.target).text(currentText + ' ' + $('#' + data).text());
             $('#' + data).remove();
         }
     </script>
