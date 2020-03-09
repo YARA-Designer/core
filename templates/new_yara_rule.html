@@ -8,7 +8,7 @@
         <h5>Custom fields: {{ case.data.customFields }}</h5>
     {% endif %}
 
-    <form>
+    <form action="{{ url_for('post_rule') }}" method="post">
         <table>
             <tr>
                 <th>Operator</th>
@@ -87,3 +87,5 @@
         }
     </script>
 {% endblock %}
+
+{% include 'yara_rule_designer.html' %}
