@@ -1,7 +1,7 @@
 import json
 import os
 
-from flask import render_template, request
+from flask import render_template, request, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 
 from database.models import PendingRule
@@ -90,6 +90,26 @@ def list_pending_rules():
 def new_rule():
     return render_template('new_yara_rule.html',
                            case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
+
+
+def post_rule():
+    """
+    Receives an ImmutableMultiDict of the operators which needs to be matched against the original list of artifacts.
+    :return:
+    """
+    print(request.form)
+    # operator = request.form['operator']
+    # artifact = request.form['artifact']
+    # artifact_type = request.form['artifactType']
+    # artifact_id = request.form['artifactId']
+    # print("operator = {}\n"
+    #       "artifact = {}\n"
+    #       "artifact_type = {}\n"
+    #       "artifact_id = {}\n".format(operator, artifact, artifact_type, artifact_id))
+
+    return dict_to_json(request.form)
+    # return render_template('post_yara_rule.html',
+    #                        case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
 
 
 def home():
