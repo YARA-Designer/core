@@ -1,34 +1,34 @@
-<div class="block1">
-    {% for case in thehive_cases %}
-    <table style="border: 1px solid black;">
-        <tr>
-            <th>Key</th>
-            <th>Value</th>
-        </tr>
-            <h1> Case: {{ case.title }} [ID: {{ case.id }}] </h1>
-            {% for key, value in case.items() %}
-                {% if key == "observables" %}
-                    <p>Observables:</p>
-                    <ul>
-                        {% for observable in case.observables %}
-                                <li>
-                                    {{ observable.id }}
-                                    <ul>
-                                        {% for k, v in observable.items() %}
-                                            <li> {{ k }}: {{ v }}] </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                        <tr>
-                            <td> {{ key }} </td>
-                            <td>{{ value }}</td>
-                        </tr>
+<link rel="stylesheet" href="{{ url_for('static', filename='thehive_cases_raw_partial.css') }}">
 
-                {% endif %}
-            {% endfor %}
+<div class="block1">
+    <table class="table table-striped case-list">
+        <tr>
+            <th style="width: 10px" class="p-0"></th>
+            <th>Title</th>
+            <th style="width: 100px;text-align:center">Severity</th>
+            <th style="width: 100px">Observables</th>
+            <th style="width: 60px">Owner</th>
+            <th style="width: 120px">Added on</th>
+            <th>ID</th>
+        </tr>
+        {% for case in cases %}
+             {% if case.data.tlp == 1 %}
+                {% set tlp_class = "p-0 bg-tlp-1 clickable" %}
+             {% elif case.data.tlp == 2 %}
+                {% set tlp_class = "p-0 bg-tlp-2 clickable" %}
+            {% elif case.data.tlp == 3 %}
+                {% set tlp_class = "p-0 bg-tlp-3 clickable" %}
+            {% endif %}
+
+            <tr onclick="window.location='#';">
+                <td class={{ tlp_class }}></td>
+                <td>{{ case.data.title }}</td>
+                <td>{{ case.data.severity }}</td>
+                <td>{{ case.data.observables|length }}</td>
+                <td>{{ case.data.owner }}</td>
+                <td>{{ case.added_on }} </td>
+                <td>{{ case.data.id }}</td>
+            </tr>
+        {% endfor %}
     </table>
-    {% endfor %}
 </div>

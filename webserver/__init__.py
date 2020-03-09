@@ -49,7 +49,7 @@ def get_pending_rules_db():
     return pending_rules
 
 
-def list_pending_rules():
+def list_pending_rules_rawhtml():
     # Get pending rules from database.
     pending_rules = get_pending_rules_db()
 
@@ -65,17 +65,31 @@ def list_pending_rules():
     return line
 
 
-def new_rule():
+def dict_to_json(d: dict):
     # Get rule dict
-    rule_dict = get_pending_rule_db_by_case_id(request.args.get('id'))
+    rule_dict = d
 
     # Serialize all items as str
     rule_json_str = json.dumps(rule_dict, default=str)
 
     # Convert it into a JSON object (avoids TypeErrors with things like datetime)
-    rule_json = json.loads(rule_json_str)
+    return json.loads(rule_json_str)
 
-    return render_template('new_yara_rule.html', case=rule_json)
+
+def list_pending_rules():
+    # Get pending rules from database.
+    pending_rules_dict = get_pending_rules_db()
+
+    pending_rules_json = []
+    for rule_dict in pending_rules_dict:
+        pending_rules_json.append(dict_to_json(rule_dict))
+
+    return render_template('list_pending_rules.html', cases=pending_rules_json)
+
+
+def new_rule():
+    return render_template('new_yara_rule.html',
+                           case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
 
 
 def home():

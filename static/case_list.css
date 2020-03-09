@@ -1,0 +1,42 @@
+table {
+ border-collapse:collapse;
+ border-spacing:0
+}
+td,
+th {
+ padding:0
+}
+
+.table-striped>tbody>tr:nth-of-type(odd) {
+ background-color:#f9f9f9
+}
+.table-hover>tbody>tr:hover {
+ background-color:#f5f5f5
+}
+
+.bg-tlp-na {
+ background-color:#428bca!important
+}
+.bg-tlp-0,
+.bg-tlp-white {
+ background-color:#5bc0ce!important
+}
+.bg-tlp-1,
+.bg-tlp-green {
+ background-color:#5cb85c!important
+}
+.bg-tlp-2,
+.bg-tlp-amber {
+ background-color:#f0ad4e!important
+}
+.bg-tlp-3,
+.bg-tlp-red {
+ background-color:#d9534f!important
+}
+
+.clickable {
+    cursor: pointer;
+}
+.p-0 {
+    padding: 0 !important;
+}
