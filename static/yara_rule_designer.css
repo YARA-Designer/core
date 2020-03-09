@@ -4,17 +4,17 @@
 
 #yara_rule_designer_div {
     margin-left: 0px;
-    width:720px;
-    height:200px;
+    width:1280px;
+    height:720px;
     padding:50px;
     border:1px solid #aaaaaa;
-    background-color: LightBlue;
+    /*background-color: ;*/
 }
 
 span {
     margin: 20px;
     padding: 20px;
-    background-color:#FFFF88;
+    background-color: #4a90dd;
     font-size: 20px;
     border: 0px solid;
     border-radius: 25px;
@@ -38,6 +38,11 @@ span {
     -moz-user-select: moz-none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.condition_keyword {
+    color: #ffffff;
+    font-weight: bold;
 }
 
 #makeMeDraggable { width: 100px; height: 100px; background: red; }

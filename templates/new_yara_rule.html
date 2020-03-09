@@ -69,6 +69,7 @@
         {% endfor %}
     </table>
 </div>
+
 {% block javascript %}
     <script type="text/javascript">
         var coll = document.getElementsByClassName("caseDetailsCollapsible");
@@ -88,4 +89,5 @@
     </script>
 {% endblock %}
 
+{% set artifacts = case.data.observables %}
 {% include 'yara_rule_designer.html' %}
