@@ -48,7 +48,13 @@
                     {% endif %}
                 {% endfor %}
         </table>
-        <label for="raw_yara_condition_input"></label><input type="text" id="raw_yara_condition_input" oninput="colorize_artifacts()" value="" style="width:93%;display:inline-block;float:left">
+        <div class="raw_yara_condition_input" id="raw_yara_condition_input" contentEditable="true"
+             onblur="onDivBlur();" onmousedown="return cancelEvent(event);" onclick="return cancelEvent(event);"
+             onmouseup="saveSelection();" onkeyup="saveSelection();" onfocus="restoreSelection();"
+        >
+<!--            <p id="raw_yara_condition_prompt">Write custom raw Yara rule here...</p>-->
+            <p contentEditable="true" id="raw_yara_condition_textarea"></p>
+        </div>
         <input type="submit" value="Submit (RAW)">
     </form>
 </div>
@@ -75,6 +81,68 @@
 {% block javascript %}
     <!--        Add custom styling for each artifact_# -->
     <script type="text/javascript">
+        // Fix caret position reset issues with contenteditable div elements-->
+        // src: https://stackoverflow.com/a/3323835 -->
+        var savedRange,isInFocus;
+        function saveSelection()
+        {
+            if(window.getSelection)//non IE Browsers
+            {
+                savedRange = window.getSelection().getRangeAt(0);
+            }
+            else if(document.selection)//IE
+            {
+                savedRange = document.selection.createRange();
+            }
+        }
+
+        function restoreSelection()
+        {
+            isInFocus = true;
+            document.getElementById("raw_yara_condition_textarea").focus();
+            if (savedRange != null) {
+                if (window.getSelection)//non IE and there is already a selection
+                {
+                    var s = window.getSelection();
+                    if (s.rangeCount > 0)
+                        s.removeAllRanges();
+                    s.addRange(savedRange);
+                }
+                else if (document.createRange)//non IE and no selection
+                {
+                    window.getSelection().addRange(savedRange);
+                }
+                else if (document.selection)//IE
+                {
+                    savedRange.select();
+                }
+            }
+        }
+        //this part onwards is only needed if you want to restore selection onclick
+        var isInFocus = false;
+        function onDivBlur()
+        {
+            isInFocus = false;
+        }
+
+        function cancelEvent(e)
+        {
+            if (isInFocus == false && savedRange != null) {
+                if (e && e.preventDefault) {
+                    //alert("FF");
+                    e.stopPropagation(); // DOM style (return false doesn't always work in FF)
+                    e.preventDefault();
+                }
+                else {
+                    window.event.cancelBubble = true;//IE stopPropagation
+                }
+                restoreSelection();
+                return false; // false = IE style
+            }
+        }
+
+        // -------------- THE DIVIDE ----------------
+
         var colors = ['#1f618d', '#0074D9', '#7FDBFF', '#a9a70f', '#39CCCC', '#3D9970',
             '#2ECC40', '#01FF70', '#FF851B', '#FF4136', '#85144b', '#F012BE', '#B10DC9', '#17a589'];
         var color_pos = 0;
@@ -117,47 +185,35 @@
             }
         }
 
-        // function colorize_word(word, index) {
-        //     /**
-        //      * Destructively modifies word if it matches colorize requirments.
-        //      *
-        //      * keyword:this is the entire words array.
-        //      */
-        //     // Only proceed if word is a potential varname reference.
-        //     if (word.startsWith('$')) {
-        //         if (word in artifact_color.getAllKeys()) {
-        //             // Get position of color in colors list in otder to find the matching generated class ID.
-        //             var pos = artifact_colors_pos[word];
-        //
-        //             // Modify the current word to be wrapped in a color span.
-        //             this[index] = "<span class=\"generatedArtifactColor" + pos + "\">" + word + "</span>"
-        //         }
-        //     }
-        // }
+        var sDiv=document.getElementById('raw_yara_condition_input');
+        sDiv.onkeypress=function(){
+            setTimeout(function(){
+                //the setTimeout is so the content is inserted before execution
 
-        function colorize_artifacts() {
-            var input = document.getElementById("raw_yara_condition_input");
+                // Store the current caret position
+                saveSelection();
 
-            console.log(input.value.split(' '));
-            var words = input.value.split(' ');
+                document.getElementById('raw_yara_condition_textarea').value=sDiv.textContent;
 
-            // Destructively modifies word if it matches colorize requirments.
-            // words.forEach(colorize_word(part, index), words); // Use words as keyword:this
-            words.forEach(function(word, index) {
-                // Only proceed if word is a potential varname reference.
-                if (word.startsWith('$')) {
-                    if (artifact_color.hasOwnProperty(word)) {
-                        // Get position of color in colors list in order to find the matching generated class ID.
-                        var pos = artifact_colors_pos[word];
+                console.log(sDiv.innerHTML);
+                var words = sDiv.innerHTML.split(' ');
+                console.log(words);
 
-                        // Modify the current word to be wrapped in a color span.
-                        this[index] = "<span class=\"generatedArtifactColor" + pos + "\">" + word + "</span>"
+                // Destructively modifies word if it matches colorize requirments.
+                words.forEach(function(word) {
+                    // Only proceed if word is a potential varname reference.
+                    if (word.startsWith('$')) {
+                        if (artifact_color.hasOwnProperty(word)) {
+                            // Modify the current word to be wrapped in a color span.
+                            sDiv.innerHTML=sDiv.innerHTML.replace(word,'<span style="color:' + artifact_color[word] +
+                                '">' + word + '</span>');
+
+                        }
                     }
-                }
-            }, words); // Use words as keyword:this
-
-            // Overwrite input.value with the modified version.
-            input.value = words.join(" ");
+                }); // Use words as keyword:this
+                // Restore the caret pos which gets set to 0 after every replace()..
+                restoreSelection();
+            },50);
         }
     </script>
 

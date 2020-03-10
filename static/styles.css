@@ -40,3 +40,22 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 /*#yara_rule_designer*/
 
 /*#artifact_varname*/
+
+.raw_yara_condition_input {
+  width:92%;
+  height:3%;
+  display:inline-block;
+  float:left;
+  border: 1px solid black;
+  padding: 5px;
+}
+
+#raw_yara_condition_input_prompt {
+  flex-shrink: 0;
+}
+
+#raw_yara_condition_input_textarea {
+  min-width: 100px;
+  word-break: break-all;
+  cursor: text;
+}
