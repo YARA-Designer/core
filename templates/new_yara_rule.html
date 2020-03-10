@@ -11,7 +11,7 @@
     <form action="{{ url_for('post_rule') }}" method="post">
         <table>
             <tr>
-                <th>Operator</th>
+                <th>Variable ref.</th>
                 <th>Artifact</th>
                 <th>Type</th>
                 <th>ID</th>
@@ -23,8 +23,9 @@
                                 {% for observable in case.data.observables %}
                                     <tr>
                                       <td>
-                                          <label for="operator"></label>
-                                          <input type="text" id="operator" name="operator">
+                                          <p class="artifact_varname" id="artifact_{{ loop.index }}">
+                                              $artifact{{ loop.index }}
+                                          </p>
                                       </td>
                                       <td>
                                           <p id="artifact">
@@ -47,7 +48,8 @@
                     {% endif %}
                 {% endfor %}
         </table>
-        <input type="submit" value="Submit">
+        <label for="raw_yara_condition"></label><input type="text" id="raw_yara_condition" value="" style="width:93%;display:inline-block;float:left">
+        <input type="submit" value="Submit (RAW)">
     </form>
 </div>
 
@@ -71,6 +73,29 @@
 </div>
 
 {% block javascript %}
+    <!--        Add custom styling for each artifact_# -->
+    <script type="text/javascript">
+        var colors = ['#1f618d', '#0074D9', '#7FDBFF', '#a9a70f', '#39CCCC', '#3D9970',
+            '#2ECC40', '#01FF70', '#FF851B', '#FF4136', '#85144b', '#F012BE', '#B10DC9', '#17a589'];
+        var color_pos = 0;
+
+        // Get the element with class="artifact_varname", then get all members.
+        var elements = document.getElementsByClassName('artifact_varname');
+        console.log(elements)
+
+        // Create a for loop and set the border of all <a> elements with a target attribute in div
+        var i;
+        for (i = 0; i < elements.length; i++) {
+            console.log(elements[i])
+            elements[i].style.color = colors[color_pos];
+            if (color_pos === colors.length -1) {
+              color_pos = 0
+            } else {
+              color_pos++;
+            }
+        }
+    </script>
+
     <script type="text/javascript">
         var coll = document.getElementsByClassName("caseDetailsCollapsible");
         var i;
