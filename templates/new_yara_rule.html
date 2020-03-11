@@ -75,7 +75,6 @@
 </div>
 
 {% block javascript %}
-    <!--        Add custom styling for each artifact_# -->
     <script type="text/javascript">
         // Fix caret position reset issues with contenteditable div elements-->
         // src: https://stackoverflow.com/a/3323835 -->
@@ -98,24 +97,24 @@
             isInFocus = true;
             document.getElementById("raw_yara_condition_input").focus();
             if (savedRange != null) {
-                if (window.getSelection)//non IE and there is already a selection
+                if (window.getSelection) //Non-IE and there is already a selection
                 {
                     var s = window.getSelection();
                     if (s.rangeCount > 0)
                         s.removeAllRanges();
                     s.addRange(savedRange);
                 }
-                else if (document.createRange)//non IE and no selection
+                else if (document.createRange) // Non-IE and no selection
                 {
                     window.getSelection().addRange(savedRange);
                 }
-                else if (document.selection)//IE
+                else if (document.selection) //IE
                 {
                     savedRange.select();
                 }
             }
         }
-        //this part onwards is only needed if you want to restore selection onclick
+        // This part onwards is only needed if you want to restore selection onclick
         var isInFocus = false;
         function onDivBlur()
         {
@@ -126,37 +125,41 @@
         {
             if (isInFocus == false && savedRange != null) {
                 if (e && e.preventDefault) {
-                    //alert("FF");
                     e.stopPropagation(); // DOM style (return false doesn't always work in FF)
                     e.preventDefault();
                 }
                 else {
-                    window.event.cancelBubble = true;//IE stopPropagation
+                    window.event.cancelBubble = true; //IE stopPropagation
                 }
                 restoreSelection();
                 return false; // false = IE style
             }
         }
 
-        function placeCaretAtEnd(el) {
-            el.focus();
-            if (typeof window.getSelection != "undefined"
-                    && typeof document.createRange != "undefined") {
-                var range = document.createRange();
-                range.selectNodeContents(el);
-                range.collapse(false);
-                var sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            } else if (typeof document.body.createTextRange != "undefined") {
-                var textRange = document.body.createTextRange();
-                textRange.moveToElementText(el);
-                textRange.collapse(false);
-                textRange.select();
+        // https://stackoverflow.com/a/3866442
+        function setEndOfContenteditable(contentEditableElement)
+        {
+            var range,selection;
+            if(document.createRange)//Firefox, Chrome, Opera, Safari, IE 9+
+            {
+                range = document.createRange(); //Create a range (a range is a like the selection but invisible)
+                range.selectNodeContents(contentEditableElement); //Select the entire contents of the element with the range
+                range.collapse(false); //collapse the range to the end point. false means collapse to end rather than the start
+                selection = window.getSelection(); //get the selection object (allows you to change selection)
+                selection.removeAllRanges(); //remove any selections already made
+                selection.addRange(range); //make the range you have just created the visible selection
+            }
+            else if(document.selection) //IE 8 and lower
+            {
+                range = document.body.createTextRange();//Create a range (a range is a like the selection but invisible)
+                range.moveToElementText(contentEditableElement);//Select the entire contents of the element with the range
+                range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+                range.select();//Select the range (make it the visible selection
             }
         }
 
-        // -------------- THE DIVIDE ----------------
+        // ----------------------------------------
+        // Add custom styling for each artifact_#
 
         var colors = ['#1f618d', '#0074D9', '#7FDBFF', '#a9a70f', '#39CCCC', '#3D9970',
             '#2ECC40', '#01FF70', '#FF851B', '#FF4136', '#85144b', '#F012BE', '#B10DC9', '#17a589'];
@@ -204,7 +207,7 @@
         sDiv.onkeypress=function(){
             setTimeout(function(){
                 // The setTimeout is so the content is inserted before execution
-                saveSelection();
+                // saveSelection();
                 document.getElementById('raw_yara_condition_input').value=sDiv.textContent;
 
                 // console.log(sDiv.innerHTML);
@@ -220,14 +223,12 @@
                             sDiv.innerHTML=sDiv.innerHTML.replace(word,'<span style="color:' + artifact_color[word] +
                                 '">' + word + '</span>');
 
-                            // placeCaretAtEnd(document.getElementById('raw_yara_condition_textarea'));
-                            restoreSelection();
-                            // document.getElementById("raw_yara_condition_textarea").focus();
+                            // Workaround for caret resetting after each replace; Always put caret at end of string after replace.
+                            elem = document.getElementById('raw_yara_condition_input');//This is the element that you want to move the caret to the end of
+                            setEndOfContenteditable(elem);
                         }
                     }
                 }); // Use words as keyword:this
-                // Workaround for caret resetting after each replace; Always put caret at end of string after replace.
-                // placeCaretAtEnd( document.querySelector('p') );
             },50);
         }
     </script>
