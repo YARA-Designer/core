@@ -50,11 +50,7 @@
         </table>
         <div class="raw_yara_condition_input" id="raw_yara_condition_input" contentEditable="true"
              onblur="onDivBlur();" onmousedown="return cancelEvent(event);" onclick="return cancelEvent(event);"
-             onmouseup="saveSelection();" onkeyup="saveSelection();" onfocus="restoreSelection();"
-        >
-<!--            <p id="raw_yara_condition_prompt">Write custom raw Yara rule here...</p>-->
-            <p contentEditable="true" id="raw_yara_condition_textarea"></p>
-        </div>
+             onmouseup="saveSelection();" onkeyup="saveSelection();" onfocus="restoreSelection();"></div>
         <input type="submit" value="Submit (RAW)">
     </form>
 </div>
@@ -84,6 +80,7 @@
         // Fix caret position reset issues with contenteditable div elements-->
         // src: https://stackoverflow.com/a/3323835 -->
         var savedRange,isInFocus;
+
         function saveSelection()
         {
             if(window.getSelection)//non IE Browsers
@@ -99,7 +96,7 @@
         function restoreSelection()
         {
             isInFocus = true;
-            document.getElementById("raw_yara_condition_textarea").focus();
+            document.getElementById("raw_yara_condition_input").focus();
             if (savedRange != null) {
                 if (window.getSelection)//non IE and there is already a selection
                 {
@@ -141,6 +138,24 @@
             }
         }
 
+        function placeCaretAtEnd(el) {
+            el.focus();
+            if (typeof window.getSelection != "undefined"
+                    && typeof document.createRange != "undefined") {
+                var range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else if (typeof document.body.createTextRange != "undefined") {
+                var textRange = document.body.createTextRange();
+                textRange.moveToElementText(el);
+                textRange.collapse(false);
+                textRange.select();
+            }
+        }
+
         // -------------- THE DIVIDE ----------------
 
         var colors = ['#1f618d', '#0074D9', '#7FDBFF', '#a9a70f', '#39CCCC', '#3D9970',
@@ -151,7 +166,7 @@
 
         // Get the element with class="artifact_varname", then get all members.
         var elements = document.getElementsByClassName('artifact_varname');
-        console.log(elements);
+        // console.log(elements);
 
         function createCSSClass(name, rules){
             var style = document.createElement('style');
@@ -166,7 +181,7 @@
         // Create a for loop and set the border of all <a> elements with a target attribute in div
         var i;
         for (i = 0; i < elements.length; i++) {
-            console.log(elements[i]);
+            // console.log(elements[i]);
             // Set color for the <p> element.
             elements[i].style.color = colors[color_pos];
 
@@ -188,14 +203,11 @@
         var sDiv=document.getElementById('raw_yara_condition_input');
         sDiv.onkeypress=function(){
             setTimeout(function(){
-                //the setTimeout is so the content is inserted before execution
-
-                // Store the current caret position
+                // The setTimeout is so the content is inserted before execution
                 saveSelection();
+                document.getElementById('raw_yara_condition_input').value=sDiv.textContent;
 
-                document.getElementById('raw_yara_condition_textarea').value=sDiv.textContent;
-
-                console.log(sDiv.innerHTML);
+                // console.log(sDiv.innerHTML);
                 var words = sDiv.innerHTML.split(' ');
                 console.log(words);
 
@@ -208,11 +220,14 @@
                             sDiv.innerHTML=sDiv.innerHTML.replace(word,'<span style="color:' + artifact_color[word] +
                                 '">' + word + '</span>');
 
+                            // placeCaretAtEnd(document.getElementById('raw_yara_condition_textarea'));
+                            restoreSelection();
+                            // document.getElementById("raw_yara_condition_textarea").focus();
                         }
                     }
                 }); // Use words as keyword:this
-                // Restore the caret pos which gets set to 0 after every replace()..
-                restoreSelection();
+                // Workaround for caret resetting after each replace; Always put caret at end of string after replace.
+                // placeCaretAtEnd( document.querySelector('p') );
             },50);
         }
     </script>

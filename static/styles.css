@@ -42,9 +42,7 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 /*#artifact_varname*/
 
 .raw_yara_condition_input {
-  width:92%;
-  height:3%;
-  display:inline-block;
+  height:1.5%;
   float:left;
   border: 1px solid black;
   padding: 5px;
@@ -58,4 +56,18 @@ tr:nth-child(even) {background-color: #f2f2f2;}
   min-width: 100px;
   word-break: break-all;
   cursor: text;
+}
+
+[contenteditable="true"].raw_yara_condition_input {
+    white-space: nowrap;
+    width:92%;
+    overflow: hidden;
+}
+[contenteditable="true"].raw_yara_condition_input br {
+    display:none;
+
+}
+[contenteditable="true"].raw_yara_condition_input * {
+    display:inline-block;
+    white-space:nowrap;
 }
