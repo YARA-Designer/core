@@ -53,6 +53,8 @@
              onmouseup="saveSelection();" onkeyup="saveSelection();" onfocus="restoreSelection();"></div>
         <input type="submit" value="Submit (RAW)">
     </form>
+    <label for="enableSyntaxHighlighting"></label>
+    <input type="checkbox" id="enableSyntaxHighlighting" onclick="toggleSyntaxHighlighting()">Enable Syntax Highlighting (EXPERIMENTAL)
 </div>
 
 <!-- DETAILS SECTION //-->
@@ -160,6 +162,12 @@
 
         // ----------------------------------------
         // Add custom styling for each artifact_#
+        var syntaxHighlightingEnabled = document.getElementById("enableSyntaxHighlighting").checked;
+
+        function toggleSyntaxHighlighting() {
+            syntaxHighlightingEnabled = document.getElementById("enableSyntaxHighlighting").checked;
+            console.log(syntaxHighlightingEnabled)
+        }
 
         var colors = ['#1f618d', '#0074D9', '#7FDBFF', '#a9a70f', '#39CCCC', '#3D9970',
             '#2ECC40', '#01FF70', '#FF851B', '#FF4136', '#85144b', '#F012BE', '#B10DC9', '#17a589'];
@@ -206,29 +214,31 @@
         var sDiv=document.getElementById('raw_yara_condition_input');
         sDiv.onkeypress=function(){
             setTimeout(function(){
-                // The setTimeout is so the content is inserted before execution
-                // saveSelection();
-                document.getElementById('raw_yara_condition_input').value=sDiv.textContent;
+                if (syntaxHighlightingEnabled) {
+                    // The setTimeout is so the content is inserted before execution
+                    // saveSelection();
+                    document.getElementById('raw_yara_condition_input').value = sDiv.textContent;
 
-                // console.log(sDiv.innerHTML);
-                var words = sDiv.innerHTML.split(' ');
-                console.log(words);
+                    // console.log(sDiv.innerHTML);
+                    var words = sDiv.innerHTML.split(' ');
+                    console.log(words);
 
-                // Destructively modifies word if it matches colorize requirments.
-                words.forEach(function(word) {
-                    // Only proceed if word is a potential varname reference.
-                    if (word.startsWith('$')) {
-                        if (artifact_color.hasOwnProperty(word)) {
-                            // Modify the current word to be wrapped in a color span.
-                            sDiv.innerHTML=sDiv.innerHTML.replace(word,'<span style="color:' + artifact_color[word] +
-                                '">' + word + '</span>');
+                    // Destructively modifies word if it matches colorize requirments.
+                    words.forEach(function (word) {
+                        // Only proceed if word is a potential varname reference.
+                        if (word.startsWith('$')) {
+                            if (artifact_color.hasOwnProperty(word)) {
+                                // Modify the current word to be wrapped in a color span.
+                                sDiv.innerHTML = sDiv.innerHTML.replace(word, '<span style="color:' + artifact_color[word] +
+                                    '">' + word + '</span>');
 
-                            // Workaround for caret resetting after each replace; Always put caret at end of string after replace.
-                            elem = document.getElementById('raw_yara_condition_input');//This is the element that you want to move the caret to the end of
-                            setEndOfContenteditable(elem);
+                                // Workaround for caret resetting after each replace; Always put caret at end of string after replace.
+                                elem = document.getElementById('raw_yara_condition_input');//This is the element that you want to move the caret to the end of
+                                setEndOfContenteditable(elem);
+                            }
                         }
-                    }
-                }); // Use words as keyword:this
+                    }); // Use words as keyword:this
+                }
             },50);
         }
     </script>
