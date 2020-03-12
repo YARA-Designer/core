@@ -22,7 +22,7 @@
     color: #ffffff;
 }
 
-#yara_rule_designer_div1 {
+#yara_rule_designer_artifacts {
     /*position: absolute;*/
     float:left; /* add this */
     overflow: scroll;
@@ -34,12 +34,24 @@
     /*background-color: ;*/
 }
 
-#yara_rule_designer_div2 {
+#yara_rule_designer_editor {
     /*position: absolute;*/
     float:left; /* add this */
     overflow: scroll;
     margin-left: 0px;
     width:1000px;
+    height:720px;
+    padding:30px;
+    border:1px solid #aaaaaa;
+    /*background-color: ;*/
+}
+
+#yara_rule_designer_operators {
+    /*position: absolute;*/
+    float:left; /* add this */
+    overflow: scroll;
+    margin-left: 0px;
+    width:300px;
     height:720px;
     padding:30px;
     border:1px solid #aaaaaa;

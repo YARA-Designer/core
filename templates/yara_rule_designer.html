@@ -5,43 +5,47 @@
     {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
 {% endif %}
 
-<div class="yara_rule_designer" id="yara_rule_designer_div1" ondrop="drop(event)" ondragover="allowDrop(event)">
-<!--    Add conditional keywords-->
-<!--    Boolean-->
-    <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">AND</span>
-    <span id="condition_keyword_or" class="condition_keyword" draggable="true" ondragstart="drag(event)">OR</span>
-    <span id="condition_keyword_not" class="condition_keyword" draggable="true" ondragstart="drag(event)">NOT</span>
-<!--    Arithmetic-->
-    <span id="condition_keyword_equal" class="condition_keyword" draggable="true" ondragstart="drag(event)">==</span>
-    <span id="condition_keyword_lt" class="condition_keyword" draggable="true" ondragstart="drag(event)"><</span>
-    <span id="condition_keyword_gt" class="condition_keyword" draggable="true" ondragstart="drag(event)">></span>
-    <span id="condition_keyword_leq" class="condition_keyword" draggable="true" ondragstart="drag(event)"><=</span>
-    <span id="condition_keyword_geq" class="condition_keyword" draggable="true" ondragstart="drag(event)">>=</span>
-    <span id="condition_keyword_neq" class="condition_keyword" draggable="true" ondragstart="drag(event)">!=</span>
-<!--    Relational-->
-    <span id="condition_keyword_add" class="condition_keyword" draggable="true" ondragstart="drag(event)">+</span>
-    <span id="condition_keyword_sub" class="condition_keyword" draggable="true" ondragstart="drag(event)">-</span>
-    <span id="condition_keyword_mul" class="condition_keyword" draggable="true" ondragstart="drag(event)">*</span>
-    <span id="condition_keyword_div" class="condition_keyword" draggable="true" ondragstart="drag(event)">/</span>
-    <span id="condition_keyword_pct" class="condition_keyword" draggable="true" ondragstart="drag(event)">%</span>
-    <span id="condition_keyword_setminus" class="condition_keyword" draggable="true" ondragstart="drag(event)">\</span>
-<!--    Bitwise-->
-    <span id="condition_keyword_bitwise_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">&</span>
-    <span id="condition_keyword_bitwise_or" class="condition_keyword" draggable="true" ondragstart="drag(event)">|</span>
-    <span id="condition_keyword_bitwise_not" class="condition_keyword" draggable="true" ondragstart="drag(event)">~</span>
-    <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)">^</span>
-    <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"><<</span>
-    <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)">>></span>
-<!--    Add artifacts as individual draggable objects-->
-    {% for artifact in artifacts %}
-        <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }}</span>
-    {% endfor %}
-</div>
+<div class="yara_rule_designer" id="yara_rule_designer_container" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <!--    Add artifacts as individual draggable objects-->
+        {% for artifact in artifacts %}
+            <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }}</span>
+        {% endfor %}
+    </div>
 
-<div class="yara_rule_designer" id="yara_rule_designer_div2" ondrop="drop(event)" ondragover="allowDrop(event)">
-    <span id="test" class="draggable_artifact" draggable="true" ondragstart="drag(event)">TEST AREA</span>
-</div>
+    <div class="yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <span id="test" class="draggable_artifact" draggable="true" ondragstart="drag(event)">TEST AREA</span>
+    </div>
 
+    <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <!--    Add conditional keywords-->
+    <!--    Boolean-->
+        <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">AND</span>
+        <span id="condition_keyword_or" class="condition_keyword" draggable="true" ondragstart="drag(event)">OR</span>
+        <span id="condition_keyword_not" class="condition_keyword" draggable="true" ondragstart="drag(event)">NOT</span>
+    <!--    Arithmetic-->
+        <span id="condition_keyword_equal" class="condition_keyword" draggable="true" ondragstart="drag(event)">==</span>
+        <span id="condition_keyword_lt" class="condition_keyword" draggable="true" ondragstart="drag(event)"><</span>
+        <span id="condition_keyword_gt" class="condition_keyword" draggable="true" ondragstart="drag(event)">></span>
+        <span id="condition_keyword_leq" class="condition_keyword" draggable="true" ondragstart="drag(event)"><=</span>
+        <span id="condition_keyword_geq" class="condition_keyword" draggable="true" ondragstart="drag(event)">>=</span>
+        <span id="condition_keyword_neq" class="condition_keyword" draggable="true" ondragstart="drag(event)">!=</span>
+    <!--    Relational-->
+        <span id="condition_keyword_add" class="condition_keyword" draggable="true" ondragstart="drag(event)">+</span>
+        <span id="condition_keyword_sub" class="condition_keyword" draggable="true" ondragstart="drag(event)">-</span>
+        <span id="condition_keyword_mul" class="condition_keyword" draggable="true" ondragstart="drag(event)">*</span>
+        <span id="condition_keyword_div" class="condition_keyword" draggable="true" ondragstart="drag(event)">/</span>
+        <span id="condition_keyword_pct" class="condition_keyword" draggable="true" ondragstart="drag(event)">%</span>
+        <span id="condition_keyword_setminus" class="condition_keyword" draggable="true" ondragstart="drag(event)">\</span>
+    <!--    Bitwise-->
+        <span id="condition_keyword_bitwise_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">&</span>
+        <span id="condition_keyword_bitwise_or" class="condition_keyword" draggable="true" ondragstart="drag(event)">|</span>
+        <span id="condition_keyword_bitwise_not" class="condition_keyword" draggable="true" ondragstart="drag(event)">~</span>
+        <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)">^</span>
+        <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"><<</span>
+        <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)">>></span>
+    </div>
+</div>
 <!--<div id="content" style="height: 400px;">-->
 <!--  <div id="makeMeDraggable"> </div>-->
 <!--</div>-->
