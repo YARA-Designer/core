@@ -18,7 +18,6 @@ def get_pending_rule_db_by_case_id(case_id: str):
     try:
         # Get the first item in the list of queries
         query = session.query(PendingRule).filter(PendingRule.case_id == case_id)[0]
-        print("dfdff")
         rule = {'added_on': query.added_on, 'data': query.data, 'case_id': query.case_id, 'id': query.id}
 
         # Commit transaction (NB: makes detached instances expire)
@@ -88,6 +87,9 @@ def list_pending_rules():
 
 
 def new_rule():
+    if 'id' not in request.args:
+        return "Please specify a case ID!"
+
     return render_template('new_yara_rule.html',
                            case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
 
@@ -97,6 +99,7 @@ def post_rule():
     Receives an ImmutableMultiDict of the operators which needs to be matched against the original list of artifacts.
     :return:
     """
+    req = request
     print(request.form)
     # operator = request.form['operator']
     # artifact = request.form['artifact']
