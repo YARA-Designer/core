@@ -10,10 +10,6 @@ html, body {
 }
 
 #yara_rule_designer {
-    /*width: 1580px;*/
-    /*height: 720px;*/
-    /*position: absolute;*/
-    /*display: inline-block;*/
     overflow: auto;
     border:1px solid limegreen;
 }
@@ -21,6 +17,7 @@ html, body {
 #yara_rule_designer_container {
     width: 100%;
     height: 100%;
+    display: flex;
 }
 
 .yara_rule_designer > span {
@@ -36,6 +33,7 @@ html, body {
 }
 
 #yara_rule_designer_header {
+    order: 0;
     overflow: hidden;
     width:100%;
     height: 10%;
@@ -48,6 +46,7 @@ html, body {
 }
 
 #yara_rule_designer_artifacts {
+    order: 1;
     float:left;
     overflow: auto;
     width:20%;
@@ -58,9 +57,10 @@ html, body {
 }
 
 #yara_rule_designer_editor {
+    order: 2;
     float: left;
     overflow: auto;
-    width: 59.68%;
+    width: 60%;
     height: 90%;
     /*padding:30px;*/
     border:1px solid black;
@@ -68,6 +68,7 @@ html, body {
 }
 
 #yara_rule_designer_operators {
+    order: 3;
     float:right;
     overflow: auto;
     width:20%;
