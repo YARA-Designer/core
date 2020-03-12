@@ -27,15 +27,15 @@ if __name__ == "__main__":
 
     # -- Page containing both raw rule cli and the designer.
     app.add_url_rule('/yara_rule', view_func=webserver.new_rule)
-    webserver.routes['/yara_rule'] = "Page containing both raw rule cli and the designer."
+    webserver.routes['/yara_rule'] = "Create Yara rule"
 
     # -- Page to create raw yara rules on.
     app.add_url_rule('/yara_rule_raw', view_func=webserver.new_rule_raw)
-    webserver.routes['/yara_rule_raw'] = "Page to create raw yara rules on."
+    webserver.routes['/yara_rule_raw'] = "Create Yara rule using only raw CLI"
 
     # -- Page to design yara rules on.
     app.add_url_rule('/yara_rule_designer', view_func=webserver.new_rule_designer)
-    webserver.routes['/yara_rule_designer'] = "Page to design yara rules on."
+    webserver.routes['/yara_rule_designer'] = "Create Yara rule using only the designer"
 
     # -- Page to receive POST request from new_yara_rule so it can be processed by the codebase.
     app.add_url_rule('/post_yara_rule', view_func=webserver.post_rule, methods=['POST'])
