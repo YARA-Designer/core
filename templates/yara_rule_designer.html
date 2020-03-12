@@ -5,6 +5,8 @@
     {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
 {% endif %}
 
+<h1> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </h1>
+
 <div class="yara_rule_designer" id="yara_rule_designer_container" ondrop="drop(event)" ondragover="allowDrop(event)">
     <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="allowDrop(event)">
     <!--    Add artifacts as individual draggable objects-->

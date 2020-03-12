@@ -9,6 +9,7 @@ from database.operations import db_session
 
 tab_character = "&nbsp;"
 tab = tab_character*4
+routes = {}
 
 
 def get_pending_rule_db_by_case_id(case_id: str):
@@ -87,11 +88,34 @@ def list_pending_rules():
 
 
 def new_rule():
+    """
+    Renders a web page containing both raw rule cli and the designer.
+    :return:
+    """
     if 'id' not in request.args:
         return "Please specify a case ID!"
 
     return render_template('new_yara_rule.html',
                            case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
+
+
+def new_rule_raw():
+    if 'id' not in request.args:
+        return "Please specify a case ID!"
+
+    return render_template('yara_rule_raw.html',
+                           case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
+
+
+def new_rule_designer():
+    if 'id' not in request.args:
+        return "Please specify a case ID!"
+
+    case = dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id')))
+
+    return render_template('yara_rule_designer.html',
+                           case=case,
+                           artifacts=case['data']['observables'])
 
 
 def post_rule():
@@ -116,5 +140,5 @@ def post_rule():
 
 
 def home():
-    return new_rule()
+    return render_template('index.html', routes=dict_to_json(routes))
 

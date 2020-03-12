@@ -1,0 +1,12 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+<!--Define variable-->
+{% if routes is not defined %}
+    {% set routes = {} %}
+{% endif %}
+
+<ul>
+    {% for key, value in routes.items() %}
+        <li><a href="{{ key }}">{{ value }}</a></li>
+    {% endfor %}
+</ul>

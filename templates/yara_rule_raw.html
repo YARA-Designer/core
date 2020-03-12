@@ -1,0 +1,319 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+<div class="block1">
+    <h1> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </h1>
+    <h2>Severity: {{ case.data.severity }}</h2>
+    <h4>Tags: {{ case.data.tags }}</h4>
+    {% if case.data.customFields %}
+        <h5>Custom fields: {{ case.data.customFields }}</h5>
+    {% endif %}
+
+    <table>
+        <tr>
+            <th>Variable ref.</th>
+            <th>Artifact</th>
+            <th>Type</th>
+            <th>ID</th>
+        </tr>
+            {% for key, value in case.data.items() %}
+                {% if key == "observables" %}
+                        <td>
+
+                            {% for observable in case.data.observables %}
+                                <tr>
+                                  <td>
+                                      <p class="artifact_varname" id="artifact_{{ loop.index }}">
+                                          $artifact{{ loop.index }}
+                                      </p>
+                                  </td>
+                                  <td>
+                                      <p id="artifact">
+                                          {{ observable.data }}
+                                      </p>
+                                  </td>
+                                  <td>
+                                      <p id="artifactType">
+                                          {{ observable.dataType }}
+                                      </p>
+                                  </td>
+                                  <td>
+                                      <p id="artifactId">
+                                          {{ observable.id }}
+                                      </p>
+                                  </td>
+                                </tr>
+                            {% endfor %}
+                        </td>
+                {% endif %}
+            {% endfor %}
+    </table>
+    <div class="raw_yara_condition_input" id="raw_yara_condition_input" contentEditable="true"
+         onblur="onDivBlur();" onmousedown="return cancelEvent(event);" onclick="return cancelEvent(event);"
+         onmouseup="saveSelection();" onkeyup="saveSelection();" onfocus="restoreSelection();"></div>
+
+<!--    <form id="raw_yara_condition_form" action="{{ url_for('post_rule') }}" method="post" onsubmit="return getRawYaraCondition()">-->
+    <form id="raw_yara_condition_form" onsubmit="debugThingie()">
+        <label for="raw_yara_condition_form_textarea"></label>
+        <textarea id="raw_yara_condition_form_textarea" style="display:none"></textarea>
+        <input type="submit" value="Submit (RAW)">
+    </form>
+
+    <label for="enableSyntaxHighlighting"></label>
+    <input type="checkbox" id="enableSyntaxHighlighting" onclick="toggleSyntaxHighlighting()">Enable Syntax Highlighting (EXPERIMENTAL)
+</div>
+
+<!-- DETAILS SECTION //-->
+<button type="button" class="caseDetailsCollapsible">Show case details</button>
+<div class="caseDetailsContent">
+    <table>
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+        </tr>
+        {% for key, value in case.data.items() %}
+            {% if key != "observables" %}
+                <tr>
+                    <td> {{ key }} </td>
+                    <td>{{ value }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+</div>
+
+{% block javascript %}
+    <script type="text/javascript">
+        var coll = document.getElementsByClassName("caseDetailsCollapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+          coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+              content.style.display = "none";
+            } else {
+              content.style.display = "block";
+            }
+          });
+        }
+    </script>
+
+    <script type="text/javascript">
+        // Fix caret position reset issues with contenteditable div elements-->
+        // src: https://stackoverflow.com/a/3323835 -->
+        var savedRange,isInFocus;
+
+        function saveSelection()
+        {
+            if(window.getSelection)//non IE Browsers
+            {
+                savedRange = window.getSelection().getRangeAt(0);
+            }
+            else if(document.selection)//IE
+            {
+                savedRange = document.selection.createRange();
+            }
+        }
+
+        function restoreSelection()
+        {
+            isInFocus = true;
+            document.getElementById("raw_yara_condition_input").focus();
+            if (savedRange != null) {
+                if (window.getSelection) //Non-IE and there is already a selection
+                {
+                    var s = window.getSelection();
+                    if (s.rangeCount > 0)
+                        s.removeAllRanges();
+                    s.addRange(savedRange);
+                }
+                else if (document.createRange) // Non-IE and no selection
+                {
+                    window.getSelection().addRange(savedRange);
+                }
+                else if (document.selection) //IE
+                {
+                    savedRange.select();
+                }
+            }
+        }
+        // This part onwards is only needed if you want to restore selection onclick
+        var isInFocus = false;
+        function onDivBlur()
+        {
+            isInFocus = false;
+        }
+
+        function cancelEvent(e)
+        {
+            if (isInFocus == false && savedRange != null) {
+                if (e && e.preventDefault) {
+                    e.stopPropagation(); // DOM style (return false doesn't always work in FF)
+                    e.preventDefault();
+                }
+                else {
+                    window.event.cancelBubble = true; //IE stopPropagation
+                }
+                restoreSelection();
+                return false; // false = IE style
+            }
+        }
+
+        // https://stackoverflow.com/a/3866442
+        function setEndOfContenteditable(contentEditableElement)
+        {
+            var range,selection;
+            if(document.createRange)//Firefox, Chrome, Opera, Safari, IE 9+
+            {
+                range = document.createRange(); //Create a range (a range is a like the selection but invisible)
+                range.selectNodeContents(contentEditableElement); //Select the entire contents of the element with the range
+                range.collapse(false); //collapse the range to the end point. false means collapse to end rather than the start
+                selection = window.getSelection(); //get the selection object (allows you to change selection)
+                selection.removeAllRanges(); //remove any selections already made
+                selection.addRange(range); //make the range you have just created the visible selection
+            }
+            else if(document.selection) //IE 8 and lower
+            {
+                range = document.body.createTextRange();//Create a range (a range is a like the selection but invisible)
+                range.moveToElementText(contentEditableElement);//Select the entire contents of the element with the range
+                range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
+                range.select();//Select the range (make it the visible selection
+            }
+        }
+
+        // ----------------------------------------
+        // Add custom styling for each artifact_#
+        var syntaxHighlightingEnabled = document.getElementById("enableSyntaxHighlighting").checked;
+
+        function toggleSyntaxHighlighting() {
+            syntaxHighlightingEnabled = document.getElementById("enableSyntaxHighlighting").checked;
+            console.log(syntaxHighlightingEnabled)
+        }
+
+        var colors = ['#1f618d', '#0074D9', '#7FDBFF', '#a9a70f', '#39CCCC', '#3D9970',
+            '#2ECC40', '#01FF70', '#FF851B', '#FF4136', '#85144b', '#F012BE', '#B10DC9', '#17a589'];
+        var color_pos = 0;
+        var artifact_color = {};
+        var artifact_colors_pos = [];
+
+        // Get the element with class="artifact_varname", then get all members.
+        var elements = document.getElementsByClassName('artifact_varname');
+        // console.log(elements);
+
+        function createCSSClass(name, rules){
+            var style = document.createElement('style');
+            style.type = 'text/css';
+            document.getElementsByTagName('head')[0].appendChild(style);
+            if(!(style.sheet||{}).insertRule)
+                (style.styleSheet || style.sheet).addRule(name, rules);
+            else
+                style.sheet.insertRule(name+"{" + rules + "}",0);
+        }
+
+        // Create a for loop and set the border of all <a> elements with a target attribute in div
+        var i;
+        for (i = 0; i < elements.length; i++) {
+            // console.log(elements[i]);
+            // Set color for the <p> element.
+            elements[i].style.color = colors[color_pos];
+
+            // Store varname: color to JSON for later use (e.g. input colorization).
+            artifact_color[elements[i].innerText] = colors[color_pos];  // ex: ["$artifact4"] = '#a9a70f'
+            artifact_colors_pos[elements[i].innerText] = color_pos;     // ex: ["$artifact4"] = 3
+
+            // Create a CSS class for the specific artifact and its color for later use.
+            createCSSClass('.generatedArtifactColor' + color_pos,"color: " + colors[color_pos] + ";");
+
+            // Increment color cursor, loop around if end is reached.
+            if (color_pos === colors.length -1) {
+              color_pos = 0
+            } else {
+              color_pos++;
+            }
+        }
+
+        var sDiv=document.getElementById('raw_yara_condition_input');
+        sDiv.onkeypress=function(){
+            setTimeout(function(){
+                if (syntaxHighlightingEnabled) {
+                    // The setTimeout is so the content is inserted before execution
+                    // saveSelection();
+                    document.getElementById('raw_yara_condition_input').value = sDiv.textContent;
+
+                    // console.log(sDiv.innerHTML);
+                    var words = sDiv.innerHTML.split(' ');
+                    console.log(words);
+
+                    // Destructively modifies word if it matches colorize requirments.
+                    words.forEach(function (word) {
+                        // Only proceed if word is a potential varname reference.
+                        if (word.startsWith('$')) {
+                            if (artifact_color.hasOwnProperty(word)) {
+                                // Modify the current word to be wrapped in a color span.
+                                sDiv.innerHTML = sDiv.innerHTML.replace(word, '<span style="color:' + artifact_color[word] +
+                                    '">' + word + '</span>');
+
+                                // Workaround for caret resetting after each replace; Always put caret at end of string after replace.
+                                elem = document.getElementById('raw_yara_condition_input');//This is the element that you want to move the caret to the end of
+                                setEndOfContenteditable(elem);
+                            }
+                        }
+                    }); // Use words as keyword:this
+                }
+            },50);
+        };
+
+        // Used to manually POST request with pure JS.
+        function postRequest(json) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", $('#post_rule_url').data(), true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+                value: value
+            }));
+        }
+
+        function postRawYaraCondition() {
+            postRequest(JSON.stringify({
+                data: value
+            }));
+        }
+
+        function debugThingie() {
+            console.log(document.getElementById('raw_yara_condition_input'))
+        }
+
+        // Used in input submit form as Content Editable does not work as a form element.
+        function getRawYaraCondition() {
+            // console.log(document.getElementById('raw_yara_condition_input').value);
+            // console.log(document.getElementById('raw_yara_condition_input').innerHTML);
+            console.log(document.getElementById('raw_yara_condition_input').innerHTML);
+            // document.getElementById("raw_yara_condition_input_textarea").value = document.getElementById("raw_yara_condition_input").innerHTML;
+            document.getElementById("raw_yara_condition_input_textarea").value = "bananapie";
+            // return document.getElementById("raw_yara_condition_input").value;
+        }
+
+
+        // function submitRawYaraCondition() {
+        //     var param = '';
+        //
+        //     // jQuery
+        //     param = $('#raw_yara_condition_form').text();
+        //
+        //     // or you could use pure javascript
+        //     param = document.getElementById('raw_yara_condition_input').innerHTML;
+        //
+        //     // Now that you have these values you should add them to your form as an input
+        //     // input fields are how you send data through forms to wherever you are posting them
+        //     // build the input field
+        //     param = "<input type='text' name'param1' value='" + param + "'/>";
+        //
+        //     // append it to the form
+        //     $('#raw_yara_condition_form').append(param);
+        //
+        //     // finally submit the form.
+        //     document.getElementById("raw_yara_condition_form").submit();
+        //     }
+    </script>
+{% endblock %}
