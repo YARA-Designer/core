@@ -8,51 +8,56 @@
         <h5>Custom fields: {{ case.data.customFields }}</h5>
     {% endif %}
 
-    <form action="{{ url_for('post_rule') }}" method="post">
-        <table>
-            <tr>
-                <th>Variable ref.</th>
-                <th>Artifact</th>
-                <th>Type</th>
-                <th>ID</th>
-            </tr>
-                {% for key, value in case.data.items() %}
-                    {% if key == "observables" %}
-                            <td>
+    <table>
+        <tr>
+            <th>Variable ref.</th>
+            <th>Artifact</th>
+            <th>Type</th>
+            <th>ID</th>
+        </tr>
+            {% for key, value in case.data.items() %}
+                {% if key == "observables" %}
+                        <td>
 
-                                {% for observable in case.data.observables %}
-                                    <tr>
-                                      <td>
-                                          <p class="artifact_varname" id="artifact_{{ loop.index }}">
-                                              $artifact{{ loop.index }}
-                                          </p>
-                                      </td>
-                                      <td>
-                                          <p id="artifact">
-                                              {{ observable.data }}
-                                          </p>
-                                      </td>
-                                      <td>
-                                          <p id="artifactType">
-                                              {{ observable.dataType }}
-                                          </p>
-                                      </td>
-                                      <td>
-                                          <p id="artifactId">
-                                              {{ observable.id }}
-                                          </p>
-                                      </td>
-                                    </tr>
-                                {% endfor %}
-                            </td>
-                    {% endif %}
-                {% endfor %}
-        </table>
-        <div class="raw_yara_condition_input" id="raw_yara_condition_input" contentEditable="true"
-             onblur="onDivBlur();" onmousedown="return cancelEvent(event);" onclick="return cancelEvent(event);"
-             onmouseup="saveSelection();" onkeyup="saveSelection();" onfocus="restoreSelection();"></div>
+                            {% for observable in case.data.observables %}
+                                <tr>
+                                  <td>
+                                      <p class="artifact_varname" id="artifact_{{ loop.index }}">
+                                          $artifact{{ loop.index }}
+                                      </p>
+                                  </td>
+                                  <td>
+                                      <p id="artifact">
+                                          {{ observable.data }}
+                                      </p>
+                                  </td>
+                                  <td>
+                                      <p id="artifactType">
+                                          {{ observable.dataType }}
+                                      </p>
+                                  </td>
+                                  <td>
+                                      <p id="artifactId">
+                                          {{ observable.id }}
+                                      </p>
+                                  </td>
+                                </tr>
+                            {% endfor %}
+                        </td>
+                {% endif %}
+            {% endfor %}
+    </table>
+    <div class="raw_yara_condition_input" id="raw_yara_condition_input" contentEditable="true"
+         onblur="onDivBlur();" onmousedown="return cancelEvent(event);" onclick="return cancelEvent(event);"
+         onmouseup="saveSelection();" onkeyup="saveSelection();" onfocus="restoreSelection();"></div>
+
+<!--    <form id="raw_yara_condition_form" action="{{ url_for('post_rule') }}" method="post" onsubmit="return getRawYaraCondition()">-->
+    <form id="raw_yara_condition_form" onsubmit="debugThingie()">
+        <label for="raw_yara_condition_form_textarea"></label>
+        <textarea id="raw_yara_condition_form_textarea" style="display:none"></textarea>
         <input type="submit" value="Submit (RAW)">
     </form>
+
     <label for="enableSyntaxHighlighting"></label>
     <input type="checkbox" id="enableSyntaxHighlighting" onclick="toggleSyntaxHighlighting()">Enable Syntax Highlighting (EXPERIMENTAL)
 </div>
@@ -75,6 +80,9 @@
         {% endfor %}
     </table>
 </div>
+
+<!-- Set Jinja2 variables for use in JavaScript -->
+<meta id="post_rule_url" data-name="{{ url_for('post_rule') }}" data-other="{{other}}">
 
 {% block javascript %}
     <script type="text/javascript">
@@ -240,7 +248,59 @@
                     }); // Use words as keyword:this
                 }
             },50);
+        };
+
+        // Used to manually POST request with pure JS.
+        function postRequest(json) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", $('#post_rule_url').data(), true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+                value: value
+            }));
         }
+
+        function postRawYaraCondition() {
+            postRequest(JSON.stringify({
+                data: value
+            }));
+        }
+
+        function debugThingie() {
+            console.log(document.getElementById('raw_yara_condition_input'))
+        }
+
+        // Used in input submit form as Content Editable does not work as a form element.
+        function getRawYaraCondition() {
+            // console.log(document.getElementById('raw_yara_condition_input').value);
+            // console.log(document.getElementById('raw_yara_condition_input').innerHTML);
+            console.log(document.getElementById('raw_yara_condition_input').innerHTML);
+            // document.getElementById("raw_yara_condition_input_textarea").value = document.getElementById("raw_yara_condition_input").innerHTML;
+            document.getElementById("raw_yara_condition_input_textarea").value = "bananapie";
+            // return document.getElementById("raw_yara_condition_input").value;
+        }
+
+
+        // function submitRawYaraCondition() {
+        //     var param = '';
+        //
+        //     // jQuery
+        //     param = $('#raw_yara_condition_form').text();
+        //
+        //     // or you could use pure javascript
+        //     param = document.getElementById('raw_yara_condition_input').innerHTML;
+        //
+        //     // Now that you have these values you should add them to your form as an input
+        //     // input fields are how you send data through forms to wherever you are posting them
+        //     // build the input field
+        //     param = "<input type='text' name'param1' value='" + param + "'/>";
+        //
+        //     // append it to the form
+        //     $('#raw_yara_condition_form').append(param);
+        //
+        //     // finally submit the form.
+        //     document.getElementById("raw_yara_condition_form").submit();
+        //     }
     </script>
 
     <script type="text/javascript">
