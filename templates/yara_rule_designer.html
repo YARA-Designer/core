@@ -74,9 +74,12 @@
             ev.preventDefault();
             var data=ev.dataTransfer.getData("Text");
 
-            var currentText = $(ev.target).text();
-            $(ev.target).text(currentText + ' ' + $('#' + data).text());
-            $('#' + data).remove();
+            ev.target.appendChild(document.getElementById(data));
+
+            // Text append to existing obj
+            // var currentText = $(ev.target).text();
+            // $(ev.target).text(currentText + ' ' + $('#' + data).text());
+            // $('#' + data).remove();
         }
     </script>
 {% endblock %}
