@@ -7,7 +7,7 @@
 
 <div id="yara_rule_designer_header"><p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p></div>
 <div id="yara_rule_designer_container">
-    <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="deleteItem(event)">
     <!--    Add artifacts as individual draggable objects-->
         {% for artifact in artifacts %}
             <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }}</span>
@@ -18,7 +18,7 @@
         <span id="test" class="draggable_artifact" draggable="true" ondragstart="drag(event)">TEST AREA</span>
     </div>
 
-    <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="deleteItem(event)">
     <!--    Add conditional keywords-->
     <!--    Boolean-->
         <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">AND</span>
@@ -54,19 +54,22 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-2.1.0.min.js"></script>
 
     <script>
-        function allowDrop(ev)
-        {
+        function allowDrop(ev) {
+            // By default, data/elements cannot be dropped in other elements.
+            // To allow a drop, we must prevent the default handling of the element.
             ev.preventDefault();
         }
 
-        function drag(ev)
-        {
+        function deleteItem(ev) {
+            console.log('delete ' + $(ev.target).text());
+        }
+
+        function drag(ev)  {
             console.log('drag ' + $(ev.target).text());
             ev.dataTransfer.setData("Text",ev.target.id);
         }
 
-        function drop(ev)
-        {
+        function drop(ev) {
             console.log('drop ' + $(ev.target).text());
             ev.preventDefault();
             var data=ev.dataTransfer.getData("Text");
