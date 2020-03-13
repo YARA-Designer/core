@@ -17,7 +17,7 @@ html, body {
 }
 
 .yara_rule_designer > span {
-    display: inline-block;
+    /*display: inline-grid;*/
     margin: 10px;
     padding: 10px;
     font-size: 12px;
@@ -25,6 +25,19 @@ html, body {
     border-radius: 25px;
     box-shadow: 5px 5px 5px grey;
     color: #ffffff;
+}
+
+#yara_rule_designer_artifacts > span {
+    display: inline-grid;
+}
+
+#yara_rule_designer_editor > span {
+    /*display: inline-grid;*/
+    /*padding: 10px;*/
+}
+
+#yara_rule_designer_operators > span {
+    display: inline-grid;
 }
 
 #yara_rule_designer_header {
