@@ -32,7 +32,7 @@ html, body {
 }
 
 #yara_rule_designer_editor > span {
-    /*display: inline-grid;*/
+    display: inline-grid;
     /*padding: 10px;*/
 }
 

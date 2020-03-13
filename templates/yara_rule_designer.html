@@ -7,18 +7,18 @@
 
 <div id="yara_rule_designer_header"><p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p></div>
 <div id="yara_rule_designer_container">
-    <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)">
+    <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add artifacts as individual draggable objects-->
         {% for artifact in artifacts %}
             <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }}</span>
         {% endfor %}
     </div>
 
-    <div class="yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)">
+    <div class="yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
         <span id="test" class="draggable_artifact" draggable="true" ondragstart="drag(event)">TEST AREA</span>
     </div>
 
-    <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)">
+    <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add conditional keywords-->
     <!--    Boolean-->
         <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">AND</span>
@@ -54,21 +54,155 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-2.1.0.min.js"></script>
 
     <script>
+        // https://stackoverflow.com/a/26272668
+        function getStyleRuleValue(selector, style) {
+         var selector_compare=selector.toLowerCase();
+         var selector_compare2= selector_compare.substr(0,1)==='.' ?  selector_compare.substr(1) : '.'+selector_compare;
+
+         for (var i = 0; i < document.styleSheets.length; i++)
+         {
+          var mysheet = document.styleSheets[i];
+          var myrules = mysheet.cssRules ? mysheet.cssRules : mysheet.rules;
+
+          for (var j = 0; j < myrules.length; j++)
+          {
+            if (myrules[j].selectorText)
+            {
+             var check = myrules[j].selectorText.toLowerCase();
+             switch (check)
+             {
+              case selector_compare  :
+              case selector_compare2 : return myrules[j].style[style];
+             }
+            }
+           }
+          }
+         }
+
         const ALLOWED_ITEM_COLOR = '#229954';
         const DENIED_ITEM_COLOR = '#c0392b';
+        const CLASSES_NOT_TO_COLOR = ['yara_rule_designer'];
 
-        function colorHoveredItem(hoveredItem, color) {
-            console.log(hoveredItem);
-            hoveredItem.style.background = color;
+        function colorHoveredItem(hoveredItemToColor, color) {
+            /**
+             * Colors a hovered object.
+             */
+
+            if (typeof hoveredItemToColor == "undefined") {
+                console.log("FAILED Coloring (hoveredItemToColor was undefined!)'");
+                return;
+            }
+            console.log("hoveredItemToColor:");
+            console.log(hoveredItemToColor);
+
+            console.log("Coloring '" + $(hoveredItemToColor).text() + "': " + color);
+
+            hoveredItemToColor.style.background = color;
         }
 
-        function hoverOverItemAction(target, allowed=true) {
-            allowed ? colorHoveredItem(target, ALLOWED_ITEM_COLOR) : colorHoveredItem(target, DENIED_ITEM_COLOR);
+        function hasRelatedTarget(ev) {
+            /**
+             * Because null == undefined is true, this will catch both null and undefined.
+             */
+            return ev.relatedTarget != null;
+        }
+
+        function hasTarget(ev) {
+            /**
+             * Because null == undefined is true, this will catch both null and undefined.
+             */
+            return ev.target != null;
+        }
+
+        function isNotToBeColored(ev) {
+            try {
+                // Check if object inherits a class that's not to be colored
+                console.log("Ignore coloring obj: '" + ev.target.id + "' of class '" + ev.target.getAttribute('class'));
+                return CLASSES_NOT_TO_COLOR.includes(ev.target.getAttribute('class'));
+            } catch (err) {
+                // If anything goes wrong, assume the object it not to be colored.
+                console.log("isNotToBeColored EXCEPTION: " + err.message);
+                console.log(ev);
+                return true;
+            }
+        }
+
+        function dragEnterDenied(ev) {
+            if (isNotToBeColored(ev) === true) {
+                return;
+            }
+
+            console.log('Forbidden drop target (enter): ' + $(ev.target).text());
+            console.log(ev);
+
+            // Make sure event is hovering a valid droppable object (has a relatedTarget property).
+            console.log("hasRelatedTarget: " + hasRelatedTarget(ev));
+            if (hasRelatedTarget(ev) === true) {
+                colorHoveredItem(ev.target, DENIED_ITEM_COLOR);
+            }
+        }
+
+        function resetColoredObject(ev) {
+            /**
+             * Resets a colored hoveredItem object back to its original style (using its class as reference)
+             */
+            // Get the item that is being hovered over (NB: target not relatedTarget on ondragleave).
+            if (hasTarget(ev) === true) {
+                var hoveredItem = ev.target;
+            } else {
+                console.log("resetColoredObject: ABORTED! Was given object with no target properly:");
+                console.log(ev);
+                return;
+            }
+            console.log("hoveredItem:");
+            console.log(hoveredItem);
+
+            // Get its class.
+            var hoveredItemClass = hoveredItem.getAttribute("class");
+            console.log("hoveredItemClass: " + hoveredItemClass);
+            // Use the class name to determine its original color setting.
+            var originalColor = getStyleRuleValue('.' + hoveredItemClass, 'backgroundColor');
+            console.log("originalColor: " + originalColor);
+
+            console.log("Reset color on '" + $(hoveredItem).text().replace(/(\r\n|\n|\r)/gm,"") + "': " + originalColor);
+            colorHoveredItem(hoveredItem, originalColor);
+        }
+
+        function dragLeaveDenied(ev) {
+            console.log("dragLeaveDenied: isNotToBeColored: " + isNotToBeColored(ev));
+            if (isNotToBeColored(ev) === true) {
+                return;
+            }
+
+            console.log('Forbidden drop target (leave): ' + $(ev.target).text());
+            console.log(ev);
+
+            // Reset color.
+            resetColoredObject(ev);
+        }
+
+        function dragEnterAllowed(ev) {
+            console.log('Allowed drop target (enter): ' + $(ev.target).text());
+
+            if (isNotToBeColored(ev) !== true) {
+                colorHoveredItem(ev.target, ALLOWED_ITEM_COLOR);
+            }
+
+        }
+
+        function dragLeaveAllowed(ev) {
+            console.log('Allowed drop target (leave): ' + $(ev.target).text());
+
+            if (isNotToBeColored(ev) === true) {
+                return;
+            }
+
+            // Reset color.
+            resetColoredObject(ev);
         }
 
         function dragOverAllowedDrop(ev) {
-            console.log('Allowed drop target: ' + $(ev.target).text());
-            hoverOverItemAction(ev.target, true);
+            console.log('Allowed drop target (hover): ' + $(ev.target).text());
 
             // By default, data/elements cannot be dropped in other elements.
             // To allow a drop, we must prevent the default handling of the element.
@@ -76,10 +210,7 @@
         }
 
         function dragOverDisallowedDrop(ev) {
-            hoverOverItemAction(ev.target, false);
-
-            console.log('Forbidden drop target: ' + $(ev.target).text());
-
+            console.log('Forbidden drop target (hover): ' + $(ev.target).text().replace(/(\r\n|\n|\r)/gm,""));
         }
 
         function drag(ev)  {
@@ -95,6 +226,10 @@
 
         function drop(ev) {
             console.log('drop ' + $(ev.target).text());
+
+            // Reset color.
+            resetColoredObject(ev);
+
             ev.preventDefault();
             var data=ev.dataTransfer.getData("Text");
 
