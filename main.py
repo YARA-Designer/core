@@ -5,6 +5,14 @@ from listener import api
 import webserver
 from database import init_db
 
+
+def utility_functions():
+    def print_in_console(message):
+        print(str(message))
+
+    return dict(mdebug=print_in_console)
+
+
 if __name__ == "__main__":
     # Get config
     config = config_handler.load_config()
@@ -16,9 +24,10 @@ if __name__ == "__main__":
     app = Flask(__name__)
     app.config["DEBUG"] = True
 
+    app.context_processor(utility_functions)
+
     # Add TheHive listener endpoint
     app.add_url_rule(config["hive_listener_endpoint"], methods=['POST'], view_func=api.create_yara_whitelist_rule)
-
 
     # Add other useful routes
     # -- Listing of all pending rules.
