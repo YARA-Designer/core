@@ -112,10 +112,12 @@ def new_rule_designer():
         return "Please specify a case ID!"
 
     case = dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id')))
+    theme = request.args.get('theme')
 
     return render_template('yara_rule_designer.html',
                            case=case,
-                           artifacts=case['data']['observables'])
+                           artifacts=case['data']['observables'],
+                           theme=theme)
 
 
 def post_rule():

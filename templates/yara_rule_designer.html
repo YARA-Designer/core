@@ -5,6 +5,13 @@
     {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
 {% endif %}
 
+<!-- Load theme if specified -->
+{% if theme is defined %}
+    <!-- Set Jinja2 variables for use in JavaScript -->
+    <meta id="themeArg" data-name="{{ theme }}" data-path="{{ url_for('static', filename='themes') + '/' }}">
+{% endif %}
+
+
 <div id="yara_rule_designer_header"><p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p></div>
 <div id="yara_rule_designer_container">
     <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
@@ -52,6 +59,36 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-2.1.0.min.js"></script>
+
+    <script>
+        // extend jQuery with this tiny convenience to allow for simple existence tests.
+        $.fn.exists = function () {
+            return this.length !== 0;
+        };
+
+        function loadTheme(themeData) {
+            const rootEl = document.querySelector(':root');
+            const themePath = themeData.path;
+
+            var themeFile = themeData.name + ".json";
+            var themeFilePath = themePath + themeFile;
+
+            // Load corresponding theme JSON from file.
+            console.log("Load theme: " + themeFilePath);
+            $.getJSON(themeFilePath, function(json) {
+                console.log(json); // this will show the info it in firebug console
+                for (var key in json) {
+                    console.log("setProperty(" + key + ", " + json[key] + ")")
+                    rootEl.style.setProperty(key, json[key]);
+                }
+
+            });
+        }
+
+        if ($('#themeArg').exists()) {
+            loadTheme($('#themeArg').data())
+        }
+    </script>
 
     <script>
         // https://stackoverflow.com/a/26272668

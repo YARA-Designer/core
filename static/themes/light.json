@@ -1,0 +1,11 @@
+{
+    "--yara_rule_designer_color": "white",
+    "--yara_rule_designer_span_box_shadow": "grey",
+    "--yara_rule_designer_header_color": "black",
+    "--yara_rule_designer_border_color": "black",
+    "--yara_rule_designer_background": "white",
+    "--condition_keyword_color": "white",
+    "--condition_keyword_background": "#dd63ba",
+    "--draggable_artifact_color": "white",
+    "--draggable_artifact_background": "#4a90dd"
+}
