@@ -55,10 +55,12 @@
 </div>
 
 {% block javascript %}
+    <!-- JQuery includes ( required for drag and drop and $() ). -->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-2.1.0.min.js"></script>
 
+    <!-- Theme handler -->
     <script>
         // extend jQuery with this tiny convenience to allow for simple existence tests.
         $.fn.exists = function () {
