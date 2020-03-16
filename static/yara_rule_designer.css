@@ -68,6 +68,7 @@ html, body {
 }
 
 #yara_rule_designer_editor {
+    /*display: inline-grid;*/
     order: 2;
     float: left;
     overflow: auto;
@@ -92,6 +93,13 @@ html, body {
     font-weight: bold;
     background: var(--condition_keyword_background);
 }
+
+.condition_encapsulator {
+    color: var(--condition_keyword_color);
+    font-weight: bold;
+    background: var(--condition_keyword_background);
+}
+
 
 .draggable_artifact {
     color: var(--draggable_artifact_color);

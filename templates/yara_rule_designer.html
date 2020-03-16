@@ -51,6 +51,10 @@
         <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ^ </span>
         <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"> << </span>
         <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"> >> </span>
+    <!-- Parenthesis and wrappers       -->
+        <span id="condition_keyword_lparen" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ( </span>
+        <span id="condition_keyword_rparen" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ) </span>
+        <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" draggable="true" ondragstart="drag(event)"> () </span>
 
         <span id="condition_keyword_test" class="condition_keyword" draggable="true">Lorem ipsum dolor sit amet, consectetur. </span>
     </div>
@@ -121,8 +125,23 @@
 
         const ALLOWED_ITEM_COLOR = '#229954';
         const DENIED_ITEM_COLOR = '#c0392b';
+        const ROOT_CLASS = 'yara_rule_designer';
+        const DRAGGABLE_CLASSES = ['draggable_artifact', 'condition_keyword', 'condition_encapsulator'];
         const CLASSES_NOT_TO_COLOR = ['yara_rule_designer'];
         const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
+        const ENCAPSULATOR_IDS = ['condition_keyword_encapsulate_paren'];
+        const ENCAPSULATORS = {
+            "condition_keyword_encapsulate_paren": {
+                "pre": "condition_keyword_lparen",
+                "post": "condition_keyword_rparen"
+            }
+        };
+
+        var originalParentIdLookupByClass = {
+            "draggable_artifact": "yara_rule_designer_artifacts",
+            "condition_keyword": "yara_rule_designer_operators",
+            "condition_encapsulator": "yara_rule_designer_operators"
+        };
 
         function colorHoveredItem(hoveredItemToColor, color) {
             /**
@@ -141,17 +160,17 @@
             hoveredItemToColor.style.background = color;
         }
 
+        /**
+         * Because null == undefined is true, this will catch both null and undefined.
+         */
         function hasRelatedTarget(ev) {
-            /**
-             * Because null == undefined is true, this will catch both null and undefined.
-             */
             return ev.relatedTarget != null;
         }
 
+        /**
+         * Because null == undefined is true, this will catch both null and undefined.
+         */
         function hasTarget(ev) {
-            /**
-             * Because null == undefined is true, this will catch both null and undefined.
-             */
             return ev.target != null;
         }
 
@@ -183,10 +202,10 @@
             }
         }
 
+        /**
+         * Resets a colored hoveredItem object back to its original style (using its class as reference)
+         */
         function resetColoredObject(ev) {
-            /**
-             * Resets a colored hoveredItem object back to its original style (using its class as reference)
-             */
             // Get the item that is being hovered over (NB: target not relatedTarget on ondragleave).
             if (hasTarget(ev) === true) {
                 var hoveredItem = ev.target;
@@ -258,6 +277,17 @@
             console.log('drag ' + $(dragStartEvent.target).text());
             console.log(dragStartEvent);
 
+            // // Attach a pointer to the original parent div, for use in drop (cleanup etc.).
+            // var parentElement = dragStartEvent.target.parentElement;
+            // var parentElementClass = dragStartEvent.target.parentElement.getAttribute("class");
+            // var parentElementId = dragStartEvent.target.parentElement.getAttribute("id");
+
+            // if (parentElementClass === ROOT_CLASS && DIVS_WITH_CLONING.includes(parentElementId)) {
+            //     dragStartEvent.target.setAttribute("originalParentId", parentElementId);
+            //     console.log(dragStartEvent.target.getAttribute("originalParentId"));
+            // }
+            // // dragStartEvent.target.setAttribute("__originalParent", dragStartEvent.target.parentNode);
+
             // Only clone if object resides in a div with cloning enabled.
             if ( DIVS_WITH_CLONING.includes(dragStartEvent.target.parentElement.getAttribute('id')) ) {
                 console.log(DIVS_WITH_CLONING.toString() + " includes :" + dragStartEvent.target.parentElement.getAttribute('id'));
@@ -270,24 +300,61 @@
             dragStartEvent.dataTransfer.setData("Text",dragStartEvent.target.id);
         }
 
+        /**
+         * Wraps an element in two encapsulating elements.
+         * */
+        function encapsulate(ev) {
+            var draggableObjectId = ev.dataTransfer.getData("Text");
+            var pre =  document.getElementById(ENCAPSULATORS[draggableObjectId]["pre"]);
+            var post =  document.getElementById(ENCAPSULATORS[draggableObjectId]["post"]);
+
+            // 1 . Prepend encapsulator
+            ev.target.insertBefore(pre, ev.target.firstChild);
+
+            // 2. Append encapsulator
+            ev.target.appendChild(post);
+        }
+
         function drop(ev) {
+            var draggableObject;
+            var draggableObjectId = ev.dataTransfer.getData("Text");
+
             console.log('drop ' + $(ev.target).text());
 
             // Reset color.
             resetColoredObject(ev);
 
             ev.preventDefault();
-            var draggable_object=ev.dataTransfer.getData("Text");
 
-            ev.target.appendChild(document.getElementById(draggable_object));
+            console.log("DEBUG ENCAPSUALTION:")
+            console.log(draggableObjectId);
+            console.log(ev.target.getAttribute('class'));
+            // Encapsulate if draggable object is an encapsulator and target class is a draggable.
+            if ( ENCAPSULATOR_IDS.includes(draggableObjectId)
+                && DRAGGABLE_CLASSES.includes(ev.target.getAttribute('class')) ) {
+                console.log("Encapsulate: " + ev.target);
+                encapsulate(ev);
+            } else {
+                console.log("DONT Encapsulate: " + ev.target);
+                draggableObject = document.getElementById(draggableObjectId);
+                ev.target.appendChild(draggableObject);
+            }
+
 
             // Delete the cloned element in div
             console.log(ev);
-            console.log("Removing target: ");
-            console.log(ev.target);
-            console.log("From parentNode: ");
-            console.log(ev.target.parentNode);
-            ev.target.parentNode.removeChild(draggable_object);
+            var originalParent = document.getElementById(originalParentIdLookupByClass[draggableObject.getAttribute("class")]);
+
+            if (originalParent.getAttribute("class") !== ROOT_CLASS) {
+                console.log("Removing target: ");
+                console.log(ev.target);
+                console.log("From parentNode (originalParent): ");
+                console.log(originalParent);
+
+                originalParent.removeChild(draggableObject);
+            } else {
+                console.log("SKIPPING Removing target for '" + originalParent.getAttribute("id") + "' of root class: " + originalParent.getAttribute("class"));
+            }
 
             // Text append to existing obj
             // var currentText = $(ev.target).text();
