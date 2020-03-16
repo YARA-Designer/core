@@ -27,30 +27,30 @@
     <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add conditional keywords-->
     <!--    Boolean-->
-        <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">AND</span>
-        <span id="condition_keyword_or" class="condition_keyword" draggable="true" ondragstart="drag(event)">OR</span>
-        <span id="condition_keyword_not" class="condition_keyword" draggable="true" ondragstart="drag(event)">NOT</span>
+        <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)"> AND </span>
+        <span id="condition_keyword_or" class="condition_keyword" draggable="true" ondragstart="drag(event)"> OR </span>
+        <span id="condition_keyword_not" class="condition_keyword" draggable="true" ondragstart="drag(event)"> NOT </span>
     <!--    Arithmetic-->
-        <span id="condition_keyword_equal" class="condition_keyword" draggable="true" ondragstart="drag(event)">==</span>
-        <span id="condition_keyword_lt" class="condition_keyword" draggable="true" ondragstart="drag(event)"><</span>
-        <span id="condition_keyword_gt" class="condition_keyword" draggable="true" ondragstart="drag(event)">></span>
-        <span id="condition_keyword_leq" class="condition_keyword" draggable="true" ondragstart="drag(event)"><=</span>
-        <span id="condition_keyword_geq" class="condition_keyword" draggable="true" ondragstart="drag(event)">>=</span>
-        <span id="condition_keyword_neq" class="condition_keyword" draggable="true" ondragstart="drag(event)">!=</span>
+        <span id="condition_keyword_equal" class="condition_keyword" draggable="true" ondragstart="drag(event)"> == </span>
+        <span id="condition_keyword_lt" class="condition_keyword" draggable="true" ondragstart="drag(event)"> < </span>
+        <span id="condition_keyword_gt" class="condition_keyword" draggable="true" ondragstart="drag(event)"> > </span>
+        <span id="condition_keyword_leq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> <= </span>
+        <span id="condition_keyword_geq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> >= </span>
+        <span id="condition_keyword_neq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> != </span>
     <!--    Relational-->
-        <span id="condition_keyword_add" class="condition_keyword" draggable="true" ondragstart="drag(event)">+</span>
-        <span id="condition_keyword_sub" class="condition_keyword" draggable="true" ondragstart="drag(event)">-</span>
-        <span id="condition_keyword_mul" class="condition_keyword" draggable="true" ondragstart="drag(event)">*</span>
-        <span id="condition_keyword_div" class="condition_keyword" draggable="true" ondragstart="drag(event)">/</span>
-        <span id="condition_keyword_pct" class="condition_keyword" draggable="true" ondragstart="drag(event)">%</span>
-        <span id="condition_keyword_setminus" class="condition_keyword" draggable="true" ondragstart="drag(event)">\</span>
+        <span id="condition_keyword_add" class="condition_keyword" draggable="true" ondragstart="drag(event)"> + </span>
+        <span id="condition_keyword_sub" class="condition_keyword" draggable="true" ondragstart="drag(event)"> - </span>
+        <span id="condition_keyword_mul" class="condition_keyword" draggable="true" ondragstart="drag(event)"> * </span>
+        <span id="condition_keyword_div" class="condition_keyword" draggable="true" ondragstart="drag(event)"> / </span>
+        <span id="condition_keyword_pct" class="condition_keyword" draggable="true" ondragstart="drag(event)"> % </span>
+        <span id="condition_keyword_setminus" class="condition_keyword" draggable="true" ondragstart="drag(event)"> \ </span>
     <!--    Bitwise-->
-        <span id="condition_keyword_bitwise_and" class="condition_keyword" draggable="true" ondragstart="drag(event)">&</span>
-        <span id="condition_keyword_bitwise_or" class="condition_keyword" draggable="true" ondragstart="drag(event)">|</span>
-        <span id="condition_keyword_bitwise_not" class="condition_keyword" draggable="true" ondragstart="drag(event)">~</span>
-        <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)">^</span>
-        <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"><<</span>
-        <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)">>></span>
+        <span id="condition_keyword_bitwise_and" class="condition_keyword" draggable="true" ondragstart="drag(event)"> & </span>
+        <span id="condition_keyword_bitwise_or" class="condition_keyword" draggable="true" ondragstart="drag(event)"> | </span>
+        <span id="condition_keyword_bitwise_not" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ~ </span>
+        <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ^ </span>
+        <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"> << </span>
+        <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"> >> </span>
 
         <span id="condition_keyword_test" class="condition_keyword" draggable="true">Lorem ipsum dolor sit amet, consectetur. </span>
     </div>
@@ -260,6 +260,7 @@
 
             // Only clone if object resides in a div with cloning enabled.
             if ( DIVS_WITH_CLONING.includes(dragStartEvent.target.parentElement.getAttribute('id')) ) {
+                console.log(DIVS_WITH_CLONING.toString() + " includes :" + dragStartEvent.target.parentElement.getAttribute('id'));
                 // Clone the draggable's target and replace event's target with the cloned copy.
                 dragStartEvent.target = makeClone(dragStartEvent.target);
             }
