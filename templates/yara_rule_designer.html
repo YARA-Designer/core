@@ -122,6 +122,7 @@
         const ALLOWED_ITEM_COLOR = '#229954';
         const DENIED_ITEM_COLOR = '#c0392b';
         const CLASSES_NOT_TO_COLOR = ['yara_rule_designer'];
+        const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
 
         function colorHoveredItem(hoveredItemToColor, color) {
             /**
@@ -253,26 +254,19 @@
             console.log('Forbidden drop target (hover): ' + $(ev.target).text().replace(/(\r\n|\n|\r)/gm,""));
         }
 
-        function drag(ev)  {
-            console.log('drag ' + $(ev.target).text());
-            console.log(ev);
+        function drag(dragStartEvent)  {
+            console.log('drag ' + $(dragStartEvent.target).text());
+            console.log(dragStartEvent);
 
-            // Tells the browser that only the listed type(s) of operations are allowed for the user.
-            // ev.dataTransfer.effectAllowed = "copy";
-
-            // Clone the draggable's target.
-            var cloned_draggable = makeClone(ev.target);
-            // Replace event's target with the cloned copy.
-            ev.target = cloned_draggable;
+            // Only clone if object resides in a div with cloning enabled.
+            if ( DIVS_WITH_CLONING.includes(dragStartEvent.target.parentElement.getAttribute('id')) ) {
+                // Clone the draggable's target and replace event's target with the cloned copy.
+                dragStartEvent.target = makeClone(dragStartEvent.target);
+            }
 
             // Add this element's id to the drag payload so the drop handler will
-            // know which element to add to its tree
-            // ev.dataTransfer.setData("Text",ev.target.id);
-            ev.dataTransfer.setData("Text",cloned_draggable.id);
-
-
-            // new Drag(document.querySelector('.element'));
-            // new Drag(ev.target);
+            // know which element to add to its tree.
+            dragStartEvent.dataTransfer.setData("Text",dragStartEvent.target.id);
         }
 
         function drop(ev) {

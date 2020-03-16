@@ -8,7 +8,7 @@
 * Delete (cloned) elements dragged back into artifact/operator div element.
 
 #### Priority 2
-
+* Fix colouring when combining elements in the editor div.
 ##### Priority 3
 * Split (what's possible) of script blocks into separate .js files.
 * Fix drag and drop transparency issues: https://stackoverflow.com/a/26534667
