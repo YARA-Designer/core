@@ -51,6 +51,8 @@
         <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)">^</span>
         <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"><<</span>
         <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)">>></span>
+
+        <span id="condition_keyword_test" class="condition_keyword" draggable="true">Lorem ipsum dolor sit amet, consectetur. </span>
     </div>
 </div>
 
@@ -253,13 +255,24 @@
 
         function drag(ev)  {
             console.log('drag ' + $(ev.target).text());
+            console.log(ev);
 
             // Tells the browser that only the listed type(s) of operations are allowed for the user.
-            ev.dataTransfer.effectAllowed = "copy";
+            // ev.dataTransfer.effectAllowed = "copy";
+
+            // Clone the draggable's target.
+            var cloned_draggable = makeClone(ev.target);
+            // Replace event's target with the cloned copy.
+            ev.target = cloned_draggable;
 
             // Add this element's id to the drag payload so the drop handler will
             // know which element to add to its tree
-            ev.dataTransfer.setData("Text",ev.target.id);
+            // ev.dataTransfer.setData("Text",ev.target.id);
+            ev.dataTransfer.setData("Text",cloned_draggable.id);
+
+
+            // new Drag(document.querySelector('.element'));
+            // new Drag(ev.target);
         }
 
         function drop(ev) {
@@ -269,14 +282,57 @@
             resetColoredObject(ev);
 
             ev.preventDefault();
-            var data=ev.dataTransfer.getData("Text");
+            var draggable_object=ev.dataTransfer.getData("Text");
 
-            ev.target.appendChild(document.getElementById(data));
+            ev.target.appendChild(document.getElementById(draggable_object));
+
+            // Delete the cloned element in div
+            console.log(ev);
+            console.log("Removing target: ");
+            console.log(ev.target);
+            console.log("From parentNode: ");
+            console.log(ev.target.parentNode);
+            ev.target.parentNode.removeChild(draggable_object);
 
             // Text append to existing obj
             // var currentText = $(ev.target).text();
             // $(ev.target).text(currentText + ' ' + $('#' + data).text());
             // $('#' + data).remove();
+        }
+
+        //////
+        /**
+         * Make clone width and height static.
+         * Take clone out of the element flow.
+         *
+         * @param {HTMLElement} node
+         * @param {Number} width
+         * @param {Number} height
+         */
+        function styleClone(node, width, height) {
+            node.style.position = 'fixed';
+            node.style.zIndex = 9999;
+            node.style.width = width + 'px';
+            node.style.height = height + 'px';
+            node.style.left = '-9999px';
+
+            node.style.margin = 0;
+            node.style.padding = 0;
+        }
+
+
+        function makeClone(node) {
+            console.log(node);
+            var clone;
+
+            // Returns a copy of node. If deep is true, the copy also includes the node's descendants.
+            clone = node.cloneNode(true);
+
+            // this.styleClone(clone, node.offsetWidth, node.offsetHeight);
+
+            node.parentNode.insertBefore(clone, node);
+
+            return clone;
         }
     </script>
 {% endblock %}
