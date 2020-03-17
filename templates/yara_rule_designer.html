@@ -12,7 +12,7 @@
 {% endif %}
 
 
-<div id="yara_rule_designer_header"><p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p></div>
+<div id="yara_rule_designer_header" class="yara_rule_designer"><p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p></div>
 <div id="yara_rule_designer_container">
     <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add artifacts as individual draggable objects-->
@@ -127,7 +127,9 @@
         const DENIED_ITEM_COLOR = '#c0392b';
         const ROOT_CLASS = 'yara_rule_designer';
         const DRAGGABLE_CLASSES = ['draggable_artifact', 'condition_keyword', 'condition_encapsulator'];
-        const CLASSES_NOT_TO_COLOR = ['yara_rule_designer'];
+        const COLORABLE_IDS = ['yara_rule_designer_editor'];
+        const COLORABLE_CLASSES = DRAGGABLE_CLASSES;
+        const COLORABLE_NODE_NAMES = ['SPAN', 'DIV'];
         const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
         const ENCAPSULATOR_IDS = ['condition_keyword_encapsulate_paren'];
         const ENCAPSULATORS = {
@@ -152,12 +154,25 @@
                 console.log("FAILED Coloring (hoveredItemToColor was undefined!)'");
                 return;
             }
-            console.log("hoveredItemToColor:");
-            console.log(hoveredItemToColor);
 
-            console.log("Coloring '" + $(hoveredItemToColor).text() + "': " + color);
+            if (isColorable(hoveredItemToColor) === true) {
+                console.log("hoveredItemToColor:");
+                console.log(hoveredItemToColor);
 
-            hoveredItemToColor.style.background = color;
+                console.log("Coloring '" + getIdentifier(hoveredItemToColor) + "': " + color);
+                try {
+                    // Get the correct node (sometimes #text gets selected instead of its SPAN ancestor).
+                    if (!COLORABLE_NODE_NAMES.includes(hoveredItemToColor.nodeName)) {
+                        hoveredItemToColor = hoveredItemToColor.parentElement;
+                    }
+
+                    hoveredItemToColor.style.background = color;
+                } catch (e) {
+                    console.error("colorHoveredItem EXCEPTION: " + e.message);
+                    console.error(hoveredItemToColor);
+                    throw e;
+                }
+            }
         }
 
         /**
@@ -174,30 +189,42 @@
             return ev.target != null;
         }
 
-        function isNotToBeColored(ev) {
+
+        function isColorable(target) {
             try {
-                // Check if object inherits a class that's not to be colored
-                console.log("Ignore coloring obj: '" + ev.target.id + "' of class '" + ev.target.getAttribute('class'));
-                return CLASSES_NOT_TO_COLOR.includes(ev.target.getAttribute('class'));
+                // Check if object inherits a class and/or id that's to be colored
+                return COLORABLE_CLASSES.includes(target.getAttribute('class')) || COLORABLE_IDS.includes(target.getAttribute('id'));
             } catch (err) {
                 // If anything goes wrong, assume the object it not to be colored.
-                console.log("isNotToBeColored EXCEPTION: " + err.message);
-                console.log(ev);
+                console.log("isColorable EXCEPTION: " + err.message);
+                console.log(target);
                 return true;
             }
         }
 
-        function dragEnterDenied(ev) {
-            if (isNotToBeColored(ev) === true) {
-                return;
+        /**
+         * Get the identifying property of the item when getAttribute isn't inherited.
+         */
+        function getIdentifier(target) {
+            if (target.nodeName === "#text") {
+                return target.data + " [type: #text]";
+            } else {
+                return target.getAttribute('id');
             }
+        }
 
-            console.log('Forbidden drop target (enter): ' + $(ev.target).text());
-            console.log(ev);
+        function dragEnterDenied(ev) {
+            try {
+                console.log('Forbidden drop target (enter): ' + getIdentifier(ev.target));
+            } catch (e) {
+                console.log("dragEnterDenied EXCEPTION: " + e.message);
+                console.log(ev);
+            }
 
             // Make sure event is hovering a valid droppable object (has a relatedTarget property).
             console.log("hasRelatedTarget: " + hasRelatedTarget(ev));
             if (hasRelatedTarget(ev) === true) {
+                // Color hovered item (if colorable).
                 colorHoveredItem(ev.target, DENIED_ITEM_COLOR);
             }
         }
@@ -205,88 +232,60 @@
         /**
          * Resets a colored hoveredItem object back to its original style (using its class as reference)
          */
-        function resetColoredObject(ev) {
-            // Get the item that is being hovered over (NB: target not relatedTarget on ondragleave).
-            if (hasTarget(ev) === true) {
-                var hoveredItem = ev.target;
-            } else {
-                console.log("resetColoredObject: ABORTED! Was given object with no target properly:");
-                console.log(ev);
-                return;
-            }
+        function resetColoredObject(hoveredItem) {
+            var originalColor;
             console.log("hoveredItem:");
             console.log(hoveredItem);
 
-            // Get its class.
-            var hoveredItemClass = hoveredItem.getAttribute("class");
-            console.log("hoveredItemClass: " + hoveredItemClass);
+            // Get the correct node (sometimes #text gets selected instead of its SPAN ancestor).
+            if (!COLORABLE_NODE_NAMES.includes(hoveredItem.nodeName)) {
+                hoveredItem = hoveredItem.parentElement;
+            }
+
             // Use the class name to determine its original color setting.
-            var originalColor = getStyleRuleValue('.' + hoveredItemClass, 'backgroundColor');
+            originalColor = getStyleRuleValue('.' + hoveredItem.getAttribute("class"), 'background');
             console.log("originalColor: " + originalColor);
 
-            console.log("Reset color on '" + $(hoveredItem).text().replace(/(\r\n|\n|\r)/gm,"") + "': " + originalColor);
+            console.log("Reset color on '" + hoveredItem.getAttribute('id') + "': " + originalColor);
             colorHoveredItem(hoveredItem, originalColor);
         }
 
         function dragLeaveDenied(ev) {
-            console.log("dragLeaveDenied: isNotToBeColored: " + isNotToBeColored(ev));
-            if (isNotToBeColored(ev) === true) {
-                return;
-            }
-
-            console.log('Forbidden drop target (leave): ' + $(ev.target).text());
+            console.log('Forbidden drop target (leave): ' + getIdentifier(ev.target));
             console.log(ev);
 
-            // Reset color.
-            resetColoredObject(ev);
+            // Reset color (if colorable).
+            resetColoredObject(ev.target);
         }
 
         function dragEnterAllowed(ev) {
-            console.log('Allowed drop target (enter): ' + $(ev.target).text());
+            console.log('Allowed drop target (enter): ' + getIdentifier(ev.target));
 
-            if (isNotToBeColored(ev) !== true) {
-                colorHoveredItem(ev.target, ALLOWED_ITEM_COLOR);
-            }
-
+            // Color hovered item (if colorable).
+            colorHoveredItem(ev.target, ALLOWED_ITEM_COLOR);
         }
 
         function dragLeaveAllowed(ev) {
-            console.log('Allowed drop target (leave): ' + $(ev.target).text());
+            console.log('Allowed drop target (leave): ' + getIdentifier(ev.target));
 
-            if (isNotToBeColored(ev) === true) {
-                return;
-            }
-
-            // Reset color.
-            resetColoredObject(ev);
+            // Reset color (if colorable).
+            resetColoredObject(ev.target);
         }
 
         function dragOverAllowedDrop(ev) {
-            console.log('Allowed drop target (hover): ' + $(ev.target).text());
+            console.log('Allowed drop target (hover): ' + getIdentifier(ev.target));
 
-            // By default, data/elements cannot be dropped in other elements.
-            // To allow a drop, we must prevent the default handling of the element.
+            // Prevent default element handling in order to allow drag and drop.
             ev.preventDefault();
         }
 
         function dragOverDisallowedDrop(ev) {
-            console.log('Forbidden drop target (hover): ' + $(ev.target).text().replace(/(\r\n|\n|\r)/gm,""));
+            console.log('Forbidden drop target (hover): ' + getIdentifier(ev.target));
         }
 
         function drag(dragStartEvent)  {
-            console.log('drag ' + $(dragStartEvent.target).text());
+            console.log('drag ' + $(dragStartEvent.target).text() + " [" + dragStartEvent.target.getAttribute('id') + "]");
             console.log(dragStartEvent);
-
-            // // Attach a pointer to the original parent div, for use in drop (cleanup etc.).
-            // var parentElement = dragStartEvent.target.parentElement;
-            // var parentElementClass = dragStartEvent.target.parentElement.getAttribute("class");
-            // var parentElementId = dragStartEvent.target.parentElement.getAttribute("id");
-
-            // if (parentElementClass === ROOT_CLASS && DIVS_WITH_CLONING.includes(parentElementId)) {
-            //     dragStartEvent.target.setAttribute("originalParentId", parentElementId);
-            //     console.log(dragStartEvent.target.getAttribute("originalParentId"));
-            // }
-            // // dragStartEvent.target.setAttribute("__originalParent", dragStartEvent.target.parentNode);
 
             // Only clone if object resides in a div with cloning enabled.
             if ( DIVS_WITH_CLONING.includes(dragStartEvent.target.parentElement.getAttribute('id')) ) {
@@ -302,64 +301,73 @@
 
         /**
          * Wraps an element in two encapsulating elements.
-         * */
+         */
         function encapsulate(ev) {
-            var draggableObjectId = ev.dataTransfer.getData("Text");
-            var pre =  document.getElementById(ENCAPSULATORS[draggableObjectId]["pre"]);
-            var post =  document.getElementById(ENCAPSULATORS[draggableObjectId]["post"]);
+            var pre =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["pre"]);
+            var post =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["post"]);
 
-            // 1 . Prepend encapsulator
+            // 1 . Prepend encapsulation
             ev.target.insertBefore(pre, ev.target.firstChild);
 
-            // 2. Append encapsulator
+            // 2. Append encapsulation
             ev.target.appendChild(post);
         }
 
         function drop(ev) {
-            var draggableObject;
-            var draggableObjectId = ev.dataTransfer.getData("Text");
+            try {
+                var draggableObject;
+                var draggableObjectId = ev.dataTransfer.getData("Text");
 
-            console.log('drop ' + $(ev.target).text());
+                console.log('drop ' + $(ev.target).text());
 
-            // Reset color.
-            resetColoredObject(ev);
+                // Reset color (if colorable).
+                resetColoredObject(ev.target);
 
-            ev.preventDefault();
+                // Prevent default element handling in order to allow drag and drop.
+                ev.preventDefault();
 
-            console.log("DEBUG ENCAPSUALTION:")
-            console.log(draggableObjectId);
-            console.log(ev.target.getAttribute('class'));
-            // Encapsulate if draggable object is an encapsulator and target class is a draggable.
-            if ( ENCAPSULATOR_IDS.includes(draggableObjectId)
-                && DRAGGABLE_CLASSES.includes(ev.target.getAttribute('class')) ) {
-                console.log("Encapsulate: " + ev.target);
-                encapsulate(ev);
-            } else {
-                console.log("DONT Encapsulate: " + ev.target);
-                draggableObject = document.getElementById(draggableObjectId);
-                ev.target.appendChild(draggableObject);
+                // Encapsulate if draggable object is an encapsulation class and target class is a draggable.
+                if ( ENCAPSULATOR_IDS.includes(draggableObjectId)
+                    && DRAGGABLE_CLASSES.includes(ev.target.getAttribute('class')) ) {
+                    console.log("Encapsulate: " + ev.target);
+                    encapsulate(ev);
+                } else {
+                    console.log("DONT Encapsulate: " + ev.target);
+                    draggableObject = document.getElementById(draggableObjectId);
+                    ev.target.appendChild(draggableObject);
+                }
+
+
+                // Delete the cloned element in div
+                console.log(ev);
+                var originalParent = document.getElementById(originalParentIdLookupByClass[draggableObject.getAttribute("class")]);
+
+                if (originalParent.getAttribute("class") !== ROOT_CLASS) {
+                    console.log("Removing target: ");
+                    console.log(ev.target);
+                    console.log("From parentNode (originalParent): ");
+                    console.log(originalParent);
+
+                    originalParent.removeChild(draggableObject);
+                } else {
+                    console.log("SKIPPING Removing target for '" + originalParent.getAttribute("id") + "' of root class: " + originalParent.getAttribute("class"));
+                }
+
+                // Text append to existing obj
+                // var currentText = $(ev.target).text();
+                // $(ev.target).text(currentText + ' ' + $('#' + data).text());
+                // $('#' + data).remove();
+
+            } catch (e) {
+                console.error("drop() threw EXCEPTION: " + e.message);
+                console.error(ev);
+
+                // Make **ABSOLUTELY** sure exceptions don't cause default behaviour (navigate off-site).
+                ev.preventDefault();
+
+                // Rethrow exception.
+                throw e;
             }
-
-
-            // Delete the cloned element in div
-            console.log(ev);
-            var originalParent = document.getElementById(originalParentIdLookupByClass[draggableObject.getAttribute("class")]);
-
-            if (originalParent.getAttribute("class") !== ROOT_CLASS) {
-                console.log("Removing target: ");
-                console.log(ev.target);
-                console.log("From parentNode (originalParent): ");
-                console.log(originalParent);
-
-                originalParent.removeChild(draggableObject);
-            } else {
-                console.log("SKIPPING Removing target for '" + originalParent.getAttribute("id") + "' of root class: " + originalParent.getAttribute("class"));
-            }
-
-            // Text append to existing obj
-            // var currentText = $(ev.target).text();
-            // $(ev.target).text(currentText + ' ' + $('#' + data).text());
-            // $('#' + data).remove();
         }
 
         //////

@@ -18,9 +18,10 @@ html, body {
     padding:0;
 }
 
-#yara_rule_designer {
+.yara_rule_designer {
     overflow: auto;
     border:1px solid var(--yara_rule_designer_border_color);
+    background: var(--yara_rule_designer_background);
 }
 
 #yara_rule_designer_container {
@@ -53,7 +54,6 @@ html, body {
     font-size: 22pt;
     font-weight: bold;
     border:1px solid var(--yara_rule_designer_border_color);
-    background: var(--yara_rule_designer_background);
     color: var(--yara_rule_designer_header_color);
 }
 
@@ -64,7 +64,6 @@ html, body {
     width:20%;
     height:90%;
     border:1px solid var(--yara_rule_designer_border_color);;
-    background: var(--yara_rule_designer_background);
 }
 
 #yara_rule_designer_editor {
@@ -75,7 +74,6 @@ html, body {
     width: 60%;
     height: 90%;
     border:1px solid var(--yara_rule_designer_border_color);;
-    background: var(--yara_rule_designer_background);
 }
 
 #yara_rule_designer_operators {
@@ -85,7 +83,6 @@ html, body {
     width:20%;
     height:90%;
     border:1px solid var(--yara_rule_designer_border_color);;
-    background: var(--yara_rule_designer_background);
 }
 
 .condition_keyword {
