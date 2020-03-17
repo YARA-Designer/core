@@ -17,7 +17,7 @@
     <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add artifacts as individual draggable objects-->
         {% for artifact in artifacts %}
-            <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }}</span>
+            <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }} </span>
         {% endfor %}
     </div>
 

@@ -1,5 +1,4 @@
 ### Priority 1
-* Clone dragged elements, don't move actual.
 * Create a submit div/area at the bottom where you drag a finished rule
     1. Take grouped SPAN elements
     2. Assemble elements into a condition string with artifact vars
