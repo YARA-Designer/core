@@ -120,23 +120,37 @@ def new_rule_designer():
                            theme=theme)
 
 
-def post_rule():
+def post_rule_raw_imd():
     """
     Receives an ImmutableMultiDict of the operators which needs to be matched against the original list of artifacts.
-    :return:
+    :return: JSON on the form of:
+    {
+        "artifacts:
+        [
+            {
+            "artifactN":
+            {
+                "artifact",
+                "id",
+                "type"
+            }
+            }
+        ]",
+        condition: ""
+    }
     """
-    req = request
-    print(request.form)
-    # operator = request.form['operator']
-    # artifact = request.form['artifact']
-    # artifact_type = request.form['artifactType']
-    # artifact_id = request.form['artifactId']
-    # print("operator = {}\n"
-    #       "artifact = {}\n"
-    #       "artifact_type = {}\n"
-    #       "artifact_id = {}\n".format(operator, artifact, artifact_type, artifact_id))
 
-    return dict_to_json(request.form)
+    artifacts = {}
+    for artifact, varname, artifact_type, artifact_id in zip(request.form.getlist('artifact'),
+                                                             request.form.getlist('artifact_var'),
+                                                             request.form.getlist('artifact_type'),
+                                                             request.form.getlist('artifact_id')):
+        artifacts[varname] = {"artifact": artifact, "type": artifact_type, "id": artifact_id}
+
+    yara_condition_string = request.form['rawUrlSubmit']
+    combined = {"artifacts": artifacts, "condition": yara_condition_string}
+
+    return combined
     # return render_template('post_yara_rule.html',
     #                        case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
 
