@@ -22,3 +22,4 @@
     Possible solutions:
     - Modify every cloned (operator) ID to be unique.
     - 
+* Drag and drop seems broken on the editor_post div.
