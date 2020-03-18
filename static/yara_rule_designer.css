@@ -31,7 +31,6 @@ html, body {
 }
 
 .yara_rule_designer > span {
-    /*display: inline-grid;*/
     margin: 10px;
     padding: 10px;
     font-size: 12px;
@@ -39,10 +38,6 @@ html, body {
     border-radius: 25px;
     box-shadow: 5px 5px 5px var(--yara_rule_designer_span_box_shadow);
     color: var(--yara_rule_designer_color);
-}
-
-#yara_rule_designer_artifacts > span , #yara_rule_designer_editor > span , #yara_rule_designer_operators > span {
-    display: inline-grid;
 }
 
 #yara_rule_designer_header {
@@ -67,7 +62,6 @@ html, body {
 }
 
 #yara_rule_designer_editor {
-    /*display: inline-grid;*/
     order: 2;
     float: left;
     overflow: auto;
@@ -86,12 +80,14 @@ html, body {
 }
 
 .condition_keyword {
+    display: inline-table;
     color: var(--condition_keyword_color);
     font-weight: bold;
     background: var(--condition_keyword_background);
 }
 
 .condition_encapsulator {
+    display: inline-table;
     color: var(--condition_keyword_color);
     font-weight: bold;
     background: var(--condition_keyword_background);
@@ -99,6 +95,7 @@ html, body {
 
 
 .draggable_artifact {
+    display: inline-table;
     color: var(--draggable_artifact_color);
     background-color: var(--draggable_artifact_background);
 }
