@@ -61,12 +61,25 @@ html, body {
     border:1px solid var(--yara_rule_designer_border_color);;
 }
 
-#yara_rule_designer_editor {
+#yara_rule_designer_editor_container {
     order: 2;
     float: left;
     overflow: auto;
     width: 60%;
     height: 90%;
+}
+
+#yara_rule_designer_editor {
+    float: top;
+    overflow: auto;
+    height: 80%;
+    border:1px solid var(--yara_rule_designer_border_color);;
+}
+
+#yara_rule_designer_post {
+    float: bottom;
+    overflow: auto;
+    /*height: 10%;*/ /* DO NOT ADD height as it causes weird scrollbar/overflow */
     border:1px solid var(--yara_rule_designer_border_color);;
 }
 

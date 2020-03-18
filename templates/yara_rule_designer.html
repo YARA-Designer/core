@@ -20,8 +20,9 @@
             <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }} </span>
         {% endfor %}
     </div>
-
-    <div class="yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
+    <div id="yara_rule_designer_editor_container" class="yara_rule_designer">
+        <div class="yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)"></div>
+        <div class="yara_rule_designer" id="yara_rule_designer_post" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)"></div>
     </div>
 
     <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
@@ -127,7 +128,7 @@
         const DENIED_ITEM_COLOR = '#c0392b';
         const ROOT_CLASS = 'yara_rule_designer';
         const DRAGGABLE_CLASSES = ['draggable_artifact', 'condition_keyword', 'condition_encapsulator'];
-        const COLORABLE_IDS = ['yara_rule_designer_editor'];
+        const COLORABLE_IDS = ['yara_rule_designer_editor', 'yara_rule_designer_post'];
         const COLORABLE_CLASSES = DRAGGABLE_CLASSES;
         const COLORABLE_NODE_NAMES = ['SPAN', 'DIV'];
         const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
