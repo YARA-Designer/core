@@ -9,6 +9,15 @@
     {% endif %}
 
     <form id="raw_yara_condition_form" action="{{ url_for('post_rule_raw_imd') }}" method="post">
+        <input type="hidden" id="yara_rule_name" name="rule" value="Whitelist_{{ case.data.title }}">
+        <!-- Used to denote which meta keys are set (works as a makeshift key:value
+
+             You can also post multiple inputs with the same name and have them save into an array by adding empty
+             square brackets to the input name.
+        -->
+        <input type="hidden" name="meta_keys" value="description">
+<!--        <input type="hidden" name="meta_keys[]" value="test">-->
+        <input type="hidden" id="yara_rule_meta_description" name="meta_description" value="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
         <table>
             <tr>
                 <th>Variable ref.</th>

@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from database.models import PendingRule
 from database.operations import db_session
+import yara_handling
 
 tab_character = "&nbsp;"
 tab = tab_character*4
@@ -120,6 +121,7 @@ def new_rule_designer():
                            theme=theme)
 
 
+
 def post_rule_raw_imd():
     """
     Receives an ImmutableMultiDict of the operators which needs to be matched against the original list of artifacts.
@@ -139,6 +141,8 @@ def post_rule_raw_imd():
         condition: ""
     }
     """
+    print("keys: " + str([key for key in request.form.keys()]))
+    print("request.form: {}".format(request.form))
 
     artifacts = {}
     for artifact, varname, artifact_type, artifact_id in zip(request.form.getlist('artifact'),
@@ -148,11 +152,21 @@ def post_rule_raw_imd():
         artifacts[varname] = {"artifact": artifact, "type": artifact_type, "id": artifact_id}
 
     yara_condition_string = request.form['rawUrlSubmit']
-    combined = {"artifacts": artifacts, "condition": yara_condition_string}
+    combined = {"rule": (request.form['rule'] if 'rule' in request.form else 'UNNAMED_RULE'),
+                "meta": ({k: request.form['meta_' + k] for k in request.form['meta_keys'].split(',')} if 'meta_keys' in request.form else {}),
+                "tags": (request.form["tags"] if "tags" in request.form else []),
+                "artifacts": artifacts,
+                "condition": yara_condition_string}
 
+    try:
+        # Generate yara rule
+        yara_handling.generate_yara_rule_from_dict(combined)
+    except Exception as exc:
+        # pass
+        raise exc
+
+    # FIXME: Send proper feedback to be handled by webpage instead of navigating to a JSON dump.
     return combined
-    # return render_template('post_yara_rule.html',
-    #                        case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
 
 
 def home():
