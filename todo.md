@@ -4,7 +4,6 @@
     2. Assemble elements into a condition string with artifact vars
     3. POST condition string back into Python backend.
     4. Send into Yara rule generator
-* Create a Yara rule generator that takes a condition string with artifact vars.
 * Delete (cloned) elements dragged back into artifact/operator div element.
 
 #### Priority 2
