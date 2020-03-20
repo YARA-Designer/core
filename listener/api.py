@@ -8,7 +8,6 @@ from werkzeug.datastructures import ImmutableMultiDict
 from database.operations import add_row
 from handlers import config_handler
 
-from yara_handling.rules import YaraWhitelistAlertRule
 import webserver
 from database import engine
 from database.models import PendingRule
