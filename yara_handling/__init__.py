@@ -2,7 +2,7 @@ import yara
 import re
 
 
-def is_number(s: str):
+def is_number(s: str) -> bool:
     """
     Checks is a string value is numeric.
 
@@ -16,7 +16,7 @@ def is_number(s: str):
         return False
 
 
-def sanitize_rulename(rule_name: str):
+def sanitize_rulename(rule_name: str) -> str:
     """
     Identifiers must follow the same lexical conventions of the C programming language,
     they can contain any alphanumeric character and the underscore character, but the
@@ -37,7 +37,7 @@ def sanitize_rulename(rule_name: str):
     return s
 
 
-def get_externals(yara_artifacts: dict):
+def extract_yara_strings_dict(yara_artifacts: dict) -> dict:
     """
     Takes a yara artifacts dict (varname: {artifact, id, type} and returns a dict with only varname: {artifact}.
     :param yara_artifacts:
@@ -46,7 +46,7 @@ def get_externals(yara_artifacts: dict):
     return {k: yara_artifacts[k]["artifact"] for k in yara_artifacts}
 
 
-def get_referenced_strings(cond_stmt: str, yara_strings: dict):
+def get_referenced_strings(cond_stmt: str, yara_strings: dict) -> dict:
     """
     In Yara it is a SyntaxError to have unreferenced strings/vars,
     so these need to be rinsed out before rule compilation.
@@ -68,7 +68,7 @@ def get_referenced_strings(cond_stmt: str, yara_strings: dict):
     return confirmed_items
 
 
-def generate_source_string(src: dict):
+def generate_source_string(src: dict) -> str:
     """
     Generates a yara rule on string form.
 
@@ -127,7 +127,7 @@ def generate_source_string(src: dict):
     return rule_string
 
 
-def generate_yara_rule_from_dict(yara_dict: dict, error_on_warning=True, **kwargs):
+def generate_yara_rule_from_dict(yara_dict: dict, error_on_warning=True, **kwargs) -> yara.Rules:
     """
     Generates a yara rule based on a given dict on the form of:
      {rule: "", tags: [""], meta: {}, artifacts: [artifact: "", id: "", type: ""], condition: ""}.
@@ -139,7 +139,7 @@ def generate_yara_rule_from_dict(yara_dict: dict, error_on_warning=True, **kwarg
     source = generate_source_string({"tags": yara_dict["tags"],
                                      "rule": sanitize_rulename(yara_dict["rule"]),
                                      "meta": {k: yara_dict["meta"][k] for k in yara_dict["meta"]},
-                                     "strings": get_externals(yara_dict["artifacts"]),
+                                     "strings": extract_yara_strings_dict(yara_dict["artifacts"]),
                                      "condition": yara_dict["condition"]
                                      })
 
