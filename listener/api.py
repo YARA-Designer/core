@@ -1,15 +1,12 @@
 import json
 
 from flask import request, jsonify
-from sqlalchemy.orm import sessionmaker
 from thehive4py.api import TheHiveApi
 from werkzeug.datastructures import ImmutableMultiDict
 
 from database.operations import add_row
 from handlers import config_handler
 
-import webserver
-from database import engine
 from database.models import PendingRule
 
 

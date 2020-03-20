@@ -1,7 +1,6 @@
 import json
-import os
 
-from flask import render_template, request, jsonify
+from flask import render_template, request
 from sqlalchemy.exc import SQLAlchemyError
 
 from database.models import PendingRule
