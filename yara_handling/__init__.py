@@ -1,5 +1,11 @@
+import os
+
 import yara
 import re
+
+
+RULES_DIR = "rules"
+YARA_FILE_EXTENSION = ".yar"
 
 
 def is_number(s: str) -> bool:
@@ -127,28 +133,41 @@ def generate_source_string(src: dict) -> str:
     return rule_string
 
 
-def generate_yara_rule_from_dict(yara_dict: dict, error_on_warning=True, **kwargs) -> yara.Rules:
+def save_to_file(rules: yara.Rules, filename: str, file_ext=YARA_FILE_EXTENSION, rules_dir=RULES_DIR):
+    # If destination directory does not exist, create it.
+    if not os.path.isdir(rules_dir):
+        os.mkdir(rules_dir)
+
+    # Save rule to file.
+    rules.save(os.path.join(rules_dir, filename + file_ext))
+
+
+def generate_yara_rule_from_dict(yara_dict: dict, error_on_warning=True, rules_dir=RULES_DIR, **kwargs) -> yara.Rules:
     """
     Generates a yara rule based on a given dict on the form of:
      {rule: "", tags: [""], meta: {}, artifacts: [artifact: "", id: "", type: ""], condition: ""}.
 
+    :param rules_dir:
     :param error_on_warning: If true warnings are treated as errors, raising an exception.
     :param yara_dict:
     :return:
     """
-    source = generate_source_string({"tags": yara_dict["tags"],
-                                     "rule": sanitize_rulename(yara_dict["rule"]),
-                                     "meta": {k: yara_dict["meta"][k] for k in yara_dict["meta"]},
-                                     "strings": extract_yara_strings_dict(yara_dict["artifacts"]),
-                                     "condition": yara_dict["condition"]
-                                     })
+    source: str = generate_source_string({"tags": yara_dict["tags"],
+                                          "rule": sanitize_rulename(yara_dict["rule"]),
+                                          "meta": {k: yara_dict["meta"][k] for k in yara_dict["meta"]},
+                                          "strings": extract_yara_strings_dict(yara_dict["artifacts"]),
+                                          "condition": yara_dict["condition"]
+                                          })
 
     print("source: \n{}".format(source))    # FIXME: DEBUG
 
     try:
-        yara_rules = yara.compile(source=source,
-                                  error_on_warning=error_on_warning,
-                                  **kwargs)
+        yara_rules: yara.Rules = yara.compile(source=source,
+                                              error_on_warning=error_on_warning,
+                                              **kwargs)
+
+        # Save rule to file
+        save_to_file(rules=yara_rules, filename=sanitize_rulename(yara_dict["rule"]), rules_dir=rules_dir)
 
         return yara_rules
     except (yara.SyntaxError, yara.Error) as yara_exc:
