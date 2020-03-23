@@ -1,7 +1,5 @@
-import io
 import json
 
-import yara
 from flask import render_template, request
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -12,19 +10,6 @@ import yara_handling
 tab_character = "&nbsp;"
 tab = tab_character*4
 routes = {}
-
-
-class FakeFile(io.StringIO):
-    data: str
-
-    def __init__(self):
-        super().__init__()
-        self.data = ""
-
-    def write(self, s: str):
-        self.data = self.data + s
-        print(s)
-        return len(s)
 
 
 def get_pending_rule_db_by_case_id(case_id: str):
@@ -166,26 +151,21 @@ def post_rule_raw_imd():
 
     yara_condition_string = request.form['rawUrlSubmit']
     yara_dict = {"rule": (request.form['rule'] if 'rule' in request.form else 'UNNAMED_RULE'),
-                "meta": ({k: request.form['meta_' + k] for k in request.form['meta_keys'].split(',')} if 'meta_keys' in request.form else {}),
-                "tags": (request.form["tags"] if "tags" in request.form else []),
-                "artifacts": artifacts,
-                "condition": yara_condition_string}
+                 "meta": ({k: request.form['meta_' + k] for k in request.form['meta_keys'].split(',')}
+                          if 'meta_keys' in request.form else {}),
+                 "tags": (request.form["tags"] if "tags" in request.form else []),
+                 "artifacts": artifacts,
+                 "condition": yara_condition_string}
 
+    retv = yara_dict
     try:
         # Generate yara rule
-        yara_rules: yara.Rules = yara_handling.generate_yara_rule_from_dict(yara_dict)
+        retv["generated_rule_source"] = yara_handling.compile_from_source(yara_dict)
     except Exception as exc:
         # pass
         raise exc
 
     # FIXME: Send proper feedback to be handled by webpage instead of navigating to a JSON dump.
-    retv = yara_dict
-
-    # fakefile = FakeFile()
-    # yara_rules.save(file=fakefile)
-    # retv.update({"rules": fakefile})
-    # print("fakefile:\n {}".format(fakefile))
-
     return retv
 
 

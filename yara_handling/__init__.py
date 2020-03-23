@@ -3,9 +3,12 @@ import os
 import yara
 import re
 
+from typing import overload, Union, List
 
 RULES_DIR = "rules"
-YARA_FILE_EXTENSION = ".yar"
+SOURCE_FILE_EXTENSION = ".yar"
+COMPILED_FILE_EXTENSION = ".bin"
+CALLBACK_DICTS: list = []
 
 
 def is_number(s: str) -> bool:
@@ -133,49 +136,192 @@ def generate_source_string(src: dict) -> str:
     return rule_string
 
 
-def save_to_file(rules: yara.Rules, filename: str, file_ext=YARA_FILE_EXTENSION, rules_dir=RULES_DIR):
+def save_compiled(rules: yara.Rules, filename: str, file_ext=COMPILED_FILE_EXTENSION, rules_dir=RULES_DIR):
+    """
+    Saves compiled (binary) YARA rules to file.
+
+    :param rules:
+    :param filename:
+    :param file_ext:
+    :param rules_dir:
+    :return:
+    """
     # If destination directory does not exist, create it.
     if not os.path.isdir(rules_dir):
         os.mkdir(rules_dir)
 
-    # Save rule to file.
-    rules.save(os.path.join(rules_dir, filename + file_ext))
+    filepath = os.path.join(rules_dir, filename + file_ext)
+
+    if isinstance(rules, yara.Rules):
+        # Save compiled YARA rule to binary file using the Yara class' builtin.
+        rules.save(filepath)
+    else:
+        raise ValueError("save_compiled: rules must be 'yara.Rules' object.")
 
 
-def generate_yara_rule_from_dict(yara_dict: dict, error_on_warning=True, rules_dir=RULES_DIR, **kwargs) -> yara.Rules:
+def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules_dir=RULES_DIR):
+    """
+    Saves source (plaintext) YARA rules to file.
+
+    :param rules:
+    :param filename:
+    :param file_ext:
+    :param rules_dir:
+    :return:
+    """
+    # If destination directory does not exist, create it.
+    if not os.path.isdir(rules_dir):
+        os.mkdir(rules_dir)
+
+    filepath = os.path.join(rules_dir, filename + file_ext)
+
+    if isinstance(rules, str):
+        # Save YARA source rule to plaintext file using regular Python standard file I/O.
+        with open(filepath, 'w') as f:
+            f.write(rules)
+    else:
+        raise ValueError("save_source: rules must be 'str'.")
+
+
+def load_file(filename: str, rules_dir=RULES_DIR):
+    rules = None
+
+    # If destination directory does not exist, return.
+    if os.path.isdir(rules_dir):
+        # Load rules from file.
+        rules = yara.load(filepath=os.path.join(rules_dir, filename))
+
+    return rules
+
+
+def match_to_dict(match: yara.Match, condition: str = None, matches: bool = None) -> dict:
+    """
+    Copies yara.Match attributes and misc over to a more malleable dict.
+
+    :param match:
+    :param condition:
+    :param matches:
+    :return:
+    """
+    strings_tuples: List[tuple] = match.strings
+    strings_dict: dict = {}
+
+    for some_int, var, value in strings_tuples:
+        strings_dict[var] = value
+
+    return {"matches": matches, "rule": match.rule, "namespace": match.namespace, "tags": match.tags,
+            "meta": match.meta, "strings": strings_dict, "condition": condition}
+
+
+def compiled_rules_to_sources_str_callback(d: dict):
+    """
+    Callback function for when invoking yara.match method.
+    The provided function will be called for every rule, no matter if matching or not.
+
+    Function should expect a single parameter of dictionary type, and should return CALLBACK_CONTINUE
+    to proceed to the next rule or CALLBACK_ABORT to stop applying rules to your data.
+    :param d: Likely a dict.
+    :return:
+    """
+    global CALLBACK_DICTS
+
+    print("CALLBACK:")
+    for key, value in d.items():
+        print("\t{}: {}".format(key, value))
+    CALLBACK_DICTS.append(d)
+
+    # Continue/Step
+    yara.CALLBACK_CONTINUE
+
+
+@overload
+def compiled_rules_to_source_string(rules: yara.Rules, condition: str) -> str:
+    pass
+
+
+@overload
+def compiled_rules_to_source_string(rules: str, condition: str) -> str:
+    pass
+
+
+def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: str) -> str:
+    """
+    Converts a compiled yara rule (binary) to a list of source strings (.yar format).
+
+    :param rules:       yara.Rules object or path to a compiled yara rules .bin
+    :param condition:   Required parameter as the condition seemingly is not part of the compiled YARA rule.
+    :return:            List of source strings
+    """
+    global CALLBACK_DICTS
+
+    if isinstance(rules, yara.Rules):
+        complied_rules = rules
+    elif isinstance(rules, str):
+        complied_rules = load_file(filename=rules + COMPILED_FILE_EXTENSION)
+    else:
+        raise ValueError("rules must be 'yara.Rules' object or 'str' filepath to a compiled yara rules .bin")
+
+    # The match method returns a list of instances of the class Match.
+    # Instances of this class have the same attributes as the dictionary passed to the callback function.
+    matches: yara.Match = complied_rules.match(filepath=os.path.join(RULES_DIR, rules + SOURCE_FILE_EXTENSION),
+                                               callback=compiled_rules_to_sources_str_callback)
+
+    # Copy Matches attributes and misc over to a more malleable dict.
+    match = match_to_dict(matches[0], condition=condition, matches=CALLBACK_DICTS[0]["matches"])
+
+    # Reset the global callback data list.
+    CALLBACK_DICTS = []
+
+    print("match:")
+    for key, value in match.items():
+        print("\t{}: {}".format(key, value))
+
+    print("compiled_rules_to_source_strings matches: {}".format(match["matches"]))  # FIXME: Debug
+
+    return generate_source_string(match)
+
+
+def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs) -> str:
     """
     Generates a yara rule based on a given dict on the form of:
      {rule: "", tags: [""], meta: {}, artifacts: [artifact: "", id: "", type: ""], condition: ""}.
 
-    :param rules_dir:
     :param error_on_warning: If true warnings are treated as errors, raising an exception.
-    :param yara_dict:
+    :param yara_sources_dict:
     :return:
     """
-    source: str = generate_source_string({"tags": yara_dict["tags"],
-                                          "rule": sanitize_rulename(yara_dict["rule"]),
-                                          "meta": {k: yara_dict["meta"][k] for k in yara_dict["meta"]},
-                                          "strings": extract_yara_strings_dict(yara_dict["artifacts"]),
-                                          "condition": yara_dict["condition"]
+    rule_name: str = sanitize_rulename(yara_sources_dict["rule"])
+    source: str = generate_source_string({"tags": yara_sources_dict["tags"],
+                                          "rule": rule_name,
+                                          "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
+                                          "strings": extract_yara_strings_dict(yara_sources_dict["artifacts"]),
+                                          "condition": yara_sources_dict["condition"]
                                           })
 
     print("source: \n{}".format(source))    # FIXME: DEBUG
 
+    # Save source rule to text file.
+    save_source(rules=source, filename=rule_name)
+
     try:
-        yara_rules: yara.Rules = yara.compile(source=source,
-                                              error_on_warning=error_on_warning,
-                                              **kwargs)
+        compiled_yara_rules: yara.Rules = yara.compile(source=source,
+                                                       error_on_warning=error_on_warning,
+                                                       **kwargs)
 
-        # Save rule to file
-        save_to_file(rules=yara_rules, filename=sanitize_rulename(yara_dict["rule"]), rules_dir=rules_dir)
+        # Save compiled rule to binary file.  #FIXME: Change to verification/testing later.
+        save_compiled(rules=compiled_yara_rules, filename=rule_name)
 
-        return yara_rules
+        retv = compiled_rules_to_source_string(rule_name, condition=yara_sources_dict["condition"])
+
+        return retv
+
+        # return compiled_yara_rules
     except (yara.SyntaxError, yara.Error) as yara_exc:
         print("generate_yara_rule_from_json Exception: {}".format(yara_exc))
-        print("generate_yara_rule_from_json incoming dict: {}".format(yara_dict))
+        print("generate_yara_rule_from_json incoming dict: {}".format(yara_sources_dict))
         raise yara_exc
     except Exception as exc:
         print("generate_yara_rule_from_json UNEXPECTED Exception: {}".format(exc))
-        print("generate_yara_rule_from_json incoming dict: {}".format(yara_dict))
+        print("generate_yara_rule_from_json incoming dict: {}".format(yara_sources_dict))
         raise exc
 
