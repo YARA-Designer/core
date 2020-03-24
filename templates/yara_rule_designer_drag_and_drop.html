@@ -1,0 +1,409 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='yara_rule_designer_drag_and_drop.css') }}">
+
+<!--Define variable-->
+{% if artifacts is not defined %}
+    {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
+{% endif %}
+
+<!-- Load theme if specified -->
+{% if theme is defined %}
+    <!-- Set Jinja2 variables for use in JavaScript -->
+    <meta id="themeArg" data-name="{{ theme }}" data-path="{{ url_for('static', filename='themes') + '/' }}">
+{% endif %}
+
+
+<div id="yara_rule_designer_header" class="yara_rule_designer"><p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p></div>
+<div id="yara_rule_designer_container">
+    <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
+    <!--    Add artifacts as individual draggable objects-->
+        {% for artifact in artifacts %}
+            <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }} </span>
+        {% endfor %}
+    </div>
+    <div id="yara_rule_designer_editor_container" class="yara_rule_designer">
+        <div class="yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)"></div>
+        <div class="yara_rule_designer" id="yara_rule_designer_post" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)"></div>
+    </div>
+
+    <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
+    <!--    Add conditional keywords-->
+    <!--    Boolean-->
+        <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)"> AND </span>
+        <span id="condition_keyword_or" class="condition_keyword" draggable="true" ondragstart="drag(event)"> OR </span>
+        <span id="condition_keyword_not" class="condition_keyword" draggable="true" ondragstart="drag(event)"> NOT </span>
+    <!--    Arithmetic-->
+        <span id="condition_keyword_equal" class="condition_keyword" draggable="true" ondragstart="drag(event)"> == </span>
+        <span id="condition_keyword_lt" class="condition_keyword" draggable="true" ondragstart="drag(event)"> < </span>
+        <span id="condition_keyword_gt" class="condition_keyword" draggable="true" ondragstart="drag(event)"> > </span>
+        <span id="condition_keyword_leq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> <= </span>
+        <span id="condition_keyword_geq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> >= </span>
+        <span id="condition_keyword_neq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> != </span>
+    <!--    Relational-->
+        <span id="condition_keyword_add" class="condition_keyword" draggable="true" ondragstart="drag(event)"> + </span>
+        <span id="condition_keyword_sub" class="condition_keyword" draggable="true" ondragstart="drag(event)"> - </span>
+        <span id="condition_keyword_mul" class="condition_keyword" draggable="true" ondragstart="drag(event)"> * </span>
+        <span id="condition_keyword_div" class="condition_keyword" draggable="true" ondragstart="drag(event)"> / </span>
+        <span id="condition_keyword_pct" class="condition_keyword" draggable="true" ondragstart="drag(event)"> % </span>
+        <span id="condition_keyword_setminus" class="condition_keyword" draggable="true" ondragstart="drag(event)"> \ </span>
+    <!--    Bitwise-->
+        <span id="condition_keyword_bitwise_and" class="condition_keyword" draggable="true" ondragstart="drag(event)"> & </span>
+        <span id="condition_keyword_bitwise_or" class="condition_keyword" draggable="true" ondragstart="drag(event)"> | </span>
+        <span id="condition_keyword_bitwise_not" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ~ </span>
+        <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ^ </span>
+        <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"> << </span>
+        <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"> >> </span>
+    <!-- Parenthesis and wrappers       -->
+        <span id="condition_keyword_lparen" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ( </span>
+        <span id="condition_keyword_rparen" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ) </span>
+        <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" draggable="true" ondragstart="drag(event)"> () </span>
+
+        <span id="condition_keyword_test" class="condition_keyword" draggable="true">Lorem ipsum dolor sit amet, consectetur. </span>
+    </div>
+</div>
+
+{% block javascript %}
+    <!-- JQuery includes ( required for drag and drop and $() ). -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-2.1.0.min.js"></script>
+
+    <!-- Theme handler -->
+    <script>
+        // extend jQuery with this tiny convenience to allow for simple existence tests.
+        $.fn.exists = function () {
+            return this.length !== 0;
+        };
+
+        function loadTheme(themeData) {
+            const rootEl = document.querySelector(':root');
+            const themePath = themeData.path;
+
+            var themeFile = themeData.name + ".json";
+            var themeFilePath = themePath + themeFile;
+
+            // Load corresponding theme JSON from file.
+            console.log("Load theme: " + themeFilePath);
+            $.getJSON(themeFilePath, function(json) {
+                console.log(json); // this will show the info it in firebug console
+                for (var key in json) {
+                    console.log("setProperty(" + key + ", " + json[key] + ")")
+                    rootEl.style.setProperty(key, json[key]);
+                }
+
+            });
+        }
+
+        if ($('#themeArg').exists()) {
+            loadTheme($('#themeArg').data())
+        }
+    </script>
+
+    <script>
+        // https://stackoverflow.com/a/26272668
+        function getStyleRuleValue(selector, style) {
+         var selector_compare=selector.toLowerCase();
+         var selector_compare2= selector_compare.substr(0,1)==='.' ?  selector_compare.substr(1) : '.'+selector_compare;
+
+         for (var i = 0; i < document.styleSheets.length; i++)
+         {
+          var mysheet = document.styleSheets[i];
+          var myrules = mysheet.cssRules ? mysheet.cssRules : mysheet.rules;
+
+          for (var j = 0; j < myrules.length; j++)
+          {
+            if (myrules[j].selectorText)
+            {
+             var check = myrules[j].selectorText.toLowerCase();
+             switch (check)
+             {
+              case selector_compare  :
+              case selector_compare2 : return myrules[j].style[style];
+             }
+            }
+           }
+          }
+         }
+
+        const ALLOWED_ITEM_COLOR = '#229954';
+        const DENIED_ITEM_COLOR = '#c0392b';
+        const ROOT_CLASS = 'yara_rule_designer';
+        const DRAGGABLE_CLASSES = ['draggable_artifact', 'condition_keyword', 'condition_encapsulator'];
+        const COLORABLE_IDS = ['yara_rule_designer_editor', 'yara_rule_designer_post'];
+        const COLORABLE_CLASSES = DRAGGABLE_CLASSES;
+        const COLORABLE_NODE_NAMES = ['SPAN', 'DIV'];
+        const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
+        const ENCAPSULATOR_IDS = ['condition_keyword_encapsulate_paren'];
+        const ENCAPSULATORS = {
+            "condition_keyword_encapsulate_paren": {
+                "pre": "condition_keyword_lparen",
+                "post": "condition_keyword_rparen"
+            }
+        };
+
+        var originalParentIdLookupByClass = {
+            "draggable_artifact": "yara_rule_designer_artifacts",
+            "condition_keyword": "yara_rule_designer_operators",
+            "condition_encapsulator": "yara_rule_designer_operators"
+        };
+
+        function colorHoveredItem(hoveredItemToColor, color) {
+            /**
+             * Colors a hovered object.
+             */
+
+            if (typeof hoveredItemToColor == "undefined") {
+                console.log("FAILED Coloring (hoveredItemToColor was undefined!)'");
+                return;
+            }
+
+            if (isColorable(hoveredItemToColor) === true) {
+                console.log("hoveredItemToColor:");
+                console.log(hoveredItemToColor);
+
+                console.log("Coloring '" + getIdentifier(hoveredItemToColor) + "': " + color);
+                try {
+                    // Get the correct node (sometimes #text gets selected instead of its SPAN ancestor).
+                    if (!COLORABLE_NODE_NAMES.includes(hoveredItemToColor.nodeName)) {
+                        hoveredItemToColor = hoveredItemToColor.parentElement;
+                    }
+
+                    hoveredItemToColor.style.background = color;
+                } catch (e) {
+                    console.error("colorHoveredItem EXCEPTION: " + e.message);
+                    console.error(hoveredItemToColor);
+                    throw e;
+                }
+            }
+        }
+
+        /**
+         * Because null == undefined is true, this will catch both null and undefined.
+         */
+        function hasRelatedTarget(ev) {
+            return ev.relatedTarget != null;
+        }
+
+        /**
+         * Because null == undefined is true, this will catch both null and undefined.
+         */
+        function hasTarget(ev) {
+            return ev.target != null;
+        }
+
+
+        function isColorable(target) {
+            try {
+                // Check if object inherits a class and/or id that's to be colored
+                return COLORABLE_CLASSES.includes(target.getAttribute('class')) || COLORABLE_IDS.includes(target.getAttribute('id'));
+            } catch (err) {
+                // If anything goes wrong, assume the object it not to be colored.
+                console.log("isColorable EXCEPTION: " + err.message);
+                console.log(target);
+                return true;
+            }
+        }
+
+        /**
+         * Get the identifying property of the item when getAttribute isn't inherited.
+         */
+        function getIdentifier(target) {
+            if (target.nodeName === "#text") {
+                return target.data + " [type: #text]";
+            } else {
+                return target.getAttribute('id');
+            }
+        }
+
+        function dragEnterDenied(ev) {
+            try {
+                console.log('Forbidden drop target (enter): ' + getIdentifier(ev.target));
+            } catch (e) {
+                console.log("dragEnterDenied EXCEPTION: " + e.message);
+                console.log(ev);
+            }
+
+            // Make sure event is hovering a valid droppable object (has a relatedTarget property).
+            console.log("hasRelatedTarget: " + hasRelatedTarget(ev));
+            if (hasRelatedTarget(ev) === true) {
+                // Color hovered item (if colorable).
+                colorHoveredItem(ev.target, DENIED_ITEM_COLOR);
+            }
+        }
+
+        /**
+         * Resets a colored hoveredItem object back to its original style (using its class as reference)
+         */
+        function resetColoredObject(hoveredItem) {
+            var originalColor;
+            console.log("hoveredItem:");
+            console.log(hoveredItem);
+
+            // Get the correct node (sometimes #text gets selected instead of its SPAN ancestor).
+            if (!COLORABLE_NODE_NAMES.includes(hoveredItem.nodeName)) {
+                hoveredItem = hoveredItem.parentElement;
+            }
+
+            // Use the class name to determine its original color setting.
+            originalColor = getStyleRuleValue('.' + hoveredItem.getAttribute("class"), 'background');
+            console.log("originalColor: " + originalColor);
+
+            console.log("Reset color on '" + hoveredItem.getAttribute('id') + "': " + originalColor);
+            colorHoveredItem(hoveredItem, originalColor);
+        }
+
+        function dragLeaveDenied(ev) {
+            console.log('Forbidden drop target (leave): ' + getIdentifier(ev.target));
+            console.log(ev);
+
+            // Reset color (if colorable).
+            resetColoredObject(ev.target);
+        }
+
+        function dragEnterAllowed(ev) {
+            console.log('Allowed drop target (enter): ' + getIdentifier(ev.target));
+
+            // Color hovered item (if colorable).
+            colorHoveredItem(ev.target, ALLOWED_ITEM_COLOR);
+        }
+
+        function dragLeaveAllowed(ev) {
+            console.log('Allowed drop target (leave): ' + getIdentifier(ev.target));
+
+            // Reset color (if colorable).
+            resetColoredObject(ev.target);
+        }
+
+        function dragOverAllowedDrop(ev) {
+            console.log('Allowed drop target (hover): ' + getIdentifier(ev.target));
+
+            // Prevent default element handling in order to allow drag and drop.
+            ev.preventDefault();
+        }
+
+        function dragOverDisallowedDrop(ev) {
+            console.log('Forbidden drop target (hover): ' + getIdentifier(ev.target));
+        }
+
+        function drag(dragStartEvent)  {
+            console.log('drag ' + $(dragStartEvent.target).text() + " [" + dragStartEvent.target.getAttribute('id') + "]");
+            console.log(dragStartEvent);
+
+            // Only clone if object resides in a div with cloning enabled.
+            if ( DIVS_WITH_CLONING.includes(dragStartEvent.target.parentElement.getAttribute('id')) ) {
+                console.log(DIVS_WITH_CLONING.toString() + " includes :" + dragStartEvent.target.parentElement.getAttribute('id'));
+                // Clone the draggable's target and replace event's target with the cloned copy.
+                dragStartEvent.target = makeClone(dragStartEvent.target);
+            }
+
+            // Add this element's id to the drag payload so the drop handler will
+            // know which element to add to its tree.
+            dragStartEvent.dataTransfer.setData("Text",dragStartEvent.target.id);
+        }
+
+        /**
+         * Wraps an element in two encapsulating elements.
+         */
+        function encapsulate(ev) {
+            var pre =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["pre"]);
+            var post =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["post"]);
+
+            // 1 . Prepend encapsulation
+            ev.target.insertBefore(pre, ev.target.firstChild);
+
+            // 2. Append encapsulation
+            ev.target.appendChild(post);
+        }
+
+        function drop(ev) {
+            try {
+                var draggableObject;
+                var draggableObjectId = ev.dataTransfer.getData("Text");
+
+                console.log('drop ' + $(ev.target).text());
+
+                // Reset color (if colorable).
+                resetColoredObject(ev.target);
+
+                // Prevent default element handling in order to allow drag and drop.
+                ev.preventDefault();
+
+                // Encapsulate if draggable object is an encapsulation class and target class is a draggable.
+                if ( ENCAPSULATOR_IDS.includes(draggableObjectId)
+                    && DRAGGABLE_CLASSES.includes(ev.target.getAttribute('class')) ) {
+                    console.log("Encapsulate: " + ev.target);
+                    encapsulate(ev);
+                } else {
+                    console.log("DONT Encapsulate: " + ev.target);
+                    draggableObject = document.getElementById(draggableObjectId);
+                    ev.target.appendChild(draggableObject);
+                }
+
+
+                // Delete the cloned element in div
+                console.log(ev);
+                var originalParent = document.getElementById(originalParentIdLookupByClass[draggableObject.getAttribute("class")]);
+
+                if (originalParent.getAttribute("class") !== ROOT_CLASS) {
+                    console.log("Removing target: ");
+                    console.log(ev.target);
+                    console.log("From parentNode (originalParent): ");
+                    console.log(originalParent);
+
+                    originalParent.removeChild(draggableObject);
+                } else {
+                    console.log("SKIPPING Removing target for '" + originalParent.getAttribute("id") + "' of root class: " + originalParent.getAttribute("class"));
+                }
+
+                // Text append to existing obj
+                // var currentText = $(ev.target).text();
+                // $(ev.target).text(currentText + ' ' + $('#' + data).text());
+                // $('#' + data).remove();
+
+            } catch (e) {
+                console.error("drop() threw EXCEPTION: " + e.message);
+                console.error(ev);
+
+                // Make **ABSOLUTELY** sure exceptions don't cause default behaviour (navigate off-site).
+                ev.preventDefault();
+
+                // Rethrow exception.
+                throw e;
+            }
+        }
+
+        //////
+        /**
+         * Make clone width and height static.
+         * Take clone out of the element flow.
+         *
+         * @param {HTMLElement} node
+         * @param {Number} width
+         * @param {Number} height
+         */
+        function styleClone(node, width, height) {
+            node.style.position = 'fixed';
+            node.style.zIndex = 9999;
+            node.style.width = width + 'px';
+            node.style.height = height + 'px';
+            node.style.left = '-9999px';
+
+            node.style.margin = 0;
+            node.style.padding = 0;
+        }
+
+
+        function makeClone(node) {
+            console.log(node);
+            var clone;
+
+            // Returns a copy of node. If deep is true, the copy also includes the node's descendants.
+            clone = node.cloneNode(true);
+
+            // this.styleClone(clone, node.offsetWidth, node.offsetHeight);
+
+            node.parentNode.insertBefore(clone, node);
+
+            return clone;
+        }
+    </script>
+{% endblock %}

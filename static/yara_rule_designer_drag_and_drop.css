@@ -1,0 +1,114 @@
+/* Define variables for colors etc so that themes can easily override them */
+:root {
+    --yara_rule_designer_color: white;
+    --yara_rule_designer_span_box_shadow: grey;
+    --yara_rule_designer_header_color: black;
+    --yara_rule_designer_border_color: black;
+    --yara_rule_designer_background: white;
+    --condition_keyword_color: white;
+    --condition_keyword_background: #dd63ba;
+    --draggable_artifact_color: white;
+    --draggable_artifact_background: #4a90dd;
+}
+
+html, body {
+    height:100%;
+    width:100%;
+    margin:0;
+    padding:0;
+}
+
+.yara_rule_designer {
+    overflow: auto;
+    border:1px solid var(--yara_rule_designer_border_color);
+    background: var(--yara_rule_designer_background);
+}
+
+#yara_rule_designer_container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.yara_rule_designer > span {
+    margin: 10px;
+    padding: 10px;
+    font-size: 12px;
+    border: 0px solid;
+    border-radius: 25px;
+    box-shadow: 5px 5px 5px var(--yara_rule_designer_span_box_shadow);
+    color: var(--yara_rule_designer_color);
+}
+
+#yara_rule_designer_header {
+    order: 0;
+    overflow: hidden;
+    width:100%;
+    height: 10%;
+    text-align: center;
+    font-size: 22pt;
+    font-weight: bold;
+    border:1px solid var(--yara_rule_designer_border_color);
+    color: var(--yara_rule_designer_header_color);
+}
+
+#yara_rule_designer_artifacts {
+    order: 1;
+    float:left;
+    overflow: auto;
+    width:20%;
+    height:90%;
+    border:1px solid var(--yara_rule_designer_border_color);;
+}
+
+#yara_rule_designer_editor_container {
+    order: 2;
+    float: left;
+    overflow: auto;
+    width: 60%;
+    height: 90%;
+}
+
+#yara_rule_designer_editor {
+    float: top;
+    overflow: auto;
+    height: 80%;
+    border:1px solid var(--yara_rule_designer_border_color);;
+}
+
+#yara_rule_designer_post {
+    float: bottom;
+    overflow: auto;
+    /*height: 10%;*/ /* DO NOT ADD height as it causes weird scrollbar/overflow */
+    border:1px solid var(--yara_rule_designer_border_color);;
+}
+
+#yara_rule_designer_operators {
+    order: 3;
+    float:right;
+    overflow: auto;
+    width:20%;
+    height:90%;
+    border:1px solid var(--yara_rule_designer_border_color);;
+}
+
+.condition_keyword {
+    display: inline-table;
+    color: var(--condition_keyword_color);
+    font-weight: bold;
+    background: var(--condition_keyword_background);
+}
+
+.condition_encapsulator {
+    display: inline-table;
+    color: var(--condition_keyword_color);
+    font-weight: bold;
+    background: var(--condition_keyword_background);
+}
+
+
+.draggable_artifact {
+    display: inline-table;
+    color: var(--draggable_artifact_color);
+    background-color: var(--draggable_artifact_background);
+}

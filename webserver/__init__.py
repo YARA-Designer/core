@@ -107,14 +107,27 @@ def new_rule_raw():
                            case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
 
 
-def new_rule_designer():
+def new_rule_designer_drag_and_drop():
     if 'id' not in request.args:
         return "Please specify a case ID!"
 
     case = dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id')))
     theme = request.args.get('theme')
 
-    return render_template('yara_rule_designer.html',
+    return render_template('yara_rule_designer_drag_and_drop.html',
+                           case=case,
+                           artifacts=case['data']['observables'],
+                           theme=theme)
+
+
+def new_rule_designer_click():
+    if 'id' not in request.args:
+        return "Please specify a case ID!"
+
+    case = dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id')))
+    theme = request.args.get('theme')
+
+    return render_template('yara_rule_designer_click.html',
                            case=case,
                            artifacts=case['data']['observables'],
                            theme=theme)

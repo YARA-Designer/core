@@ -22,7 +22,7 @@
 
             <tr onclick="window.location='#';">
                 <td class={{ tlp_class }}></td>
-                <td><a href="{{ url_for('new_rule_designer', id=case.data.id) }}">{{ case.data.title }}</a></td>
+                <td><a href="{{ url_for('new_rule_designer_click', id=case.data.id) }}">{{ case.data.title }}</a></td>
                 <td>{{ case.data.severity }}</td>
                 <td>{{ case.data.observables|length }}</td>
                 <td>{{ case.data.owner }}</td>
