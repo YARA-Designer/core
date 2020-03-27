@@ -178,7 +178,7 @@
             var editorDiv = document.getElementById("yara_rule_designer_editor");
 
             console.log('addToEditor: ' + $(ev.target).text());
-            editorDiv.appendChild(ev.target);
+            editorDiv.appendChild(makeClone(ev.target));
         }
 
         function drop(ev) {
