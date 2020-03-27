@@ -17,7 +17,7 @@
     <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add artifacts as individual draggable objects-->
         {% for artifact in artifacts %}
-            <span id="artifact_{{ loop.index }}" class="draggable_artifact" draggable="true" ondragstart="drag(event)">{{ artifact.data }} </span>
+            <span id="artifact_{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)">{{ artifact.data }} </span>
         {% endfor %}
     </div>
     <div id="yara_rule_designer_editor_container" class="yara_rule_designer">
@@ -28,34 +28,34 @@
     <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add conditional keywords-->
     <!--    Boolean-->
-        <span id="condition_keyword_and" class="condition_keyword" draggable="true" ondragstart="drag(event)"> AND </span>
-        <span id="condition_keyword_or" class="condition_keyword" draggable="true" ondragstart="drag(event)"> OR </span>
-        <span id="condition_keyword_not" class="condition_keyword" draggable="true" ondragstart="drag(event)"> NOT </span>
+        <span id="condition_keyword_and" class="condition_keyword" onclick="addToEditor(event)"> AND </span>
+        <span id="condition_keyword_or" class="condition_keyword" onclick="addToEditor(event)"> OR </span>
+        <span id="condition_keyword_not" class="condition_keyword" onclick="addToEditor(event)"> NOT </span>
     <!--    Arithmetic-->
-        <span id="condition_keyword_equal" class="condition_keyword" draggable="true" ondragstart="drag(event)"> == </span>
-        <span id="condition_keyword_lt" class="condition_keyword" draggable="true" ondragstart="drag(event)"> < </span>
-        <span id="condition_keyword_gt" class="condition_keyword" draggable="true" ondragstart="drag(event)"> > </span>
-        <span id="condition_keyword_leq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> <= </span>
-        <span id="condition_keyword_geq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> >= </span>
-        <span id="condition_keyword_neq" class="condition_keyword" draggable="true" ondragstart="drag(event)"> != </span>
+        <span id="condition_keyword_equal" class="condition_keyword" onclick="addToEditor(event)"> == </span>
+        <span id="condition_keyword_lt" class="condition_keyword" onclick="addToEditor(event)"> < </span>
+        <span id="condition_keyword_gt" class="condition_keyword" onclick="addToEditor(event)"> > </span>
+        <span id="condition_keyword_leq" class="condition_keyword" onclick="addToEditor(event)"> <= </span>
+        <span id="condition_keyword_geq" class="condition_keyword" onclick="addToEditor(event)"> >= </span>
+        <span id="condition_keyword_neq" class="condition_keyword" onclick="addToEditor(event)"> != </span>
     <!--    Relational-->
-        <span id="condition_keyword_add" class="condition_keyword" draggable="true" ondragstart="drag(event)"> + </span>
-        <span id="condition_keyword_sub" class="condition_keyword" draggable="true" ondragstart="drag(event)"> - </span>
-        <span id="condition_keyword_mul" class="condition_keyword" draggable="true" ondragstart="drag(event)"> * </span>
-        <span id="condition_keyword_div" class="condition_keyword" draggable="true" ondragstart="drag(event)"> / </span>
-        <span id="condition_keyword_pct" class="condition_keyword" draggable="true" ondragstart="drag(event)"> % </span>
-        <span id="condition_keyword_setminus" class="condition_keyword" draggable="true" ondragstart="drag(event)"> \ </span>
+        <span id="condition_keyword_add" class="condition_keyword" onclick="addToEditor(event)"> + </span>
+        <span id="condition_keyword_sub" class="condition_keyword" onclick="addToEditor(event)"> - </span>
+        <span id="condition_keyword_mul" class="condition_keyword" onclick="addToEditor(event)"> * </span>
+        <span id="condition_keyword_div" class="condition_keyword" onclick="addToEditor(event)"> / </span>
+        <span id="condition_keyword_pct" class="condition_keyword" onclick="addToEditor(event)"> % </span>
+        <span id="condition_keyword_setminus" class="condition_keyword" onclick="addToEditor(event)"> \ </span>
     <!--    Bitwise-->
-        <span id="condition_keyword_bitwise_and" class="condition_keyword" draggable="true" ondragstart="drag(event)"> & </span>
-        <span id="condition_keyword_bitwise_or" class="condition_keyword" draggable="true" ondragstart="drag(event)"> | </span>
-        <span id="condition_keyword_bitwise_not" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ~ </span>
-        <span id="condition_keyword_bitwise_xor" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ^ </span>
-        <span id="condition_keyword_bitwise_lshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"> << </span>
-        <span id="condition_keyword_bitwise_rshift" class="condition_keyword" draggable="true" ondragstart="drag(event)"> >> </span>
+        <span id="condition_keyword_bitwise_and" class="condition_keyword" onclick="addToEditor(event)"> & </span>
+        <span id="condition_keyword_bitwise_or" class="condition_keyword" onclick="addToEditor(event)"> | </span>
+        <span id="condition_keyword_bitwise_not" class="condition_keyword" onclick="addToEditor(event)"> ~ </span>
+        <span id="condition_keyword_bitwise_xor" class="condition_keyword" onclick="addToEditor(event)"> ^ </span>
+        <span id="condition_keyword_bitwise_lshift" class="condition_keyword" onclick="addToEditor(event)"> << </span>
+        <span id="condition_keyword_bitwise_rshift" class="condition_keyword" onclick="addToEditor(event)"> >> </span>
     <!-- Parenthesis and wrappers       -->
-        <span id="condition_keyword_lparen" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ( </span>
-        <span id="condition_keyword_rparen" class="condition_keyword" draggable="true" ondragstart="drag(event)"> ) </span>
-        <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" draggable="true" ondragstart="drag(event)"> () </span>
+        <span id="condition_keyword_lparen" class="condition_keyword" onclick="addToEditor(event)"> ( </span>
+        <span id="condition_keyword_rparen" class="condition_keyword" onclick="addToEditor(event)"> ) </span>
+        <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)"> () </span>
 
         <span id="condition_keyword_test" class="condition_keyword" draggable="true">Lorem ipsum dolor sit amet, consectetur. </span>
     </div>
@@ -251,67 +251,27 @@
             colorHoveredItem(hoveredItem, originalColor);
         }
 
-        function dragLeaveDenied(ev) {
-            console.log('Forbidden drop target (leave): ' + getIdentifier(ev.target));
-            console.log(ev);
-
-            // Reset color (if colorable).
-            resetColoredObject(ev.target);
-        }
-
-        function dragEnterAllowed(ev) {
-            console.log('Allowed drop target (enter): ' + getIdentifier(ev.target));
-
-            // Color hovered item (if colorable).
-            colorHoveredItem(ev.target, ALLOWED_ITEM_COLOR);
-        }
-
-        function dragLeaveAllowed(ev) {
-            console.log('Allowed drop target (leave): ' + getIdentifier(ev.target));
-
-            // Reset color (if colorable).
-            resetColoredObject(ev.target);
-        }
-
-        function dragOverAllowedDrop(ev) {
-            console.log('Allowed drop target (hover): ' + getIdentifier(ev.target));
-
-            // Prevent default element handling in order to allow drag and drop.
-            ev.preventDefault();
-        }
-
-        function dragOverDisallowedDrop(ev) {
-            console.log('Forbidden drop target (hover): ' + getIdentifier(ev.target));
-        }
-
-        function drag(dragStartEvent)  {
-            console.log('drag ' + $(dragStartEvent.target).text() + " [" + dragStartEvent.target.getAttribute('id') + "]");
-            console.log(dragStartEvent);
-
-            // Only clone if object resides in a div with cloning enabled.
-            if ( DIVS_WITH_CLONING.includes(dragStartEvent.target.parentElement.getAttribute('id')) ) {
-                console.log(DIVS_WITH_CLONING.toString() + " includes :" + dragStartEvent.target.parentElement.getAttribute('id'));
-                // Clone the draggable's target and replace event's target with the cloned copy.
-                dragStartEvent.target = makeClone(dragStartEvent.target);
+        function addToEditor(ev) {
+            // Make sure we receive the expected event type, else error and return.
+            if (ev.type !== "click") {
+                console.error("addToEditor got non-click event: " + ev.type);
+                console.error(ev);
+                return
             }
 
-            // Add this element's id to the drag payload so the drop handler will
-            // know which element to add to its tree.
-            dragStartEvent.dataTransfer.setData("Text",dragStartEvent.target.id);
-        }
+            // If target is already in the editor, ignore the click event.
+            if (ev.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
+                console.log("Ignored click event (target is child of editor div):");
+                console.log(ev);
+                return
+            }
 
-        /**
-         * Wraps an element in two encapsulating elements.
-         */
-        function encapsulate(ev) {
-            var pre =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["pre"]);
-            var post =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["post"]);
+            console.log(ev);
 
-            // 1 . Prepend encapsulation
-            ev.target.insertBefore(pre, ev.target.firstChild);
+            var editorDiv = document.getElementById("yara_rule_designer_editor");
 
-            // 2. Append encapsulation
-            ev.target.appendChild(post);
+            console.log('addToEditor: ' + $(ev.target).text());
+            editorDiv.appendChild(ev.target);
         }
 
         function drop(ev) {
@@ -370,6 +330,37 @@
                 throw e;
             }
         }
+
+        function drag(dragStartEvent)  {
+            console.log('drag ' + $(dragStartEvent.target).text() + " [" + dragStartEvent.target.getAttribute('id') + "]");
+            console.log(dragStartEvent);
+
+            // Only clone if object resides in a div with cloning enabled.
+            if ( DIVS_WITH_CLONING.includes(dragStartEvent.target.parentElement.getAttribute('id')) ) {
+                console.log(DIVS_WITH_CLONING.toString() + " includes :" + dragStartEvent.target.parentElement.getAttribute('id'));
+                // Clone the draggable's target and replace event's target with the cloned copy.
+                dragStartEvent.target = makeClone(dragStartEvent.target);
+            }
+
+            // Add this element's id to the drag payload so the drop handler will
+            // know which element to add to its tree.
+            dragStartEvent.dataTransfer.setData("Text",dragStartEvent.target.id);
+        }
+
+        /**
+         * Wraps an element in two encapsulating elements.
+         */
+        function encapsulate(ev) {
+            var pre =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["pre"]);
+            var post =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["post"]);
+
+            // 1 . Prepend encapsulation
+            ev.target.insertBefore(pre, ev.target.firstChild);
+
+            // 2. Append encapsulation
+            ev.target.appendChild(post);
+        }
+
 
         //////
         /**
