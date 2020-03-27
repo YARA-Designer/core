@@ -17,7 +17,7 @@
     <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add artifacts as individual draggable objects-->
         {% for artifact in artifacts %}
-            <span id="artifact_{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)">{{ artifact.data }} </span>
+            <span id="artifact_{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)" >{{ artifact.data }} </span>
         {% endfor %}
     </div>
     <div id="yara_rule_designer_editor_container" class="yara_rule_designer">
@@ -59,6 +59,15 @@
 
         <span id="condition_keyword_test" class="condition_keyword" draggable="true">Lorem ipsum dolor sit amet, consectetur. </span>
     </div>
+</div>
+
+<div id="info">
+    <h1>How to use:</h1>
+     <ul>
+      <li>Click to add items to editor.</li>
+      <li>Middle click to remove item from editor.</li>
+      <li>Milk</li>
+    </ul>
 </div>
 
 {% block javascript %}
@@ -133,6 +142,24 @@
             "condition_encapsulator": "yara_rule_designer_operators"
         };
 
+        // Convenience/readability constants.
+        const LEFT_CLICK = 0;
+        const MIDDLE_CLICK = 1;
+        const RIGHT_CLICK = 2;
+
+        /**
+         * Override default behaviour for mouse clicks in the editor div,
+         * in order to support middle and right clicks.
+         */
+        document.getElementById('yara_rule_designer_editor').addEventListener('auxclick', function(ev) {
+          console.log(ev.button);
+          // Prevent default action in order to implement our own.
+          ev.preventDefault();
+
+          // Handle aux click events.
+          onAuxClick(ev);
+        });
+
         /**
          * Because null == undefined is true, this will catch both null and undefined.
          */
@@ -161,13 +188,6 @@
         function addToEditor(clickEvent) {
             var editorDiv = document.getElementById("yara_rule_designer_editor");
 
-            // Make sure we receive the expected event type, else error and return.
-            if (clickEvent.type !== "click") {
-                console.error("addToEditor got non-click event: " + clickEvent.type);
-                console.error(clickEvent);
-                return
-            }
-
             // If target is already in the editor, ignore the click event.
             if (clickEvent.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
                 console.log("Ignored click event (target is child of editor div):");
@@ -175,11 +195,35 @@
                 return
             }
 
-            console.log(clickEvent);
+            // console.log(clickEvent);
 
 
             console.log('addToEditor: ' + $(clickEvent.target).text());
             editorDiv.appendChild(makeClone(clickEvent.target));
+        }
+
+        function removeFromEditor(clickEvent) {
+            var editorDiv = document.getElementById("yara_rule_designer_editor");
+
+            // Only perform remove action if target is a child of editor div.
+            if (clickEvent.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
+                console.log("removeFromEditor: " + $(clickEvent.target).text());
+                editorDiv.removeChild(clickEvent.target);
+            }
+        }
+
+        function onAuxClick(auxClickEvent) {
+            console.log("onAuxClick:");
+            console.log(auxClickEvent);
+
+            // Check which mouse button was pressed and act accordingly.
+            switch (auxClickEvent.button) {
+                case MIDDLE_CLICK:
+                    removeFromEditor(auxClickEvent);
+                    break;
+                case RIGHT_CLICK:
+                    break;
+            }
         }
 
         //////
