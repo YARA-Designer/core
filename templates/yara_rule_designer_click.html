@@ -181,52 +181,6 @@
             editorDiv.appendChild(makeClone(ev.target));
         }
 
-        function drop(ev) {
-            try {
-                var draggableObject;
-                var draggableObjectId = ev.dataTransfer.getData("Text");
-
-                console.log('drop ' + $(ev.target).text());
-
-                // Reset color (if colorable).
-                resetColoredObject(ev.target);
-
-                // Prevent default element handling in order to allow drag and drop.
-                ev.preventDefault();
-
-
-                // Delete the cloned element in div
-                console.log(ev);
-                var originalParent = document.getElementById(originalParentIdLookupByClass[draggableObject.getAttribute("class")]);
-
-                if (originalParent.getAttribute("class") !== ROOT_CLASS) {
-                    console.log("Removing target: ");
-                    console.log(ev.target);
-                    console.log("From parentNode (originalParent): ");
-                    console.log(originalParent);
-
-                    originalParent.removeChild(draggableObject);
-                } else {
-                    console.log("SKIPPING Removing target for '" + originalParent.getAttribute("id") + "' of root class: " + originalParent.getAttribute("class"));
-                }
-
-                // Text append to existing obj
-                // var currentText = $(ev.target).text();
-                // $(ev.target).text(currentText + ' ' + $('#' + data).text());
-                // $('#' + data).remove();
-
-            } catch (e) {
-                console.error("drop() threw EXCEPTION: " + e.message);
-                console.error(ev);
-
-                // Make **ABSOLUTELY** sure exceptions don't cause default behaviour (navigate off-site).
-                ev.preventDefault();
-
-                // Rethrow exception.
-                throw e;
-            }
-        }
-
         //////
         /**
          * Make clone width and height static.
