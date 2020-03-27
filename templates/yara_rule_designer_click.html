@@ -227,23 +227,6 @@
             }
         }
 
-        function drag(dragStartEvent)  {
-            console.log('drag ' + $(dragStartEvent.target).text() + " [" + dragStartEvent.target.getAttribute('id') + "]");
-            console.log(dragStartEvent);
-
-            // Only clone if object resides in a div with cloning enabled.
-            if ( DIVS_WITH_CLONING.includes(dragStartEvent.target.parentElement.getAttribute('id')) ) {
-                console.log(DIVS_WITH_CLONING.toString() + " includes :" + dragStartEvent.target.parentElement.getAttribute('id'));
-                // Clone the draggable's target and replace event's target with the cloned copy.
-                dragStartEvent.target = makeClone(dragStartEvent.target);
-            }
-
-            // Add this element's id to the drag payload so the drop handler will
-            // know which element to add to its tree.
-            dragStartEvent.dataTransfer.setData("Text",dragStartEvent.target.id);
-        }
-
-
         //////
         /**
          * Make clone width and height static.
