@@ -158,27 +158,28 @@
             }
         }
 
-        function addToEditor(ev) {
+        function addToEditor(clickEvent) {
+            var editorDiv = document.getElementById("yara_rule_designer_editor");
+
             // Make sure we receive the expected event type, else error and return.
-            if (ev.type !== "click") {
-                console.error("addToEditor got non-click event: " + ev.type);
-                console.error(ev);
+            if (clickEvent.type !== "click") {
+                console.error("addToEditor got non-click event: " + clickEvent.type);
+                console.error(clickEvent);
                 return
             }
 
             // If target is already in the editor, ignore the click event.
-            if (ev.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
+            if (clickEvent.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
                 console.log("Ignored click event (target is child of editor div):");
-                console.log(ev);
+                console.log(clickEvent);
                 return
             }
 
-            console.log(ev);
+            console.log(clickEvent);
 
-            var editorDiv = document.getElementById("yara_rule_designer_editor");
 
-            console.log('addToEditor: ' + $(ev.target).text());
-            editorDiv.appendChild(makeClone(ev.target));
+            console.log('addToEditor: ' + $(clickEvent.target).text());
+            editorDiv.appendChild(makeClone(clickEvent.target));
         }
 
         //////
