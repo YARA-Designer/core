@@ -254,8 +254,6 @@
             // Returns a copy of node. If deep is true, the copy also includes the node's descendants.
             clone = node.cloneNode(true);
 
-            // this.styleClone(clone, node.offsetWidth, node.offsetHeight);
-
             node.parentNode.insertBefore(clone, node);
 
             return clone;
