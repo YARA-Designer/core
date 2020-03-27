@@ -124,57 +124,14 @@
           }
          }
 
-        const ALLOWED_ITEM_COLOR = '#229954';
-        const DENIED_ITEM_COLOR = '#c0392b';
         const ROOT_CLASS = 'yara_rule_designer';
-        const DRAGGABLE_CLASSES = ['draggable_artifact', 'condition_keyword', 'condition_encapsulator'];
-        const COLORABLE_IDS = ['yara_rule_designer_editor', 'yara_rule_designer_post'];
-        const COLORABLE_CLASSES = DRAGGABLE_CLASSES;
-        const COLORABLE_NODE_NAMES = ['SPAN', 'DIV'];
         const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
-        const ENCAPSULATOR_IDS = ['condition_keyword_encapsulate_paren'];
-        const ENCAPSULATORS = {
-            "condition_keyword_encapsulate_paren": {
-                "pre": "condition_keyword_lparen",
-                "post": "condition_keyword_rparen"
-            }
-        };
 
         var originalParentIdLookupByClass = {
             "draggable_artifact": "yara_rule_designer_artifacts",
             "condition_keyword": "yara_rule_designer_operators",
             "condition_encapsulator": "yara_rule_designer_operators"
         };
-
-        function colorHoveredItem(hoveredItemToColor, color) {
-            /**
-             * Colors a hovered object.
-             */
-
-            if (typeof hoveredItemToColor == "undefined") {
-                console.log("FAILED Coloring (hoveredItemToColor was undefined!)'");
-                return;
-            }
-
-            if (isColorable(hoveredItemToColor) === true) {
-                console.log("hoveredItemToColor:");
-                console.log(hoveredItemToColor);
-
-                console.log("Coloring '" + getIdentifier(hoveredItemToColor) + "': " + color);
-                try {
-                    // Get the correct node (sometimes #text gets selected instead of its SPAN ancestor).
-                    if (!COLORABLE_NODE_NAMES.includes(hoveredItemToColor.nodeName)) {
-                        hoveredItemToColor = hoveredItemToColor.parentElement;
-                    }
-
-                    hoveredItemToColor.style.background = color;
-                } catch (e) {
-                    console.error("colorHoveredItem EXCEPTION: " + e.message);
-                    console.error(hoveredItemToColor);
-                    throw e;
-                }
-            }
-        }
 
         /**
          * Because null == undefined is true, this will catch both null and undefined.
@@ -190,19 +147,6 @@
             return ev.target != null;
         }
 
-
-        function isColorable(target) {
-            try {
-                // Check if object inherits a class and/or id that's to be colored
-                return COLORABLE_CLASSES.includes(target.getAttribute('class')) || COLORABLE_IDS.includes(target.getAttribute('id'));
-            } catch (err) {
-                // If anything goes wrong, assume the object it not to be colored.
-                console.log("isColorable EXCEPTION: " + err.message);
-                console.log(target);
-                return true;
-            }
-        }
-
         /**
          * Get the identifying property of the item when getAttribute isn't inherited.
          */
@@ -212,43 +156,6 @@
             } else {
                 return target.getAttribute('id');
             }
-        }
-
-        function dragEnterDenied(ev) {
-            try {
-                console.log('Forbidden drop target (enter): ' + getIdentifier(ev.target));
-            } catch (e) {
-                console.log("dragEnterDenied EXCEPTION: " + e.message);
-                console.log(ev);
-            }
-
-            // Make sure event is hovering a valid droppable object (has a relatedTarget property).
-            console.log("hasRelatedTarget: " + hasRelatedTarget(ev));
-            if (hasRelatedTarget(ev) === true) {
-                // Color hovered item (if colorable).
-                colorHoveredItem(ev.target, DENIED_ITEM_COLOR);
-            }
-        }
-
-        /**
-         * Resets a colored hoveredItem object back to its original style (using its class as reference)
-         */
-        function resetColoredObject(hoveredItem) {
-            var originalColor;
-            console.log("hoveredItem:");
-            console.log(hoveredItem);
-
-            // Get the correct node (sometimes #text gets selected instead of its SPAN ancestor).
-            if (!COLORABLE_NODE_NAMES.includes(hoveredItem.nodeName)) {
-                hoveredItem = hoveredItem.parentElement;
-            }
-
-            // Use the class name to determine its original color setting.
-            originalColor = getStyleRuleValue('.' + hoveredItem.getAttribute("class"), 'background');
-            console.log("originalColor: " + originalColor);
-
-            console.log("Reset color on '" + hoveredItem.getAttribute('id') + "': " + originalColor);
-            colorHoveredItem(hoveredItem, originalColor);
         }
 
         function addToEditor(ev) {
@@ -286,17 +193,6 @@
 
                 // Prevent default element handling in order to allow drag and drop.
                 ev.preventDefault();
-
-                // Encapsulate if draggable object is an encapsulation class and target class is a draggable.
-                if ( ENCAPSULATOR_IDS.includes(draggableObjectId)
-                    && DRAGGABLE_CLASSES.includes(ev.target.getAttribute('class')) ) {
-                    console.log("Encapsulate: " + ev.target);
-                    encapsulate(ev);
-                } else {
-                    console.log("DONT Encapsulate: " + ev.target);
-                    draggableObject = document.getElementById(draggableObjectId);
-                    ev.target.appendChild(draggableObject);
-                }
 
 
                 // Delete the cloned element in div
@@ -345,20 +241,6 @@
             // Add this element's id to the drag payload so the drop handler will
             // know which element to add to its tree.
             dragStartEvent.dataTransfer.setData("Text",dragStartEvent.target.id);
-        }
-
-        /**
-         * Wraps an element in two encapsulating elements.
-         */
-        function encapsulate(ev) {
-            var pre =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["pre"]);
-            var post =  document.getElementById(ENCAPSULATORS[ev.dataTransfer.getData("Text")]["post"]);
-
-            // 1 . Prepend encapsulation
-            ev.target.insertBefore(pre, ev.target.firstChild);
-
-            // 2. Append encapsulation
-            ev.target.appendChild(post);
         }
 
 
