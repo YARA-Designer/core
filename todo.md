@@ -32,4 +32,3 @@ Drag and drop:
 * Drag and drop seems broken on the editor_post div.
 
 Backend:
-* tag items sometimes include a space at the head. (Probably issue with splitter code.)
