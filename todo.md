@@ -30,3 +30,6 @@ Drag and drop:
     - Modify every cloned (operator) ID to be unique.
     - 
 * Drag and drop seems broken on the editor_post div.
+
+Backend:
+* tag items sometimes include a space at the head. (Probably issue with splitter code.)
