@@ -21,21 +21,23 @@
 <div id="yara_rule_designer_header" class="yara_rule_designer"><p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p></div>
 <div id="yara_rule_designer_container">
     <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
-    <!--    Add artifacts as individual draggable objects-->
+        <!--    Add artifacts and artifact dataTypes as individual draggable objects-->
+
         <!-- Define list to filter artifact types so that only unique occurrences are added. -->
         {% set added_artifact_types = [] %}
 
         {% for artifact in artifacts %}
+            <!-- Add artifacts -->
             <span id="artifact_{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)" >{{ artifact.data }} </span>
 
+            <!-- Add artifact dataTypes-->
             <!-- Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. -->
-            {# artifact_data_type if artifact.dataType is not none #}
-            {% if artifact.dataType is not none %}
+            {% if artifact.dataType is not none and artifact.dataType != "None" %} <!-- <== Does literally nothing... (see workaround below)-->
                 {% if artifact.dataType not in added_artifact_types %}
                     <!-- Only add unique items to editor -->
                     <span id="artifact_type_{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
                     <!-- Workaround: Below line is commented (but still executed) in order to stop printing of "None" on the webpage for NoneType entries. -->
-              <!-- {{ added_artifact_types.append(artifact.dataType) }}-->
+                    <!-- {{ added_artifact_types.append(artifact.dataType) }}-->
                 {% endif %}
             {% endif %}
         {% endfor %}
