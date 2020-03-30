@@ -109,8 +109,10 @@
             });
         }
 
-        if ($('#themeArg').exists()) {
-            loadTheme($('#themeArg').data())
+        let themeArg = $('#themeArg');
+
+        if (themeArg.exists()) {
+            loadTheme(themeArg.data())
         }
     </script>
 
