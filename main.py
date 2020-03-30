@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     # -- Page to receive POST request from new_yara_rule so it can be processed by the codebase.
     app.add_url_rule('/post_yara_rule_imd', view_func=webserver.post_rule_raw_imd, methods=['POST'])
-    # app.add_url_rule('/post_yara_rule_json', view_func=webserver.post_rule_json, methods=['POST'])
+    app.add_url_rule('/post_yara_rule_json', view_func=webserver.post_rule_json, methods=['POST'])
 
     # Add root endpoint for frontend Web GUI (last to account for polulating of route list)
     app.add_url_rule('/', view_func=webserver.home)

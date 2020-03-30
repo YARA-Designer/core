@@ -8,7 +8,13 @@
 <!-- Load theme if specified -->
 {% if theme is defined %}
     <!-- Set Jinja2 variables for use in JavaScript -->
+    <!--    Theme handler: -->
     <meta id="themeArg" data-name="{{ theme }}" data-path="{{ url_for('static', filename='themes') + '/' }}">
+    <!--    JavaScript custom POST handler -->
+    <meta id="postUrl" data-url="{{ url_for('post_rule_json') }}">
+    <!--    YARA rule variables gathered from backend for use in POST request -->
+    <meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}">
+    <meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
 {% endif %}
 
 
@@ -22,7 +28,9 @@
     </div>
     <div id="yara_rule_designer_editor_container" class="yara_rule_designer">
         <div class="yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)"></div>
-        <div class="yara_rule_designer" id="yara_rule_designer_post" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)"></div>
+        <div class="yara_rule_designer" id="yara_rule_designer_post" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
+            <button id="submit_rule_button" onclick="postRule()"></button>
+        </div>
     </div>
 
     <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
@@ -76,7 +84,8 @@
 
     <!-- Theme handler -->
     <script>
-        // extend jQuery with this tiny convenience to allow for simple existence tests.
+
+    // extend jQuery with this tiny convenience to allow for simple existence tests.
         $.fn.exists = function () {
             return this.length !== 0;
         };
@@ -222,6 +231,71 @@
                 case RIGHT_CLICK:
                     break;
             }
+        }
+
+        // /**
+        //  * Generate a JSON of varname and vardata to send in POST request.
+        //  */
+        // function getRuleConditionFromEditorElements() {
+        //     var json = {};
+        //
+        //     return json;
+        // }
+
+        /**
+         * Generate a JSON of varname and vardata to send in POST request.
+         */
+        function getRuleJsonFromEditorElements() {
+            var json = {};
+
+            // TODO: Get rule name
+            var ruleName = $('#yaraRule').data().name;
+
+            // Set meta FIXME: sub-dicts hardcoded!
+            json["meta"] = {"description" : $('#yaraMeta').data().description};
+
+            // Set rule name
+            json["rule"] = ruleName;
+
+            // Set tags.
+            json["tags"] = $('#yaraRule').data().tags;
+            console.log(json["tags"]);
+
+            // TODO: Get list of artifacts (varname, data) in editor div
+            // TODO: <Insert some sort of loop here>
+            json["artifacts"] = {
+                "artifacts" : {
+                        "artifact": "FIXME: Artifacts NOT implemented!",
+                        "id": "FIXME_NOT_AN_ID",
+                        "type": "FIXME"
+                },
+            };
+
+            // TODO: Get condition
+            json["condition"] = "FIXME: Condition NOT Implemented!";
+
+            return json;
+        }
+
+        /**
+         * Make a custom POST request for non-form elements like DIV and SPAN.
+         */
+        function postRule() {
+            var json = getRuleJsonFromEditorElements();
+
+            var xhr = new XMLHttpRequest();
+            var postUrl = $('#postUrl').data().url;
+
+            console.log("POST URL: " + postUrl);
+
+            xhr.open("POST", postUrl, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            // xhr.send(JSON.stringify({
+            //     value: value
+            // }));
+
+            // Convert a JavaScript value to a JavaScript Object Notation (JSON) string.
+            xhr.send(JSON.stringify(json));
         }
 
         //////

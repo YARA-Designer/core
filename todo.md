@@ -1,3 +1,11 @@
+Requests:
+    - Add artifact types to editor, separately.
+
+General:
+
+Click:
+
+Drag and drop:
 ### Priority 1
 * Create a submit div/area at the bottom where you drag a finished rule
     1. Take grouped SPAN elements
