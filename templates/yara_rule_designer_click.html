@@ -94,14 +94,14 @@
             const rootEl = document.querySelector(':root');
             const themePath = themeData.path;
 
-            var themeFile = themeData.name + ".json";
-            var themeFilePath = themePath + themeFile;
+            let themeFile = themeData.name + ".json";
+            let themeFilePath = themePath + themeFile;
 
             // Load corresponding theme JSON from file.
             console.log("Load theme: " + themeFilePath);
             $.getJSON(themeFilePath, function(json) {
                 console.log(json); // this will show the info it in firebug console
-                for (var key in json) {
+                for (let key in json) {
                     console.log("setProperty(" + key + ", " + json[key] + ")")
                     rootEl.style.setProperty(key, json[key]);
                 }
@@ -117,19 +117,19 @@
     <script>
         // https://stackoverflow.com/a/26272668
         function getStyleRuleValue(selector, style) {
-         var selector_compare=selector.toLowerCase();
-         var selector_compare2= selector_compare.substr(0,1)==='.' ?  selector_compare.substr(1) : '.'+selector_compare;
+         let selector_compare=selector.toLowerCase();
+         let selector_compare2= selector_compare.substr(0,1)==='.' ?  selector_compare.substr(1) : '.'+selector_compare;
 
-         for (var i = 0; i < document.styleSheets.length; i++)
+         for (let i = 0; i < document.styleSheets.length; i++)
          {
-          var mysheet = document.styleSheets[i];
-          var myrules = mysheet.cssRules ? mysheet.cssRules : mysheet.rules;
+          let mysheet = document.styleSheets[i];
+          let myrules = mysheet.cssRules ? mysheet.cssRules : mysheet.rules;
 
-          for (var j = 0; j < myrules.length; j++)
+          for (let j = 0; j < myrules.length; j++)
           {
             if (myrules[j].selectorText)
             {
-             var check = myrules[j].selectorText.toLowerCase();
+             let check = myrules[j].selectorText.toLowerCase();
              switch (check)
              {
               case selector_compare  :
@@ -143,7 +143,7 @@
         const ROOT_CLASS = 'yara_rule_designer';
         const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
 
-        var originalParentIdLookupByClass = {
+        let originalParentIdLookupByClass = {
             "draggable_artifact": "yara_rule_designer_artifacts",
             "condition_keyword": "yara_rule_designer_operators",
             "condition_encapsulator": "yara_rule_designer_operators"
@@ -193,7 +193,7 @@
         }
 
         function addToEditor(clickEvent) {
-            var editorDiv = document.getElementById("yara_rule_designer_editor");
+            let editorDiv = document.getElementById("yara_rule_designer_editor");
 
             // If target is already in the editor, ignore the click event.
             if (clickEvent.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
@@ -210,7 +210,7 @@
         }
 
         function removeFromEditor(clickEvent) {
-            var editorDiv = document.getElementById("yara_rule_designer_editor");
+            let editorDiv = document.getElementById("yara_rule_designer_editor");
 
             // Only perform remove action if target is a child of editor div.
             if (clickEvent.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
@@ -237,7 +237,7 @@
         //  * Generate a JSON of varname and vardata to send in POST request.
         //  */
         // function getRuleConditionFromEditorElements() {
-        //     var json = {};
+        //     let json = {};
         //
         //     return json;
         // }
@@ -246,10 +246,10 @@
          * Generate a JSON of varname and vardata to send in POST request.
          */
         function getRuleJsonFromEditorElements() {
-            var json = {};
+            let json = {};
 
             // TODO: Get rule name
-            var ruleName = $('#yaraRule').data().name;
+            let ruleName = $('#yaraRule').data().name;
 
             // Set meta FIXME: sub-dicts hardcoded!
             json["meta"] = {"description" : $('#yaraMeta').data().description};
@@ -281,10 +281,10 @@
          * Make a custom POST request for non-form elements like DIV and SPAN.
          */
         function postRule() {
-            var json = getRuleJsonFromEditorElements();
+            let json = getRuleJsonFromEditorElements();
 
-            var xhr = new XMLHttpRequest();
-            var postUrl = $('#postUrl').data().url;
+            let xhr = new XMLHttpRequest();
+            let postUrl = $('#postUrl').data().url;
 
             console.log("POST URL: " + postUrl);
 
@@ -318,7 +318,7 @@
 
         function makeClone(node) {
             console.log(node);
-            var clone;
+            let clone;
 
             // Returns a copy of node. If deep is true, the copy also includes the node's descendants.
             clone = node.cloneNode(true);
