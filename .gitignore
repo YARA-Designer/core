@@ -12,3 +12,7 @@ Pipfile.lock
 
 # Databases
 *.db
+
+# Generated files
+## YARA rules
+rules/
