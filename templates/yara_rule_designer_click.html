@@ -247,9 +247,10 @@
          */
         function getRuleJsonFromEditorElements() {
             let json = {};
+            let yaraRule = $('#yaraRule').data();
 
-            // TODO: Get rule name
-            let ruleName = $('#yaraRule').data().name;
+            // Get rule name
+            let ruleName = yaraRule.name;
 
             // Set meta FIXME: sub-dicts hardcoded!
             json["meta"] = {"description" : $('#yaraMeta').data().description};
@@ -258,7 +259,7 @@
             json["rule"] = ruleName;
 
             // Set tags.
-            json["tags"] = $('#yaraRule').data().tags;
+            json["tags"] = yaraRule.tags;
             console.log(json["tags"]);
 
             // TODO: Get list of artifacts (varname, data) in editor div
