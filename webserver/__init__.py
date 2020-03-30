@@ -126,6 +126,7 @@ def new_rule_designer_click():
         return "Please specify a case ID!"
 
     case = dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id')))
+    print(json.dumps(case, indent=4))
     theme = request.args.get('theme')
 
     return render_template('yara_rule_designer_click.html',

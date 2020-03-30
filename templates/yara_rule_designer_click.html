@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='yara_rule_designer_click.css') }}">
 
-<!--Define variable-->
+<!-- Define default values for variables  -->
 {% if artifacts is not defined %}
     {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
 {% endif %}
@@ -22,8 +22,16 @@
 <div id="yara_rule_designer_container">
     <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
     <!--    Add artifacts as individual draggable objects-->
+        <!-- Define list to filter artifact types so that only unique occurrences are added. -->
+        {% set added_artifact_types = [] %}
+
         {% for artifact in artifacts %}
             <span id="artifact_{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)" >{{ artifact.data }} </span>
+            {% if artifact.dataType not in added_artifact_types %}
+                <!-- Only add unique items to editor -->
+                <span id="artifact_type_{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
+                {{ added_artifact_types.append(artifact.dataType) }}
+            {% endif %}
         {% endfor %}
     </div>
     <div id="yara_rule_designer_editor_container" class="yara_rule_designer">

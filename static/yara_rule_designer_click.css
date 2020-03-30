@@ -9,6 +9,8 @@
     --condition_keyword_background: #dd63ba;
     --draggable_artifact_color: white;
     --draggable_artifact_background: #4a90dd;
+    --draggable_artifact_type_color: white;
+    --draggable_artifact_type_background: #2e86c1;
 }
 
 html, body {
@@ -118,4 +120,10 @@ html, body {
     display: inline-table;
     color: var(--draggable_artifact_color);
     background-color: var(--draggable_artifact_background);
+}
+
+.draggable_artifact_type {
+    display: inline-table;
+    color: var(--draggable_artifact_type_color);
+    background-color: var(--draggable_artifact_type_background);
 }
