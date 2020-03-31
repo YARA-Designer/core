@@ -13,6 +13,22 @@ def utility_functions():
     return dict(mdebug=print_in_console)
 
 
+def filter_suppress_none(val):
+    """
+    A filter that prevents Jinja2 from printing "None" when executing code with no return value.
+
+    This filter will return/print an empty string instead of None,
+    so no actual extra (garbage) text gets added to the HTML.
+
+    :param val:
+    :return:
+    """
+    if val is not None:
+        return val
+    else:
+        return ''
+
+
 if __name__ == "__main__":
     # Get config
     config = config_handler.load_config()
@@ -24,7 +40,11 @@ if __name__ == "__main__":
     app = Flask(__name__)
     app.config["DEBUG"] = True
 
+    # Add utility functions like print_in_console ('mdebug' in Jinja2 code)
     app.context_processor(utility_functions)
+
+    # Add filters
+    app.jinja_env.filters['ignore_none'] = filter_suppress_none
 
     # Add TheHive listener endpoint
     app.add_url_rule(config["hive_listener_endpoint"], methods=['POST'], view_func=api.create_yara_whitelist_rule)

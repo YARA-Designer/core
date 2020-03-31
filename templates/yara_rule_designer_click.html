@@ -32,11 +32,11 @@
 
             <!-- Add artifact dataTypes-->
             <!-- Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. -->
-            {% if artifact.dataType is not none and artifact.dataType != "None" %} <!-- <== Does literally nothing... (see workaround below)-->
+            {% if artifact.dataType is not none and artifact.dataType != "None" %}
                 {% if artifact.dataType not in added_artifact_types %}
                     <!-- Only add unique items to editor -->
                     <span id="artifact_type_{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
-                    {{ added_artifact_types.append(artifact.dataType) or ''}}
+                    {{ added_artifact_types.append(artifact.dataType)|ignore_none }}
                 {% endif %}
             {% endif %}
         {% endfor %}
