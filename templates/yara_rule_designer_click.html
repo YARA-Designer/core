@@ -32,12 +32,13 @@
 
             <!-- Add artifact dataTypes-->
             <!-- Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. -->
+            {{ mdebug( "data: {} | dataType: {}".format(artifact.data, artifact.dataType) ) or ''}}
             {% if artifact.dataType is not none and artifact.dataType != "None" %} <!-- <== Does literally nothing... (see workaround below)-->
                 {% if artifact.dataType not in added_artifact_types %}
                     <!-- Only add unique items to editor -->
                     <span id="artifact_type_{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
                     <!-- Workaround: Below line is commented (but still executed) in order to stop printing of "None" on the webpage for NoneType entries. -->
-                    <!-- {{ added_artifact_types.append(artifact.dataType) }}-->
+                    {{ added_artifact_types.append(artifact.dataType) or ''}}
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -88,7 +89,6 @@
      <ul>
       <li>Click to add items to editor.</li>
       <li>Middle click to remove item from editor.</li>
-      <li>Milk</li>
     </ul>
 </div>
 
