@@ -293,7 +293,8 @@
             };
 
             // TODO: Get condition
-            json["condition"] = "FIXME: Condition NOT Implemented! invalid yara string to force error: and and not not";
+            // json["condition"] = "FIXME: Condition NOT Implemented! invalid yara string to force error: and and not not";
+            json["condition"] = "$artifact1 and $artifact2";
 
             return json;
         }
