@@ -4,6 +4,9 @@ Requests:
 
 General:
 
+Frontend:
+* Add some sort of hashed "state" string to URL to reproduce the current editor elements from URL.
+
 Click:
 
 Drag and drop:
