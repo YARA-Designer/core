@@ -281,7 +281,7 @@ def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: st
     return generate_source_string(match)
 
 
-def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs) -> str:
+def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs) -> dict:
     """
     Generates a yara rule based on a given dict on the form of:
      {rule: "", tags: [""], meta: {}, artifacts: [artifact: "", id: "", type: ""], condition: ""}.
@@ -290,13 +290,28 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
     :param yara_sources_dict:
     :return:
     """
+    retv = {
+        "source": None,
+        "source (preprocessed)": None,
+        "success": False,
+        "compilable": False,
+        "error": {
+            "type": None,
+            "message": "",
+            "line number": None
+        },
+    }
+
     rule_name: str = sanitize_rulename(yara_sources_dict["rule"])
-    source: str = generate_source_string({"tags": yara_sources_dict["tags"],
-                                          "rule": rule_name,
-                                          "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
-                                          "strings": extract_yara_strings_dict(yara_sources_dict["artifacts"]),
-                                          "condition": yara_sources_dict["condition"]
-                                          })
+    retv["source (preprocessed)"]: str = generate_source_string({
+        "tags": yara_sources_dict["tags"],
+        "rule": rule_name,
+        "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
+        "strings": extract_yara_strings_dict(yara_sources_dict["artifacts"]),
+        "condition": yara_sources_dict["condition"]
+        })
+
+    source = retv["source (preprocessed)"]  # FIXME: Convenience for changing code.
 
     print("source: \n{}".format(source))    # FIXME: DEBUG
 
@@ -307,21 +322,27 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
         compiled_yara_rules: yara.Rules = yara.compile(source=source,
                                                        error_on_warning=error_on_warning,
                                                        **kwargs)
+        retv["compilable"] = True
 
         # Save compiled rule to binary file.  #FIXME: Change to verification/testing later.
         save_compiled(rules=compiled_yara_rules, filename=rule_name)
 
-        retv = compiled_rules_to_source_string(rule_name, condition=yara_sources_dict["condition"])
+        retv["source"] = compiled_rules_to_source_string(rule_name, condition=yara_sources_dict["condition"])
 
-        return retv
+        retv["success"] = True
 
-        # return compiled_yara_rules
-    except (yara.SyntaxError, yara.Error) as yara_exc:
-        print("generate_yara_rule_from_json Exception: {}".format(yara_exc))
-        print("generate_yara_rule_from_json incoming dict: {}".format(yara_sources_dict))
-        raise yara_exc
-    except Exception as exc:
-        print("generate_yara_rule_from_json UNEXPECTED Exception: {}".format(exc))
-        print("generate_yara_rule_from_json incoming dict: {}".format(yara_sources_dict))
-        raise exc
+    except yara.SyntaxError as e:
+        retv["success"] = False
+        retv["error"] = {"type": "syntax", "message": str(e)}
+        pass
+    except yara.Error as e:
+        retv["success"] = False
+        retv["error"] = {"type": "error", "message": str(e)}
+        pass
+    except Exception as e:
+        retv["success"] = False
+        retv["error"] = {"type": "exception", "message": str(e)}
+        pass
+
+    return retv
 

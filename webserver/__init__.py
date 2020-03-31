@@ -146,24 +146,24 @@ def generate_yara_rule(j: json):
     retv = {
         "in": j,
         "out": {
-            "success": False,
-            "error type": None,
-            "error": None,
-            "error message": "",
-            "source": "",
-            "compilable": False,
-            "syntax error line": None
+            # "success": False,
+            # "error type": None,
+            # "error": None,
+            # "error message": "",
+            # "source": "",
+            # "compilable": False,
+            # "syntax error line": None
         }
     }
 
-    try:
-        # Generate yara rule
-        retv["out"]["source"]: str = yara_handling.compile_from_source(j)
-    except yara.SyntaxError as yara_syn_exc:
-        pass
-    except Exception as exc:
-        # pass
-        raise exc
+    # try:
+    # Generate yara rule
+    retv["out"]: dict = yara_handling.compile_from_source(j)
+    # except yara.SyntaxError as yara_syn_exc:
+    #     pass
+    # except Exception as exc:
+    #     # pass
+    #     raise exc
 
     # FIXME: Send proper feedback to be handled by webpage instead of navigating to a JSON dump.
     return retv
