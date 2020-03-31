@@ -10,7 +10,7 @@ def utility_functions():
     def print_in_console(message):
         print(str(message))
 
-    return dict(mdebug=print_in_console)  # if dict(mdebug=print_in_console) is not None else ''
+    return dict(mdebug=print_in_console)
 
 
 if __name__ == "__main__":
