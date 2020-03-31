@@ -1,6 +1,7 @@
 import json
 import pprint
 
+import yara
 from flask import render_template, request
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -135,6 +136,39 @@ def new_rule_designer_click():
                            theme=theme)
 
 
+def generate_yara_rule(j: json):
+    print("========== DEBUG: Yara Dict ==========")
+    pp = pprint.PrettyPrinter(indent=4)
+    print(pp.pprint(j))
+    print("========== DEBUG: Yara Dict ==========")
+
+    # Processing status, return values and so forth.
+    retv = {
+        "in": j,
+        "out": {
+            "success": False,
+            "error type": None,
+            "error": None,
+            "error message": "",
+            "source": "",
+            "compilable": False,
+            "syntax error line": None
+        }
+    }
+
+    try:
+        # Generate yara rule
+        retv["out"]["source"]: str = yara_handling.compile_from_source(j)
+    except yara.SyntaxError as yara_syn_exc:
+        pass
+    except Exception as exc:
+        # pass
+        raise exc
+
+    # FIXME: Send proper feedback to be handled by webpage instead of navigating to a JSON dump.
+    return retv
+
+
 def post_rule_raw_imd():
     """
     Receives an ImmutableMultiDict of the operators which needs to be matched against the original list of artifacts.
@@ -172,20 +206,7 @@ def post_rule_raw_imd():
                  "artifacts": artifacts,
                  "condition": yara_condition_string}
 
-    retv = yara_dict
-    print("========== DEBUG: Yara Dict ==========")
-    pp = pprint.PrettyPrinter(indent=4)
-    print(pp.pprint(yara_dict))
-    print("========== DEBUG: Yara Dict ==========")
-    try:
-        # Generate yara rule
-        retv["generated_rule_source"] = yara_handling.compile_from_source(yara_dict)
-    except Exception as exc:
-        # pass
-        raise exc
-
-    # FIXME: Send proper feedback to be handled by webpage instead of navigating to a JSON dump.
-    return retv
+    return generate_yara_rule(yara_dict)
 
 
 def post_rule_json():
@@ -209,37 +230,12 @@ def post_rule_json():
     """
     print("request.json: {}".format(json.dumps(request.json, indent=4)))
 
-    # artifacts = {}
-    # for artifact, varname, artifact_type, artifact_id in zip(request.form.getlist('artifact'),
-    #                                                          request.form.getlist('artifact_var'),
-    #                                                          request.form.getlist('artifact_type'),
-    #                                                          request.form.getlist('artifact_id')):
-    #     artifacts[varname] = {"artifact": artifact, "type": artifact_type, "id": artifact_id}
-
-    # yara_condition_string = request.form['rawUrlSubmit']
-    # yara_dict = {"rule": (request.form['rule'] if 'rule' in request.form else 'UNNAMED_RULE'),
-    #              "meta": ({k: request.form['meta_' + k] for k in request.form['meta_keys'].split(',')}
-    #                       if 'meta_keys' in request.form else {}),
-    #              "tags": (request.form["tags"] if "tags" in request.form else []),
-    #              "artifacts": artifacts,
-    #              "condition": yara_condition_string}
-
     # Workaround: JSON.Stringify() returns lists wrapped in string, so let's convert it to a proper list:
     #   1. Split on the human readable delimiter and transform it into a list (NB: items will still be quoted).
     #   2. Strip head and tail string wrappers from each individual item using list comprehension.
     request.json["tags"]: list = [x[1:-1] for x in list(request.json["tags"][1:-1].split(", "))]
 
-    retv = request.json
-
-    try:
-        # Generate yara rule
-        retv["generated_rule_source"] = yara_handling.compile_from_source(request.json)
-    except Exception as exc:
-        # pass
-        raise exc
-
-    # FIXME: Send proper feedback to be handled by webpage instead of navigating to a JSON dump.
-    return retv
+    return generate_yara_rule(request.json)
 
 
 def home():
