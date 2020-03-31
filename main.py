@@ -67,7 +67,7 @@ if __name__ == "__main__":
     webserver.routes['/yara_rule_designer_drag_and_drop'] = "Create Yara rule using only the drag & drop designer"
 
     # -- Page to design yara rules on using "click". # FIXME: Give better name
-    app.add_url_rule('/yara_rule_designer_click', view_func=webserver.new_rule_designer_click)
+    app.add_url_rule('/yara_rule_designer_click', view_func=webserver.new_rule_designer_click, methods=['GET', 'POST'])
     webserver.routes['/yara_rule_designer_click'] = "Create Yara rule using only the \"click\" designer"
 
     # -- Page to receive POST request from new_yara_rule so it can be processed by the codebase.

@@ -2,7 +2,7 @@ import json
 import pprint
 
 import yara
-from flask import render_template, request
+from flask import render_template, request, jsonify, make_response
 from sqlalchemy.exc import SQLAlchemyError
 
 from database.models import PendingRule
@@ -215,7 +215,7 @@ def post_rule_json():
     #   2. Strip head and tail string wrappers from each individual item using list comprehension.
     request.json["tags"]: list = [x[1:-1] for x in list(request.json["tags"][1:-1].split(", "))]
 
-    return generate_yara_rule(request.json)
+    return make_response(jsonify(generate_yara_rule(request.json)), 200)
 
 
 def home():
