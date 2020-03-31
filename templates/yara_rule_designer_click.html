@@ -281,15 +281,19 @@
             // TODO: Get list of artifacts (varname, data) in editor div
             // TODO: <Insert some sort of loop here>
             json["artifacts"] = {
-                "artifacts" : {
+                "$artifact1" : {
                         "artifact": "FIXME: Artifacts NOT implemented!",
-                        "id": "FIXME_NOT_AN_ID",
+                        "id": "1",
+                        "type": "FIXME"
+                }, "$artifact2" : {
+                        "artifact": "FIXME: Artifacts NOT implemented!",
+                        "id": "2",
                         "type": "FIXME"
                 },
             };
 
             // TODO: Get condition
-            json["condition"] = "FIXME: Condition NOT Implemented!";
+            json["condition"] = "FIXME: Condition NOT Implemented! invalid yara string to force error: and and not not";
 
             return json;
         }
