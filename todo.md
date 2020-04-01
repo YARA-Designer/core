@@ -36,3 +36,4 @@ Drag and drop:
 * Drag and drop seems broken on the editor_post div.
 
 Backend:
+    TheHive tags may contain whitespace, which breaks YARA, make it replace them with underscores.
