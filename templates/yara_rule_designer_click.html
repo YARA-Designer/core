@@ -186,6 +186,7 @@
         const LEFT_CLICK = 0;
         const MIDDLE_CLICK = 1;
         const RIGHT_CLICK = 2;
+        const DRAGGABLE_ARTIFACT_CLASSES = ["draggable_artifact", "draggable_artifact_type"];
 
         ///////////////// Response modal globals (Re-implementations and listeners ////////////////////////
 
@@ -224,7 +225,7 @@
          *  - '-modal_color_*'
          */
         function popupModal(header=null, body=null, footer=null, level=null) {
-            console.log("function popupModal(header=" + header + ", body=" + body + ", footer=" + footer + ", level=" + level + ")");
+            // console.log("function popupModal(header=" + header + ", body=" + body + ", footer=" + footer + ", level=" + level + ")");
             // Modal element itself.
             let modal = document.getElementById("response_modal_id");
 
@@ -344,6 +345,30 @@
         //     return json;
         // }
 
+        function getEditorContents() {
+            return document.getElementById("yara_rule_designer_editor").children;
+        }
+
+        function getEditorArtifactsAndTypes(unique=true) {
+            let artifacts = [];
+            let children = getEditorContents();
+
+            for (let i = 0; i < children.length; i++) {
+                if ( DRAGGABLE_ARTIFACT_CLASSES.includes(children[i].className) ) {
+                    if (unique === true) {
+                        // If unique is specified, omit duplicate entries.
+                        if ( !artifacts.some(child => child.id === children[i].id) ) {
+                            artifacts.push(children[i]);
+                        }
+                    } else {
+                        artifacts.push(children[i]);
+                    }
+                }
+            }
+
+            return artifacts;
+        }
+
         /**
          * Generate a JSON of varname and vardata to send in POST request.
          */
@@ -366,6 +391,7 @@
 
             // TODO: Get list of artifacts (varname, data) in editor div
             // TODO: <Insert some sort of loop here>
+            console.log(getEditorArtifactsAndTypes());
             json["artifacts"] = {
                 "$artifact1" : {
                         "artifact": "FIXME: Artifacts NOT implemented!",
