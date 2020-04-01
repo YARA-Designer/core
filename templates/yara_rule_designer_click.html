@@ -447,7 +447,7 @@
 
             let artifactElements = getEditorArtifactsAndTypes();
             for (let i = 0; i < artifactElements.length; i++) {
-                json["artifacts"][artifactElements[i].id] = {
+                json["artifacts"][YARA_VARIABLE_DENOMINATOR + artifactElements[i].id] = {
                     "artifact": getEditorElementArtifactText(artifactElements[i])
                 }
             }
