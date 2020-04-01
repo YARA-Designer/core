@@ -173,6 +173,8 @@
 
         const ROOT_CLASS = 'yara_rule_designer';
         const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
+        const SUCCESS_ICON = "<span style='color: green'>&#10003;</color>";
+        const FAILED_ICON = "<span style='color: red'>&#10005;</span>";
 
         let originalParentIdLookupByClass = {
             "draggable_artifact": "yara_rule_designer_artifacts",
@@ -209,6 +211,7 @@
          * Convenience: Shortens the line width when getting a CSS variable.
          */
         function getCSSVar(varName) {
+            // console.log("getCSSVar(" + varName + ") = " + getComputedStyle(document.documentElement).getPropertyValue('--' + varName));
             return getComputedStyle(document.documentElement).getPropertyValue('--' + varName);
         }
 
@@ -217,17 +220,22 @@
          * as well as background color based on level.
          *
          * level: String that is appended to CSS variables:
-         *  - '-modal_background_color_*'
+         *  - '-modal_background_*'
          *  - '-modal_color_*'
          */
-        function popupModal(header=null, body=null, footer=null, level="info") {
-            // Modal element itself
+        function popupModal(header=null, body=null, footer=null, level=null) {
+            console.log("function popupModal(header=" + header + ", body=" + body + ", footer=" + footer + ", level=" + level + ")");
+            // Modal element itself.
             let modal = document.getElementById("response_modal_id");
 
-            // Modal sub-elements
+            // Modal sub-elements.
             let modalHeader = document.getElementById("response_modal_header");
             let modalBody = document.getElementById("response_modal_body");
             let modalFooter = document.getElementById("response_modal_footer");
+
+            // Set level (if null, set to info/default).
+            level = (level != null) ? level : "info";
+            console.log("level:" + level);
 
             // Set sub-element values, if given.
             modalHeader.innerHTML = (header != null) ? header: "<h2>header</h2>";
@@ -235,14 +243,14 @@
             modalFooter.innerHTML = (footer != null) ? footer :  "<h2>Footer</h2>";
 
             // Set custom style.
-            //      Header
-            modalHeader.style.background = getCSSVar("modal_background_color_" + level);
+            //      Header.
+            modalHeader.style.background = getCSSVar("modal_background_" + level);
             modalHeader.style.color = getCSSVar("modal_color_" + level);
-            //      Footer
-            modalFooter.style.background = getCSSVar("modal_background_color_" + level);
+            //      Footer.
+            modalFooter.style.background = getCSSVar("modal_background_" + level);
             modalFooter.style.color = getCSSVar("modal_color_" + level);
 
-            // Show modal
+            // Show modal.
             modal.style.display = "block";
         }
 
@@ -377,10 +385,83 @@
             return json;
         }
 
-        function handlePostRuleResponse(json) {
-            console.log(json);
+        function addCaseDetailsCollapsibleButtonLogic(className) {
+            let coll = document.getElementsByClassName(className);
+            let i;
 
-            popupModal("<h2>Some header</h2>", json, "Some footer");
+            for (i = 0; i < coll.length; i++) {
+              coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                let content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                  content.style.display = "none";
+                } else {
+                  content.style.display = "block";
+                }
+              });
+            }
+        }
+
+        function handlePostRuleResponse(json) {
+            let errorType = "";
+            let errorMessage = "";
+            let syntaxErrorLineNumber = null;
+            let level = "success";
+
+            // Parse JSON:
+            let inJson = json["in"];
+            let outJson = json["out"];
+
+            let compilable = outJson["compilable"];
+            let success = outJson["success"];
+
+            let source = outJson["source"];
+            let sourcePreprocessed = outJson["source (preprocessed)"];
+
+            if (!compilable) {
+                level = "warning";
+            }
+
+            if (!success) {
+                errorMessage = outJson["error"]["message"];
+                errorType = outJson["error"]["type"];
+                syntaxErrorLineNumber = outJson["error"]["line number"];
+                level = "error";
+            }
+
+            // Define header
+            let header = `<h2>YARA rule generation results: ${String(level).toUpperCase()}</h2>`;
+
+            // Define body
+            let body = "";
+
+            // Passed/Failed items.
+            body += "<p>" + (compilable === true ? SUCCESS_ICON : FAILED_ICON) + " Compiles </p>";
+
+            // Error message (if any).
+            if (!success) {
+                body += `<p>${errorType.replace(/^\w/, c => c.toUpperCase())} error message: ${errorMessage}</p>`;
+            }
+
+            // Formatted string of the generated YARA rule ("source").
+            body += "<br/>Generated YARA rule:<br/>";
+            body += "<pre>" + String(sourcePreprocessed) + "</pre>";
+
+            // Collapsible raw JSON details.
+            body +=
+                "<button type='button' class='modal_json_collapsible_button'>Show JSON</button>" +
+                "<div class='modal_json_collapsible_content'>" +
+                    "<pre>" +
+                        JSON.stringify(json, undefined, 4) +
+                    "</pre>" +
+                "</div>";
+
+            // Define footer
+            let footer = "Some footer";
+
+            popupModal(header, body, footer, level);
+            // Make the JSON detailsCollapsible element actually collapsible.
+            addCaseDetailsCollapsibleButtonLogic("modal_json_collapsible_button");
         }
 
         /**
@@ -400,7 +481,7 @@
             // Add custom handling of the response returned by XHR POST URL.
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == XMLHttpRequest.DONE) {
-                    handlePostRuleResponse(xhr.responseText);
+                    handlePostRuleResponse(JSON.parse(xhr.responseText));
                 }
             };
 
