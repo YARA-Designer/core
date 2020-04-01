@@ -175,6 +175,7 @@
         const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
         const SUCCESS_ICON = "<span style='color: green'>&#10003;</color>";
         const FAILED_ICON = "<span style='color: red'>&#10005;</span>";
+        const YARA_VARIABLE_DENOMINATOR = "$";
 
         let originalParentIdLookupByClass = {
             "draggable_artifact": "yara_rule_designer_artifacts",
@@ -186,7 +187,8 @@
         const LEFT_CLICK = 0;
         const MIDDLE_CLICK = 1;
         const RIGHT_CLICK = 2;
-        const DRAGGABLE_ARTIFACT_CLASSES = ["draggable_artifact", "draggable_artifact_type"];
+        const ARTIFACT_CLASSES = ["draggable_artifact", "draggable_artifact_type"];
+        const KEYWORD_CLASSES = ["condition_keyword"];
 
         ///////////////// Response modal globals (Re-implementations and listeners ////////////////////////
 
@@ -354,7 +356,7 @@
             let children = getEditorContents();
 
             for (let i = 0; i < children.length; i++) {
-                if ( DRAGGABLE_ARTIFACT_CLASSES.includes(children[i].className) ) {
+                if ( ARTIFACT_CLASSES.includes(children[i].className) ) {
                     if (unique === true) {
                         // If unique is specified, omit duplicate entries.
                         if ( !artifacts.some(child => child.id === children[i].id) ) {
@@ -369,13 +371,56 @@
             return artifacts;
         }
 
-        function getArtifactText(artifactElement) {
+        function getEditorElementArtifactText(element) {
             // Get text string.
-            let text = $(artifactElement).text();
+            let text = $(element).text();
 
-            // Strip the trailing whitespace and return.
+            // Strip the head whitespace and return.
             return text.substring(0, text.length - 1)
         }
+
+        function getEditorElementKeywordText(element) {
+            // Get text string.
+            let text = $(element).text();
+
+            // Strip the head and tail whitespace and return.
+            return text.substring(1, text.length - 1)
+        }
+
+        function getEditorElementIdString(elementId) {
+            // Strip the head whitespace and return.
+            return String(elementId).substring(0, elementId.length - 1)
+        }
+
+        function getEditorConditionString() {
+            let conditionString = "";
+            let children = getEditorContents();
+
+            // Spacing to use in front of a word, to form a coherent sentence structure.
+            let preSpacing = "";
+            for (let i = 0; i < children.length; i++) {
+                if (i === 1) {
+                    // If we're past the first entry we can start prepending spacing.
+                    preSpacing = " ";
+                }
+
+                // If child is of the artifact family.
+                if ( ARTIFACT_CLASSES.includes(children[i].className) ) {
+                    // Prepend with a YARA variable denominator.
+                    conditionString += preSpacing + YARA_VARIABLE_DENOMINATOR + children[i].id;
+                } else if (KEYWORD_CLASSES.includes(children[i].className)) {
+                    // Child is a logical operator
+                    conditionString += preSpacing + getEditorElementKeywordText(children[i]).toLowerCase();
+                } else {
+                    console.error("getEditorConditionString is not supposed to reach an else condition!");
+                    console.error(children[i]);
+                }
+            }
+
+            return conditionString;
+        }
+
+
 
         /**
          * Generate a JSON of varname and vardata to send in POST request.
@@ -384,13 +429,13 @@
             let json = {};
             let yaraRule = $('#yaraRule').data();
 
-            // Get rule name
+            // Get rule name.
             let ruleName = yaraRule.name;
 
             // Set meta FIXME: sub-dicts hardcoded!
             json["meta"] = {"description" : $('#yaraMeta').data().description};
 
-            // Set rule name
+            // Set rule name.
             json["rule"] = ruleName;
 
             // Set tags.
@@ -403,13 +448,12 @@
             let artifactElements = getEditorArtifactsAndTypes();
             for (let i = 0; i < artifactElements.length; i++) {
                 json["artifacts"][artifactElements[i].id] = {
-                    "artifact": getArtifactText(artifactElements[i])
+                    "artifact": getEditorElementArtifactText(artifactElements[i])
                 }
             }
 
-            // TODO: Get condition
-            // json["condition"] = "FIXME: Condition NOT Implemented! invalid yara string to force error: and and not not";
-            json["condition"] = "$artifact1 and $artifact2";
+            // Get condition.
+            json["condition"] = getEditorConditionString();
 
             return json;
         }
