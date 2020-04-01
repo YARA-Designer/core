@@ -28,14 +28,14 @@
 
         {% for artifact in artifacts %}
             <!-- Add artifacts -->
-            <span id="artifact_{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)" >{{ artifact.data }} </span>
+            <span id="artifact{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)" >{{ artifact.data }} </span>
 
             <!-- Add artifact dataTypes-->
             <!-- Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. -->
             {% if artifact.dataType is not none and artifact.dataType != "None" %}
                 {% if artifact.dataType not in added_artifact_types %}
                     <!-- Only add unique items to editor -->
-                    <span id="artifact_type_{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
+                    <span id="artifact_type{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
                     {{ added_artifact_types.append(artifact.dataType)|ignore_none }}
                 {% endif %}
             {% endif %}
@@ -369,6 +369,14 @@
             return artifacts;
         }
 
+        function getArtifactText(artifactElement) {
+            // Get text string.
+            let text = $(artifactElement).text();
+
+            // Strip the trailing whitespace and return.
+            return text.substring(0, text.length - 1)
+        }
+
         /**
          * Generate a JSON of varname and vardata to send in POST request.
          */
@@ -389,20 +397,15 @@
             json["tags"] = yaraRule.tags;
             console.log(json["tags"]);
 
-            // TODO: Get list of artifacts (varname, data) in editor div
-            // TODO: <Insert some sort of loop here>
-            console.log(getEditorArtifactsAndTypes());
-            json["artifacts"] = {
-                "$artifact1" : {
-                        "artifact": "FIXME: Artifacts NOT implemented!",
-                        "id": "1",
-                        "type": "FIXME"
-                }, "$artifact2" : {
-                        "artifact": "FIXME: Artifacts NOT implemented!",
-                        "id": "2",
-                        "type": "FIXME"
-                },
-            };
+            // Get list of artifacts currently residing in editor DIV.
+            json["artifacts"] = {};
+
+            let artifactElements = getEditorArtifactsAndTypes();
+            for (let i = 0; i < artifactElements.length; i++) {
+                json["artifacts"][artifactElements[i].id] = {
+                    "artifact": getArtifactText(artifactElements[i])
+                }
+            }
 
             // TODO: Get condition
             // json["condition"] = "FIXME: Condition NOT Implemented! invalid yara string to force error: and and not not";
