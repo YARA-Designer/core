@@ -11,6 +11,14 @@
     --draggable_artifact_background: #4a90dd;
     --draggable_artifact_type_color: white;
     --draggable_artifact_type_background: #2e86c1;
+    --modal_background_info: #87898a;
+    --modal_color_info: white;
+    --modal_background_success: #5cb85c;
+    --modal_color_success: white;
+    --modal_background_warning: #ffed3e;
+    --modal_color_warning: white;
+    --modal_background_error: #da423f;
+    --modal_color_error: white;
 }
 
 /* DEBUG Helper: Make ghost items visible */
@@ -157,8 +165,8 @@ html, body {
  /* Modal Header */
 .modal-header {
   padding: 2px 16px;
-  background-color: #5cb85c;
-  color: white;
+  background: var(--modal_background_info);
+  color: var(--modal_color_info);
 }
 
 /* Modal Body */
@@ -167,8 +175,8 @@ html, body {
 /* Modal Footer */
 .modal-footer {
   padding: 2px 16px;
-  background-color: #5cb85c;
-  color: white;
+  background: var(--modal_background_info);
+  color: var(--modal_color_info);
 }
 
 /* Modal Content */

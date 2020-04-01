@@ -81,20 +81,18 @@
         <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)"> () </span>
     </div>
 </div>
-
-<div id="info">
-    <h1>How to use:</h1>
-     <ul>
-      <li>Click to add items to editor.</li>
-      <li>Middle click to remove item from editor.</li>
-    </ul>
-</div>
-
+<!--<div id="info">-->
+<!--    <h1>How to use:</h1>-->
+<!--     <ul>-->
+<!--      <li>Click to add items to editor.</li>-->
+<!--      <li>Middle click to remove item from editor.</li>-->
+<!--    </ul>-->
+<!--</div>-->
 <!-- The Modal -->
 <div id="response_modal_id" class="response_modal">
     <!-- Modal content -->
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" id="response_modal_header">
         <span class="close_response_modal">&times;</span>
         <h2>Modal Header</h2>
       </div>
@@ -102,12 +100,11 @@
         <p>Some text in the Modal Body</p>
         <p>Some other text...</p>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" id="response_modal_footer">
         <h3>Modal Footer</h3>
       </div>
     </div>
 </div>
-
 {% block javascript %}
     <!-- JQuery includes ( required for drag and drop and $() ). -->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
@@ -187,6 +184,69 @@
         const LEFT_CLICK = 0;
         const MIDDLE_CLICK = 1;
         const RIGHT_CLICK = 2;
+
+        ///////////////// Response modal globals (Re-implementations and listeners ////////////////////////
+
+        // Get the modal
+        let responseModal = document.getElementById("response_modal_id");
+
+        // Get the <span> element that closes the modal
+        let closeResponseModal = document.getElementsByClassName("close_response_modal")[0];
+
+        // When the user clicks on <span> (x), close (hide) the modal
+        closeResponseModal.onclick = function() {
+          responseModal.style.display = "none";
+        };
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+          if (event.target == responseModal) {
+            responseModal.style.display = "none";
+          }
+        };
+
+        /**
+         * Convenience: Shortens the line width when getting a CSS variable.
+         */
+        function getCSSVar(varName) {
+            return getComputedStyle(document.documentElement).getPropertyValue('--' + varName);
+        }
+
+        /**
+         * Shows a pop-up modal with customisable header, footer and body,
+         * as well as background color based on level.
+         *
+         * level: String that is appended to CSS variables:
+         *  - '-modal_background_color_*'
+         *  - '-modal_color_*'
+         */
+        function popupModal(header=null, body=null, footer=null, level="info") {
+            // Modal element itself
+            let modal = document.getElementById("response_modal_id");
+
+            // Modal sub-elements
+            let modalHeader = document.getElementById("response_modal_header");
+            let modalBody = document.getElementById("response_modal_body");
+            let modalFooter = document.getElementById("response_modal_footer");
+
+            // Set sub-element values, if given.
+            modalHeader.innerHTML = (header != null) ? header: "<h2>header</h2>";
+            modalBody.innerHTML  = (body != null) ? body : "<h2>Modal body</h2>";
+            modalFooter.innerHTML = (footer != null) ? footer :  "<h2>Footer</h2>";
+
+            // Set custom style.
+            //      Header
+            modalHeader.style.background = getCSSVar("modal_background_color_" + level);
+            modalHeader.style.color = getCSSVar("modal_color_" + level);
+            //      Footer
+            modalFooter.style.background = getCSSVar("modal_background_color_" + level);
+            modalFooter.style.color = getCSSVar("modal_color_" + level);
+
+            // Show modal
+            modal.style.display = "block";
+        }
+
+        ///////////////////////////////////// Core (designer) code ///////////////////////////////////
 
         /**
          * Override default behaviour for mouse clicks in the editor div,
@@ -317,44 +377,10 @@
             return json;
         }
 
-        // Get the modal
-        let responseModal = document.getElementById("response_modal_id");
-        let responseModalContent = document.getElementById("response_modal_body");
-
-        // Get the button that opens the modal
-        // let btn = document.getElementById("myBtn");
-
-        // Get the <span> element that closes the modal
-        let closeResponseModal = document.getElementsByClassName("close_response_modal")[0];
-
-        // When the user clicks on the button, open the modal
-        // btn.onclick = function() {
-        //   showPostRuleResponseModal.style.display = "block";
-        // };
-
-        // When the user clicks on <span> (x), close (hide) the modal
-        closeResponseModal.onclick = function() {
-          responseModal.style.display = "none";
-        };
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-          if (event.target == responseModal) {
-            responseModal.style.display = "none";
-          }
-        };
-
         function handlePostRuleResponse(json) {
             console.log(json);
-            // Set content of modal
-            console.log("set content");
-            let content = document.getElementById("response_modal_body");
-            content.innerHTML = json;
 
-            // Show modal.
-            console.log("show modal");
-            let responseModal = document.getElementById("response_modal_id");
-            responseModal.style.display = "block";
+            popupModal("<h2>Some header</h2>", json, "Some footer");
         }
 
         /**
