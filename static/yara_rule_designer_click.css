@@ -13,11 +13,21 @@
     --draggable_artifact_type_background: #2e86c1;
 }
 
+/* DEBUG Helper: Make ghost items visible */
+/** {*/
+/*  background: #000 !important;*/
+/*  color: #0f0 !important;*/
+/*  outline: solid #f00 1px !important;*/
+/*}*/
+
+
 html, body {
     height:100%;
     width:100%;
     margin:0;
     padding:0;
+    border:0;
+    overflow: hidden;   /* Hack to avoid weird white spacing at the bottom (past 100% height) */
 }
 
 .yara_rule_designer {
