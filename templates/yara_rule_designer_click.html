@@ -518,7 +518,14 @@
 
             // Formatted string of the generated YARA rule ("source").
             body += "<br/>Generated YARA rule:<br/>";
-            body += "<pre>" + String(sourcePreprocessed) + "</pre>";
+
+            // Loop through lines to add line numbering support via CSS counter.
+            let lines = String(sourcePreprocessed).split('\n');
+            body += "<pre class='numbered_lines'>";
+            for (let i = 0; i < lines.length; i++) {
+                body += `<span >${lines[i]}</span>`;
+            }
+            body += "</pre>";
 
             // Collapsible raw JSON details.
             body +=

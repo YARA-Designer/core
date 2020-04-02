@@ -220,3 +220,27 @@ html, body {
   overflow: hidden;
   background-color: #f1f1f1;
 }
+
+.numbered_lines {
+  /*background: #303030;*/
+  /*color: #f1f1f1;*/
+  padding: 10px 16px;
+  border-radius: 2px;
+  /*border-top: 4px solid #00aeef;*/
+  /*-moz-box-shadow: inset 0 0 10px #000;*/
+  /*box-shadow: inset 0 0 10px #000;*/
+  counter-reset: line;
+}
+.numbered_lines span {
+  display: block;
+  line-height: 1.5rem;
+  counter-increment: line;
+}
+.numbered_lines span:before {
+  content: counter(line);
+  display: inline-block;
+  border-right: 1px solid #ddd;
+  padding: 0 .5em;
+  margin-right: .5em;
+  color: #888
+}
