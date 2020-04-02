@@ -9,6 +9,7 @@ RULES_DIR = "rules"
 SOURCE_FILE_EXTENSION = ".yar"
 COMPILED_FILE_EXTENSION = ".bin"
 CALLBACK_DICTS: list = []
+CONDITION_INDENT_LENGTH = 8
 
 
 def is_number(s: str) -> bool:
@@ -84,12 +85,7 @@ def newline_condition(condition: str):
     :param condition:
     :return:
     """
-    newlined_condition = condition.replace(' ', '\n')
-
-    # for cond in condition.split(' '):
-    #     newlined_condition += "\n{}".format(cond)
-
-    return newlined_condition
+    return condition.replace(' ', '\n')
 
 
 def generate_source_string(src: dict) -> str:
@@ -296,6 +292,35 @@ def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: st
     return generate_source_string(match)
 
 
+def determine_syntax_error_column(condition_as_lines_str: str, line_number: int, splitline_number: int) -> dict:
+    """
+    Determines the column (and range) that compilation failed on,
+    using whitespace line number and newline line numbers to determine the character offset to the word.
+
+    :param condition_as_lines_str:  Condition string where whitespace is replaced by \n,
+    :param line_number:             Line number that failed in the whitespace string.
+    :param splitline_number:        Line number that failed in the newline string.
+    :return:                        dict: {"column_number", "column_range", "word"}
+    """
+    global CONDITION_INDENT_LENGTH
+
+    # Create a list version of the conditions newline string, for convenience.
+    condition_as_lines_list = condition_as_lines_str.split('\n')
+
+    # Get index of the errored word in the conditions list.
+    errored_word_index = splitline_number - line_number
+
+    # Figure out the distance in chars from start of condition to bad word.
+    # (Indent + chars-up-to-error + 1 whitespace + 1 human-readable-indexing)
+    char_offset = CONDITION_INDENT_LENGTH + len(" ".join(condition_as_lines_list[:errored_word_index])) + 1 + 1
+
+    return {
+        "column_number": str(char_offset),
+        "column_range": str(char_offset + len(condition_as_lines_list[errored_word_index])),
+        "word": condition_as_lines_list[errored_word_index]
+        }
+
+
 def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs) -> dict:
     """
     Generates a yara rule based on a given dict on the form of:
@@ -314,7 +339,8 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
             "type": None,
             "message": "",
             "line_number": None,
-            "column_number": None
+            "column_number": None,
+            "word": None
         },
     }
 
@@ -352,7 +378,6 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
         retv["error"] = {"type": "syntax", "message": str(e)}
         # Get line number (split on colon, then split first element on whitespace then grab the last element.
         retv["error"]["line_number"] = str(e).split(':')[0].split(' ')[-1]
-        print("LINE: {}".format(retv["error"]["line_number"]))
 
         # Attempt to determine column no:
         condition_as_lines_str = newline_condition(yara_sources_dict["condition"])
@@ -365,40 +390,28 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
                 "condition": condition_as_lines_str
                 })
 
+            # Attempt a new (failed) compile with condition as newlined strings,
+            # in order to detect which word it fails on.
             compiled_yara_rules: yara.Rules = yara.compile(source=source_,
                                                            error_on_warning=error_on_warning,
                                                            **kwargs)
         except yara.SyntaxError as e:
-            CONDITION_INDENT_LENGTH = 8
-            print("condition_as_lines_str:\n{}".format(condition_as_lines_str))
-            print("---")
-            condition_as_lines_list = condition_as_lines_str.split('\n')
-            print("condition_as_lines_list:\n{}".format(condition_as_lines_list))
-            # Get line of string error occured on, to use as offset for the split line.
-            line_no = int(retv["error"]["line_number"])
+            splitline_number = int(str(e).split(':')[0].split(' ')[-1])
 
-            # Get split line number.
-            # split on colon, then split first element on whitespace then grab the last element.
-            split_line_no = int(str(e).split(':')[0].split(' ')[-1])
+            # Determine the column (and range) that failed, using line and splitline to determine the true word offset.
+            res = determine_syntax_error_column(condition_as_lines_str,
+                                                int(retv["error"]["line_number"]),
+                                                splitline_number)
 
-            # Get line offset to errored splitline
-            split_line_offset = split_line_no - line_no
-            print("split_line_offset: {}".format(split_line_offset))
+            retv["error"]["column_number"] = res["column_number"]
+            retv["error"]["column_range"] = res["column_range"]
+            retv["error"]["word"] = res["word"]
 
-            # Figure out the distance in chars from start of condition to bad word.
-            print(" ".join(condition_as_lines_list[:split_line_offset]))
-
-            # Indent + string-up-until-error + 1 whitespace +1 human-readable
-            char_offset = CONDITION_INDENT_LENGTH + len(" ".join(condition_as_lines_list[:split_line_offset])) + 1 + 1
-
-            retv["error"]["column_number"] = str(char_offset)
-            retv["error"]["column_range"] = str(char_offset + len(condition_as_lines_list[split_line_offset]))
-            print("COLUMN: {}".format(retv["error"]["column_number"]))
-
-            retv["error"]["message"] += "\n -- column number: {} (columns: {}-{}, word: '{}')".format(retv["error"]["column_number"],
-                                                                                                    retv["error"]["column_number"],
-                                                                                                    retv["error"]["column_range"],
-                                                                                                    condition_as_lines_list[split_line_offset])
+            retv["error"]["message"] += "\n -- column number: {} (columns: {}-{}, word: '{}')".format(
+                retv["error"]["column_number"],
+                retv["error"]["column_number"],
+                retv["error"]["column_range"],
+                retv["error"]["word"])
             pass
 
         pass
