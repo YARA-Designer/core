@@ -1,5 +1,4 @@
 Requests:
-    - Add artifact types to editor, separately.
     - Add tags to editor, separately.
 
 General:
