@@ -77,6 +77,21 @@ def get_referenced_strings(cond_stmt: str, yara_strings: dict) -> dict:
     return confirmed_items
 
 
+def newline_condition(condition: str):
+    """
+    Takes a condition string and returns a string with each condition on a separate line.
+
+    :param condition:
+    :return:
+    """
+    newlined_condition = condition.replace(' ', '\n')
+
+    # for cond in condition.split(' '):
+    #     newlined_condition += "\n{}".format(cond)
+
+    return newlined_condition
+
+
 def generate_source_string(src: dict) -> str:
     """
     Generates a yara rule on string form.
@@ -298,7 +313,8 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
         "error": {
             "type": None,
             "message": "",
-            "line number": None
+            "line_number": None,
+            "column_number": None
         },
     }
 
@@ -334,6 +350,57 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
     except yara.SyntaxError as e:
         retv["success"] = False
         retv["error"] = {"type": "syntax", "message": str(e)}
+        # Get line number (split on colon, then split first element on whitespace then grab the last element.
+        retv["error"]["line_number"] = str(e).split(':')[0].split(' ')[-1]
+        print("LINE: {}".format(retv["error"]["line_number"]))
+
+        # Attempt to determine column no:
+        condition_as_lines_str = newline_condition(yara_sources_dict["condition"])
+        try:
+            source_ = generate_source_string({
+                "tags": yara_sources_dict["tags"],
+                "rule": rule_name,
+                "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
+                "strings": extract_yara_strings_dict(yara_sources_dict["artifacts"]),
+                "condition": condition_as_lines_str
+                })
+
+            compiled_yara_rules: yara.Rules = yara.compile(source=source_,
+                                                           error_on_warning=error_on_warning,
+                                                           **kwargs)
+        except yara.SyntaxError as e:
+            CONDITION_INDENT_LENGTH = 8
+            print("condition_as_lines_str:\n{}".format(condition_as_lines_str))
+            print("---")
+            condition_as_lines_list = condition_as_lines_str.split('\n')
+            print("condition_as_lines_list:\n{}".format(condition_as_lines_list))
+            # Get line of string error occured on, to use as offset for the split line.
+            line_no = int(retv["error"]["line_number"])
+
+            # Get split line number.
+            # split on colon, then split first element on whitespace then grab the last element.
+            split_line_no = int(str(e).split(':')[0].split(' ')[-1])
+
+            # Get line offset to errored splitline
+            split_line_offset = split_line_no - line_no
+            print("split_line_offset: {}".format(split_line_offset))
+
+            # Figure out the distance in chars from start of condition to bad word.
+            print(" ".join(condition_as_lines_list[:split_line_offset]))
+
+            # Indent + string-up-until-error + 1 whitespace +1 human-readable
+            char_offset = CONDITION_INDENT_LENGTH + len(" ".join(condition_as_lines_list[:split_line_offset])) + 1 + 1
+
+            retv["error"]["column_number"] = str(char_offset)
+            retv["error"]["column_range"] = str(char_offset + len(condition_as_lines_list[split_line_offset]))
+            print("COLUMN: {}".format(retv["error"]["column_number"]))
+
+            retv["error"]["message"] += "\n -- column number: {} (columns: {}-{}, word: '{}')".format(retv["error"]["column_number"],
+                                                                                                    retv["error"]["column_number"],
+                                                                                                    retv["error"]["column_range"],
+                                                                                                    condition_as_lines_list[split_line_offset])
+            pass
+
         pass
     except yara.Error as e:
         retv["success"] = False
