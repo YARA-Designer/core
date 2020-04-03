@@ -478,7 +478,10 @@
         function handlePostRuleResponse(json) {
             let errorType = "";
             let errorMessage = "";
-            let syntaxErrorLineNumber = null;
+            let errorLineNumber = 0;
+            let errorColumnNumber = 0;
+            let errorColumnRange = 0;
+            let errorWord = "";
             let level = "success";
 
             // Parse JSON:
@@ -498,8 +501,19 @@
             if (!success) {
                 errorMessage = outJson["error"]["message"];
                 errorType = outJson["error"]["type"];
-                syntaxErrorLineNumber = outJson["error"]["line number"];
+                errorLineNumber = parseInt(outJson["error"]["line_number"]);
+                errorColumnNumber = parseInt(outJson["error"]["column_number"]);
+                errorColumnRange = parseInt(outJson["error"]["column_range"]);
+                errorWord = outJson["error"]["word"];
                 level = "error";
+
+                console.log("errorMessage: " + errorMessage);
+                console.log("errorType: " + errorType);
+                console.log("errorLineNumber: " + errorLineNumber);
+                console.log("errorColumnNumber: " + errorColumnNumber);
+                console.log("errorColumnRange: " + errorColumnRange);
+                console.log("errorWord: " + errorWord);
+                console.log("level: " + level);
             }
 
             // Define header
@@ -523,7 +537,23 @@
             let lines = String(sourcePreprocessed).split('\n');
             body += "<pre class='numbered_lines'>";
             for (let i = 0; i < lines.length; i++) {
-                body += `<span >${lines[i]}</span>`;
+                if (!success) {
+                    if (errorType === "syntax" && i === errorLineNumber-1) {
+                        // Color bad column or line.
+                        let stringUpToMark = lines[i].substring(0, errorColumnNumber -1);
+                        let stringToMark = lines[i].substring(errorColumnNumber -1, errorColumnRange - 1);
+                        let stringPastMark = lines[i].substring(errorColumnRange -1, lines[i].length);
+
+                        // console.log("stringUpToMark: " + stringUpToMark);
+                        // console.log(`stringToMark: '${stringToMark}'`);
+                        // console.log("stringPastMark: " + stringPastMark);
+
+                        lines[i] = `${stringUpToMark}<mark class='red'>${stringToMark}</mark>${stringPastMark}`;
+                    }
+                }
+
+                // Append line
+                body += `<span>${lines[i]}</span>`;
             }
             body += "</pre>";
 
