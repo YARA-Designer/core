@@ -51,11 +51,11 @@ html, body {
 }
 
 .yara_rule_designer > span {
-    margin: 10px;
+    margin: 5px;
     padding: 10px;
     font-size: 12px;
     border: 0px solid;
-    border-radius: 25px;
+    /*border-radius: 25px;*/
     box-shadow: 5px 5px 5px var(--yara_rule_designer_span_box_shadow);
     color: var(--yara_rule_designer_color);
 }
@@ -243,4 +243,9 @@ html, body {
   padding: 0 .5em;
   margin-right: .5em;
   color: #888
+}
+
+mark.red {
+    /*color:#ff0000;*/
+    background-color: var(--modal_background_error);
 }
