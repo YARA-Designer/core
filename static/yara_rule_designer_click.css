@@ -28,26 +28,16 @@
 /*  outline: solid #f00 1px !important;*/
 /*}*/
 
-
 html, body {
-    height:100%;
-    width:100%;
+    background: var(--yara_rule_designer_background);
     margin:0;
     padding:0;
     border:0;
-    overflow: hidden;   /* Hack to avoid weird white spacing at the bottom (past 100% height) */
 }
 
 .yara_rule_designer {
     overflow: auto;
-    border:1px solid var(--yara_rule_designer_border_color);
     background: var(--yara_rule_designer_background);
-}
-
-#yara_rule_designer_container {
-    width: 100%;
-    height: 100%;
-    display: flex;
 }
 
 .yara_rule_designer > span {
@@ -61,62 +51,52 @@ html, body {
 }
 
 #yara_rule_designer_header {
-    order: 0;
+    /*background: #204d74;*/
     overflow: hidden;
-    width:100%;
-    height: 10%;
     text-align: center;
     font-size: 22pt;
     font-weight: bold;
-    border:1px solid var(--yara_rule_designer_border_color);
+    border-bottom:1px solid var(--yara_rule_designer_border_color);
     color: var(--yara_rule_designer_header_color);
 }
 
 #yara_rule_designer_artifacts {
-    order: 1;
-    float:left;
-    overflow: auto;
-    width:20%;
-    height:90%;
-    border:1px solid var(--yara_rule_designer_border_color);;
-}
-
-#yara_rule_designer_editor_container {
-    order: 2;
-    float: left;
-    overflow: auto;
-    width: 60%;
-    height: 90%;
-}
-
-#yara_rule_designer_editor {
-    float: top;
-    overflow: auto;
-    height: 80%;
-    border:1px solid var(--yara_rule_designer_border_color);;
+    border-right:1px solid var(--yara_rule_designer_border_color);
+    border-bottom:1px solid var(--yara_rule_designer_border_color);;
 }
 
 /* Override designer span properties for items that are put in the editor element */
 #yara_rule_designer_editor > span {
-    margin: 0px 0px 10px 0px;    /* Spacing between inline items (top, right, bottom, left)*/
+    margin: 5px 0px 5px 0px;    /* Spacing between inline items (top, right, bottom, left)*/
     padding: 10px;  /* */
     border-radius: 0px;
 }
 
-#yara_rule_designer_post {
-    float: bottom;
-    overflow: auto;
-    /*height: 10%;*/ /* DO NOT ADD height as it causes weird scrollbar/overflow */
-    border:1px solid var(--yara_rule_designer_border_color);;
+#yara_rule_designer_buttons {
+    border-right:1px solid var(--yara_rule_designer_border_color);
+    border-bottom:1px solid var(--yara_rule_designer_border_color);
+}
+
+#submit_rule_button {
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+#submit_rule_button:hover {
+  background-color: #204d74;
+  color: white;
 }
 
 #yara_rule_designer_operators {
-    order: 3;
-    float:right;
     overflow: auto;
-    width:20%;
-    height:90%;
-    border:1px solid var(--yara_rule_designer_border_color);;
+    border-right:1px solid var(--yara_rule_designer_border_color);
+    border-bottom:1px solid var(--yara_rule_designer_border_color);
 }
 
 .condition_keyword {

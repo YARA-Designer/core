@@ -17,70 +17,91 @@
     <meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
 {% endif %}
 
+<div class="container mh-100 h-100 mw-100 w-100 yara_rule_designer" id="yara_rule_designer_container">
+    <div class="row align-items-start">
 
-<div id="yara_rule_designer_header" class="yara_rule_designer"><p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p></div>
-<div id="yara_rule_designer_container">
-    <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
-        <!--    Add artifacts and artifact dataTypes as individual draggable objects-->
-
-        <!-- Define list to filter artifact types so that only unique occurrences are added. -->
-        {% set added_artifact_types = [] %}
-
-        {% for artifact in artifacts %}
-            <!-- Add artifacts -->
-            <span id="artifact{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)" >{{ artifact.data }} </span>
-
-            <!-- Add artifact dataTypes-->
-            <!-- Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. -->
-            {% if artifact.dataType is not none and artifact.dataType != "None" %}
-                {% if artifact.dataType not in added_artifact_types %}
-                    <!-- Only add unique items to editor -->
-                    <span id="artifact_type{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
-                    {{ added_artifact_types.append(artifact.dataType)|ignore_none }}
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-    </div>
-    <div id="yara_rule_designer_editor_container" class="yara_rule_designer">
-        <div class="yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)"></div>
-        <div class="yara_rule_designer" id="yara_rule_designer_post" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
-            <button id="submit_rule_button" onclick="postRule()"></button>
+        <div id="yara_rule_designer_header" class="col yara_rule_designer">
+            <p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p>
         </div>
-    </div>
 
-    <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
-    <!--    Add conditional keywords-->
-    <!--    Boolean-->
-        <span id="condition_keyword_and" class="condition_keyword" onclick="addToEditor(event)"> AND </span>
-        <span id="condition_keyword_or" class="condition_keyword" onclick="addToEditor(event)"> OR </span>
-        <span id="condition_keyword_not" class="condition_keyword" onclick="addToEditor(event)"> NOT </span>
-    <!--    Arithmetic-->
-        <span id="condition_keyword_equal" class="condition_keyword" onclick="addToEditor(event)"> == </span>
-        <span id="condition_keyword_lt" class="condition_keyword" onclick="addToEditor(event)"> < </span>
-        <span id="condition_keyword_gt" class="condition_keyword" onclick="addToEditor(event)"> > </span>
-        <span id="condition_keyword_leq" class="condition_keyword" onclick="addToEditor(event)"> <= </span>
-        <span id="condition_keyword_geq" class="condition_keyword" onclick="addToEditor(event)"> >= </span>
-        <span id="condition_keyword_neq" class="condition_keyword" onclick="addToEditor(event)"> != </span>
-    <!--    Relational-->
-        <span id="condition_keyword_add" class="condition_keyword" onclick="addToEditor(event)"> + </span>
-        <span id="condition_keyword_sub" class="condition_keyword" onclick="addToEditor(event)"> - </span>
-        <span id="condition_keyword_mul" class="condition_keyword" onclick="addToEditor(event)"> * </span>
-        <span id="condition_keyword_div" class="condition_keyword" onclick="addToEditor(event)"> / </span>
-        <span id="condition_keyword_pct" class="condition_keyword" onclick="addToEditor(event)"> % </span>
-        <span id="condition_keyword_setminus" class="condition_keyword" onclick="addToEditor(event)"> \ </span>
-    <!--    Bitwise-->
-        <span id="condition_keyword_bitwise_and" class="condition_keyword" onclick="addToEditor(event)"> & </span>
-        <span id="condition_keyword_bitwise_or" class="condition_keyword" onclick="addToEditor(event)"> | </span>
-        <span id="condition_keyword_bitwise_not" class="condition_keyword" onclick="addToEditor(event)"> ~ </span>
-        <span id="condition_keyword_bitwise_xor" class="condition_keyword" onclick="addToEditor(event)"> ^ </span>
-        <span id="condition_keyword_bitwise_lshift" class="condition_keyword" onclick="addToEditor(event)"> << </span>
-        <span id="condition_keyword_bitwise_rshift" class="condition_keyword" onclick="addToEditor(event)"> >> </span>
-    <!-- Parenthesis and wrappers       -->
-        <span id="condition_keyword_lparen" class="condition_keyword" onclick="addToEditor(event)"> ( </span>
-        <span id="condition_keyword_rparen" class="condition_keyword" onclick="addToEditor(event)"> ) </span>
-        <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)"> () </span>
-    </div>
-</div>
+        <div class="w-100"></div>
+
+        <div id="yara_rule_designer_leftpane_container" class="col-2 yara_rule_designer">
+            <div class="row">
+                <div class="col yara_rule_designer" id="yara_rule_designer_buttons" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
+                    <button id="submit_rule_button"  onclick="postRule()">Submit</button>
+                </div>
+
+                <div class="w-100"></div>
+
+                <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
+                    <!--    Add conditional keywords-->
+                    <!--    Boolean-->
+                    <span id="condition_keyword_and" class="condition_keyword" onclick="addToEditor(event)"> AND </span>
+                    <span id="condition_keyword_or" class="condition_keyword" onclick="addToEditor(event)"> OR </span>
+                    <span id="condition_keyword_not" class="condition_keyword" onclick="addToEditor(event)"> NOT </span>
+                    <!--    Arithmetic-->
+                    <span id="condition_keyword_equal" class="condition_keyword" onclick="addToEditor(event)"> == </span>
+                    <span id="condition_keyword_lt" class="condition_keyword" onclick="addToEditor(event)"> < </span>
+                    <span id="condition_keyword_gt" class="condition_keyword" onclick="addToEditor(event)"> > </span>
+                    <span id="condition_keyword_leq" class="condition_keyword" onclick="addToEditor(event)"> <= </span>
+                    <span id="condition_keyword_geq" class="condition_keyword" onclick="addToEditor(event)"> >= </span>
+                    <span id="condition_keyword_neq" class="condition_keyword" onclick="addToEditor(event)"> != </span>
+                    <!--    Relational-->
+                    <span id="condition_keyword_add" class="condition_keyword" onclick="addToEditor(event)"> + </span>
+                    <span id="condition_keyword_sub" class="condition_keyword" onclick="addToEditor(event)"> - </span>
+                    <span id="condition_keyword_mul" class="condition_keyword" onclick="addToEditor(event)"> * </span>
+                    <span id="condition_keyword_div" class="condition_keyword" onclick="addToEditor(event)"> / </span>
+                    <span id="condition_keyword_pct" class="condition_keyword" onclick="addToEditor(event)"> % </span>
+                    <span id="condition_keyword_setminus" class="condition_keyword" onclick="addToEditor(event)"> \ </span>
+                    <!--    Bitwise-->
+                    <span id="condition_keyword_bitwise_and" class="condition_keyword" onclick="addToEditor(event)"> & </span>
+                    <span id="condition_keyword_bitwise_or" class="condition_keyword" onclick="addToEditor(event)"> | </span>
+                    <span id="condition_keyword_bitwise_not" class="condition_keyword" onclick="addToEditor(event)"> ~ </span>
+                    <span id="condition_keyword_bitwise_xor" class="condition_keyword" onclick="addToEditor(event)"> ^ </span>
+                    <span id="condition_keyword_bitwise_lshift" class="condition_keyword" onclick="addToEditor(event)"> << </span>
+                    <span id="condition_keyword_bitwise_rshift" class="condition_keyword" onclick="addToEditor(event)"> >> </span>
+                    <!-- Parenthesis and wrappers       -->
+                    <span id="condition_keyword_lparen" class="condition_keyword" onclick="addToEditor(event)"> ( </span>
+                    <span id="condition_keyword_rparen" class="condition_keyword" onclick="addToEditor(event)"> ) </span>
+                    <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)"> () </span>
+                </div>
+
+                <div class="w-100"></div>
+
+                <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
+                    <!--    Add artifacts and artifact dataTypes as individual draggable objects-->
+
+                    <!-- Define list to filter artifact types so that only unique occurrences are added. -->
+                    {% set added_artifact_types = [] %}
+
+                    {% for artifact in artifacts %}
+                        <!-- Add artifacts -->
+                        <span id="artifact{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)" >{{ artifact.data }} </span>
+
+                        <!-- Add artifact dataTypes-->
+                        <!-- Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. -->
+                        {% if artifact.dataType is not none and artifact.dataType != "None" %}
+                            {% if artifact.dataType not in added_artifact_types %}
+                                <!-- Only add unique items to editor -->
+                                <span id="artifact_type{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
+                                {{ added_artifact_types.append(artifact.dataType)|ignore_none }}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div id="yara_rule_designer_editor_container" class="col-10 yara_rule_designer">
+            <div class="row">
+                <div class="col yara_rule_designer" id="yara_rule_designer_editor" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)"></div>
+            </div>
+        </div>
+
+    </div> <!-- Row //-->
+</div> <!-- Container //-->
+
 <!--<div id="info">-->
 <!--    <h1>How to use:</h1>-->
 <!--     <ul>-->
@@ -111,10 +132,13 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-2.1.0.min.js"></script>
 
+    <!-- Bootstrap //-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
     <!-- Theme handler -->
     <script>
-
-    // extend jQuery with this tiny convenience to allow for simple existence tests.
+        // extend jQuery with this tiny convenience to allow for simple existence tests.
         $.fn.exists = function () {
             return this.length !== 0;
         };
@@ -337,15 +361,6 @@
                     break;
             }
         }
-
-        // /**
-        //  * Generate a JSON of varname and vardata to send in POST request.
-        //  */
-        // function getRuleConditionFromEditorElements() {
-        //     let json = {};
-        //
-        //     return json;
-        // }
 
         function getEditorContents() {
             return document.getElementById("yara_rule_designer_editor").children;
