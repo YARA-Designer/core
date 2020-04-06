@@ -541,7 +541,16 @@
             return conditionString;
         }
 
+        function getEnabledTags() {
+            let enabledTags= [];
+            let tagCheckboxes = document.getElementsByClassName("yara-tag-checkbox");
 
+            for (let i = 0; i < tagCheckboxes.length; i++) {
+                if (tagCheckboxes[i].checked) enabledTags.push(tagCheckboxes[i].value);
+            }
+
+            return enabledTags;
+        }
 
         /**
          * Generate a JSON of varname and vardata to send in POST request.
@@ -560,8 +569,7 @@
             json["rule"] = ruleName;
 
             // Set tags.
-            json["tags"] = yaraRule.tags;
-            console.log(json["tags"]);
+            json["tags"] = getEnabledTags();
 
             // Get list of artifacts currently residing in editor DIV.
             json["artifacts"] = {};

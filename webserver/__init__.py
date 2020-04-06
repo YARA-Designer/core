@@ -213,7 +213,7 @@ def post_rule_json():
     # Workaround: JSON.Stringify() returns lists wrapped in string, so let's convert it to a proper list:
     #   1. Split on the human readable delimiter and transform it into a list (NB: items will still be quoted).
     #   2. Strip head and tail string wrappers from each individual item using list comprehension.
-    request.json["tags"]: list = [x[1:-1] for x in list(request.json["tags"][1:-1].split(", "))]
+    # request.json["tags"]: list = [x[1:-1] for x in list(request.json["tags"][1:-1].split(", "))]
 
     return make_response(jsonify(generate_yara_rule(request.json)), 200)
 
