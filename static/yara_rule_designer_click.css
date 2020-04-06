@@ -60,20 +60,36 @@ html, body {
     color: var(--yara_rule_designer_header_color);
 }
 
-#yara_rule_designer_artifacts {
+#yara_rule_designer_leftpane_container {
+    /* Bootstrap: A border in name only, each individual child element
+       needs their own (transparent) border to stay in-bounds. */
     border-right:1px solid var(--yara_rule_designer_border_color);
-    border-bottom:1px solid var(--yara_rule_designer_border_color);;
+    border-bottom: 1px solid var(--yara_rule_designer_border_color);
+}
+
+#yara_rule_designer_artifacts {
+    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
+    border-right:1px solid transparent;
+    border-top: 1px solid var(--yara_rule_designer_border_color);
+    border-bottom:1px solid transparent;
+}
+
+#yara_rule_designer_artifact_types {
+    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
+    border-right:1px solid transparent;
+    /*border-bottom:1px solid var(--yara_rule_designer_border_color);*/
 }
 
 /* Override designer span properties for items that are put in the editor element */
 #yara_rule_designer_editor > span {
     margin: 5px 0px 5px 0px;    /* Spacing between inline span elements (top, right, bottom, left)*/
-    padding: 10px;  /* */
+    padding: 10px;
     border-radius: 0px;
 }
 
 #yara-rule-designer-buttons {
-    border-right:1px solid var(--yara_rule_designer_border_color);
+    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
+    border-right:1px solid transparent;
     border-bottom:1px solid var(--yara_rule_designer_border_color);
     padding: 0;
 }
@@ -112,7 +128,8 @@ html, body {
 
 #yara_rule_designer_operators {
     overflow: auto;
-    border-right:1px solid var(--yara_rule_designer_border_color);
+    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
+    border-right:1px solid transparent;
     border-bottom:1px solid var(--yara_rule_designer_border_color);
 }
 

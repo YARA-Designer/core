@@ -70,25 +70,43 @@
 
                 <div class="w-100"></div>
 
-                <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
-                    <!--    Add artifacts and artifact dataTypes as individual draggable objects-->
+                    {#  Add artifacts and artifact dataTypes as individual draggable objects #}
 
-                    <!-- Define list to filter artifact types so that only unique occurrences are added. -->
+                    {# Define list to filter artifact types so that only unique occurrences are added. #}
                     {% set added_artifact_types = [] %}
 
+                    {# For use in adding the HTML at a later time, to avoid looping multiple times. #}
+                    {% set artifact_span_elements = [] %}
+                    {% set artifact_type_span_elements = [] %}
+
                     {% for artifact in artifacts %}
-                        <!-- Add artifacts -->
-                        <span id="artifact{{ loop.index }}" class="draggable_artifact" onclick="addToEditor(event)" >{{ artifact.data }} </span>
+                        {# Add artifacts #}
+                        {{ artifact_span_elements.append("<span id='artifact" + loop.index|string + "' class='draggable_artifact' onclick='addToEditor(event)'>" + artifact.data|string + '</span>')|ignore_none }}
+
 
                         <!-- Add artifact dataTypes-->
                         <!-- Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. -->
                         {% if artifact.dataType is not none and artifact.dataType != "None" %}
                             {% if artifact.dataType not in added_artifact_types %}
                                 <!-- Only add unique items to editor -->
-                                <span id="artifact_type{{ loop.index }}" class="draggable_artifact_type" onclick="addToEditor(event)" >{{ artifact.dataType }} </span>
+                                {# Add artifact types #}
+                                {{ artifact_type_span_elements.append('<span id="artifact_type' + loop.index|string + '" class="draggable_artifact_type" onclick="addToEditor(event)">' + artifact.dataType|string + '</span>')|ignore_none }}
                                 {{ added_artifact_types.append(artifact.dataType)|ignore_none }}
                             {% endif %}
                         {% endif %}
+                    {% endfor %}
+
+                <div class="yara_rule_designer" id="yara_rule_designer_artifact_types" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
+                    {% for artifact_type_span_element in artifact_type_span_elements %}
+                        {{ artifact_type_span_element|safe }}
+                    {% endfor %}
+                </div>
+
+                <div class="w-100"></div>
+
+                <div class="yara_rule_designer" id="yara_rule_designer_artifacts" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
+                    {% for artifact_span_element in artifact_span_elements %}
+                        {{ artifact_span_element|safe }}
                     {% endfor %}
                 </div>
             </div>
