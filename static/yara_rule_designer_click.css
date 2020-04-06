@@ -41,8 +41,8 @@ html, body {
 }
 
 .yara_rule_designer > span {
-    margin: 5px;
-    padding: 10px;
+    margin: 5px;    /* Spacing between span elements */
+    padding: 10px;  /* Spacing within span elements */
     font-size: 12px;
     border: 0px solid;
     /*border-radius: 25px;*/
@@ -67,17 +67,17 @@ html, body {
 
 /* Override designer span properties for items that are put in the editor element */
 #yara_rule_designer_editor > span {
-    margin: 5px 0px 5px 0px;    /* Spacing between inline items (top, right, bottom, left)*/
+    margin: 5px 0px 5px 0px;    /* Spacing between inline span elements (top, right, bottom, left)*/
     padding: 10px;  /* */
     border-radius: 0px;
 }
 
-#yara_rule_designer_buttons {
+#yara-rule-designer-buttons {
     border-right:1px solid var(--yara_rule_designer_border_color);
     border-bottom:1px solid var(--yara_rule_designer_border_color);
 }
 
-#submit_rule_button {
+#submit-rule-button {
     background-color: #008CBA;
     border: none;
     color: white;
@@ -88,7 +88,7 @@ html, body {
     font-size: 16px;
 }
 
-#submit_rule_button:hover {
+#submit-rule-button:hover {
   background-color: #204d74;
   color: white;
 }
@@ -129,7 +129,7 @@ html, body {
 /* MODAL */
 
 /* The Modal (background) */
-.response_modal {
+.response-modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
@@ -143,24 +143,24 @@ html, body {
 }
 
  /* Modal Header */
-.modal-header {
+.response-modal-header {
   padding: 2px 16px;
   background: var(--modal_background_info);
   color: var(--modal_color_info);
 }
 
 /* Modal Body */
-.modal-body {padding: 2px 16px;}
+.response-modal-body {padding: 2px 16px;}
 
 /* Modal Footer */
-.modal-footer {
+.response-modal-footer {
   padding: 2px 16px;
   background: var(--modal_background_info);
   color: var(--modal_color_info);
 }
 
 /* Modal Content */
-.modal-content {
+.response-modal-content {
   position: relative;
   background-color: #fefefe;
   margin: auto;
@@ -178,7 +178,7 @@ html, body {
   to {top: 0; opacity: 1}
 }
 
-.modal_json_collapsible_button {
+.response-modal-json-collapsible-button {
   background-color: #777;
   color: white;
   cursor: pointer;
@@ -190,11 +190,11 @@ html, body {
   font-size: 15px;
 }
 
-.active, .modal_json_collapsible_button:hover {
+.active, .response-modal-json-collapsible-button:hover {
   background-color: #555;
 }
 
-.modal_json_collapsible_content {
+.response-modal-json-collapsible-content {
   padding: 0 18px;
   display: none;
   overflow: hidden;

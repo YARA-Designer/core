@@ -28,8 +28,8 @@
 
         <div id="yara_rule_designer_leftpane_container" class="col-2 yara_rule_designer">
             <div class="row">
-                <div class="col yara_rule_designer" id="yara_rule_designer_buttons" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
-                    <button id="submit_rule_button"  onclick="postRule()">Submit</button>
+                <div class="col yara_rule_designer" id="yara-rule-designer-buttons" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
+                    <button id="submit-rule-button"  onclick="postRule()">Submit</button>
                 </div>
 
                 <div class="w-100"></div>
@@ -110,18 +110,18 @@
 <!--    </ul>-->
 <!--</div>-->
 <!-- The Modal -->
-<div id="response_modal_id" class="response_modal">
+<div id="response-modal-id" class="response-modal">
     <!-- Modal content -->
-    <div class="modal-content">
-      <div class="modal-header" id="response_modal_header">
-        <span class="close_response_modal">&times;</span>
+    <div class="response-modal-content">
+      <div class="response-modal-header" id="response-modal-header">
+        <span class="close-response-modal">&times;</span>
         <h2>Modal Header</h2>
       </div>
-      <div class="modal-body" id="response_modal_body">
+      <div class="response-modal-body" id="response-modal-body">
         <p>Some text in the Modal Body</p>
         <p>Some other text...</p>
       </div>
-      <div class="modal-footer" id="response_modal_footer">
+      <div class="response-modal-footer" id="response-modal-footer">
         <h3>Modal Footer</h3>
       </div>
     </div>
@@ -217,10 +217,10 @@
         ///////////////// Response modal globals (Re-implementations and listeners ////////////////////////
 
         // Get the modal
-        let responseModal = document.getElementById("response_modal_id");
+        let responseModal = document.getElementById("response-modal-id");
 
         // Get the <span> element that closes the modal
-        let closeResponseModal = document.getElementsByClassName("close_response_modal")[0];
+        let closeResponseModal = document.getElementsByClassName("close-response-modal")[0];
 
         // When the user clicks on <span> (x), close (hide) the modal
         closeResponseModal.onclick = function() {
@@ -253,12 +253,12 @@
         function popupModal(header=null, body=null, footer=null, level=null) {
             // console.log("function popupModal(header=" + header + ", body=" + body + ", footer=" + footer + ", level=" + level + ")");
             // Modal element itself.
-            let modal = document.getElementById("response_modal_id");
+            let modal = document.getElementById("response-modal-id");
 
             // Modal sub-elements.
-            let modalHeader = document.getElementById("response_modal_header");
-            let modalBody = document.getElementById("response_modal_body");
-            let modalFooter = document.getElementById("response_modal_footer");
+            let modalHeader = document.getElementById("response-modal-header");
+            let modalBody = document.getElementById("response-modal-body");
+            let modalFooter = document.getElementById("response-modal-footer");
 
             // Set level (if null, set to info/default).
             level = (level != null) ? level : "info";
@@ -574,8 +574,8 @@
 
             // Collapsible raw JSON details.
             body +=
-                "<button type='button' class='modal_json_collapsible_button'>Show JSON</button>" +
-                "<div class='modal_json_collapsible_content'>" +
+                "<button type='button' class='response-modal-json-collapsible-button'>Show JSON</button>" +
+                "<div class='response-modal-json-collapsible-content'>" +
                     "<pre>" +
                         JSON.stringify(json, undefined, 4) +
                     "</pre>" +
@@ -586,7 +586,7 @@
 
             popupModal(header, body, footer, level);
             // Make the JSON detailsCollapsible element actually collapsible.
-            addCaseDetailsCollapsibleButtonLogic("modal_json_collapsible_button");
+            addCaseDetailsCollapsibleButtonLogic("response-modal-json-collapsible-button");
         }
 
         /**
