@@ -237,10 +237,10 @@
         const KEYWORD_CLASSES = ["condition_keyword"];
         const MODAL_DEFAULT_HEADER = "";
         const MODAL_DEFAULT_BODY = "";
-        const MODAL_DEFAULT_FOOTER = "";
+        const MODAL_DEFAULT_FOOTER = "<p>Tip: Click anywhere outside of this modal to cancel the current operation.</p>";
         const MODAL_DEFAULT_CONFIRMATION_HEADER = "<h2>Are you sure?</h2>";
         const MODAL_DEFAULT_CONFIRMATION_BODY = "";
-        const MODAL_DEFAULT_CONFIRMATION_FOOTER = "";
+        const MODAL_DEFAULT_CONFIRMATION_FOOTER = MODAL_DEFAULT_FOOTER;
         const LEVEL_ERROR = "error";
         const LEVEL_WARNING = "warning";
         const LEVEL_SUCCESS = "success";
@@ -307,9 +307,9 @@
             console.log("level:" + level);
 
             // Set sub-element values, if given.
-            modalHeader.innerHTML = (header != null) ? header: "<h2>header</h2>";
-            modalBody.innerHTML  = (body != null) ? body : "<h2>Modal body</h2>";
-            modalFooter.innerHTML = (footer != null) ? footer :  "<h2>Footer</h2>";
+            modalHeader.innerHTML = (header != null) ? header: MODAL_DEFAULT_HEADER;
+            modalBody.innerHTML  = (body != null) ? body : MODAL_DEFAULT_BODY;
+            modalFooter.innerHTML = (footer != null) ? footer :  MODAL_DEFAULT_FOOTER;
 
             // Set custom style.
             //      Header.
@@ -659,10 +659,7 @@
                     "</pre>" +
                 "</div>";
 
-            // Define footer
-            let footer = "Some footer";
-
-            popupModal("response-modal", header, body, footer, level);
+            popupModal("response-modal", header, body, MODAL_DEFAULT_FOOTER, level);
             // Make the JSON detailsCollapsible element actually collapsible.
             addCaseDetailsCollapsibleButtonLogic("response-modal-json-collapsible-button");
         }
@@ -699,7 +696,7 @@
 
         function clearRule() {
             // Define body
-            let body = "<p>Are you sure you want to clear the current rule? This is irreversible.</p>";
+            let body = "<h3>Are you sure you want to clear the current rule? This is action is <em>irreversible</em>.</h3>";
 
             // yesAction, noAction, body, args...
             popupConfirmationModal(clearEditorDivContents, undefined, body);

@@ -218,6 +218,17 @@ html, body {
   background-color: #f1f1f1;
 }
 
+#confirmation-modal-body {
+    text-align: center;
+    /* center contents by setting top and bottom margins to 0, and left and right margins to auto. */
+    margin: 0 auto;
+}
+
+#confirmation-modal-body > button {
+    /* Spacing between buttons. */
+    margin: 25px;
+}
+
 .confirmation-modal-button-yes {
     background-color: #5cb85c;
     border: none;
