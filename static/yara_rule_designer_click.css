@@ -67,26 +67,6 @@ html, body {
     border-bottom: 1px solid var(--yara_rule_designer_border_color);
 }
 
-#yara_rule_designer_artifacts {
-    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
-    border-right:1px solid transparent;
-    border-top: 1px solid var(--yara_rule_designer_border_color);
-    border-bottom:1px solid transparent;
-}
-
-#yara_rule_designer_artifact_types {
-    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
-    border-right:1px solid transparent;
-    /*border-bottom:1px solid var(--yara_rule_designer_border_color);*/
-}
-
-/* Override designer span properties for items that are put in the editor element */
-#yara_rule_designer_editor > span {
-    margin: 5px 0px 5px 0px;    /* Spacing between inline span elements (top, right, bottom, left)*/
-    padding: 10px;
-    border-radius: 0px;
-}
-
 #yara-rule-designer-buttons {
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
     border-right:1px solid transparent;
@@ -126,11 +106,41 @@ html, body {
   color: white;
 }
 
+#yara-rule-designer-tags {
+    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
+    /*border-right:1px solid transparent;*/
+    /*border-bottom:1px solid transparent;*/
+    color: var(--yara_rule_designer_color);
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
 #yara_rule_designer_operators {
     overflow: auto;
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
+    border-top: 1px solid var(--yara_rule_designer_border_color);
     border-right:1px solid transparent;
     border-bottom:1px solid var(--yara_rule_designer_border_color);
+}
+
+#yara_rule_designer_artifact_types {
+    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
+    border-right:1px solid transparent;
+    /*border-bottom:1px solid var(--yara_rule_designer_border_color);*/
+}
+
+#yara_rule_designer_artifacts {
+    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
+    border-right:1px solid transparent;
+    border-top: 1px solid var(--yara_rule_designer_border_color);
+    border-bottom:1px solid transparent;
+}
+
+/* Override designer span properties for items that are put in the editor element */
+#yara_rule_designer_editor > span {
+    margin: 5px 0px 5px 0px;    /* Spacing between inline span elements (top, right, bottom, left)*/
+    padding: 10px;
+    border-radius: 0px;
 }
 
 .condition_keyword {

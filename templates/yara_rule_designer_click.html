@@ -35,6 +35,16 @@
 
                 <div class="w-100"></div>
 
+                <div id="yara-rule-designer-tags" class="yara_rule_designer">
+                    {% for tag in case.data.tags %}
+                        <input type="checkbox" id="tagCheckbox{{ loop.index|string }}" class="yara-tag-checkbox" value="{{ tag|string }}">
+                        <label for="tagCheckbox{{ loop.index|string }}" title="{{ tag|string }}">{{ tag|string }}</label>
+                        <div class="w-100"></div>
+                    {% endfor %}
+                </div>
+
+                <div class="w-100"></div>
+
                 <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
                     <!--    Add conditional keywords-->
                     <!--    Boolean-->
