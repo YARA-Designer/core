@@ -218,6 +218,40 @@ html, body {
   background-color: #f1f1f1;
 }
 
+.confirmation-modal-button-yes {
+    background-color: #5cb85c;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.confirmation-modal-button-yes:hover {
+  background-color: #3c763d;
+  color: white;
+}
+
+.confirmation-modal-button-no {
+    background-color: #da423f;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.confirmation-modal-button-no:hover {
+  background-color: #761c19;
+  color: white;
+}
+
+/* Textbox with line numbering styling */
+
 .numbered_lines {
   /*background: #303030;*/
   /*color: #f1f1f1;*/
