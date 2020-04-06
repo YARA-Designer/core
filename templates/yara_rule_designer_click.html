@@ -30,6 +30,7 @@
             <div class="row">
                 <div class="col yara_rule_designer" id="yara-rule-designer-buttons" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
                     <button id="submit-rule-button"  onclick="postRule()">Submit</button>
+                    <button id="clear-rule-button"  onclick="clearRule()">Clear</button>
                 </div>
 
                 <div class="w-100"></div>
@@ -109,23 +110,42 @@
 <!--      <li>Middle click to remove item from editor.</li>-->
 <!--    </ul>-->
 <!--</div>-->
-<!-- The Modal -->
-<div id="response-modal-id" class="response-modal">
+
+<!-- Modals -->
+<div id="response-modal" class="custom-modal">
     <!-- Modal content -->
-    <div class="response-modal-content">
-      <div class="response-modal-header" id="response-modal-header">
-        <span class="close-response-modal">&times;</span>
+    <div class="custom-modal-content">
+      <div class="custom-modal-header" id="response-modal-header">
+        <span class="close-custom-modal" id="response-modal-close">&times;</span>
         <h2>Modal Header</h2>
       </div>
-      <div class="response-modal-body" id="response-modal-body">
+      <div class="custom-modal-body" id="response-modal-body">
         <p>Some text in the Modal Body</p>
         <p>Some other text...</p>
       </div>
-      <div class="response-modal-footer" id="response-modal-footer">
+      <div class="custom-modal-footer" id="response-modal-footer">
         <h3>Modal Footer</h3>
       </div>
     </div>
 </div>
+
+<div id="confirmation-modal" class="custom-modal">
+    <!-- Modal content -->
+    <div class="custom-modal-content">
+      <div class="custom-modal-header" id="confirmation-modal-header">
+        <span class="close-custom-modal" id="confirmation-modal-close">&times;</span>
+        <h2>Modal Header</h2>
+      </div>
+      <div class="custom-modal-body" id="confirmation-modal-body">
+        <p>Some text in the Modal Body</p>
+        <p>Some other text...</p>
+      </div>
+      <div class="custom-modal-footer" id="confirmation-modal-footer">
+        <h3>Modal Footer</h3>
+      </div>
+    </div>
+</div>
+
 {% block javascript %}
     <!-- JQuery includes ( required for drag and drop and $() ). -->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
@@ -213,26 +233,38 @@
         const RIGHT_CLICK = 2;
         const ARTIFACT_CLASSES = ["draggable_artifact", "draggable_artifact_type"];
         const KEYWORD_CLASSES = ["condition_keyword"];
+        const MODAL_DEFAULT_FOOTER = "";
 
         ///////////////// Response modal globals (Re-implementations and listeners ////////////////////////
 
-        // Get the modal
-        let responseModal = document.getElementById("response-modal-id");
+        // Get the modals
+        let modals = [];
+        let modal_ids = ["response-modal", "confirmation-modal"];
+        for (let i = 0; i < modal_ids.length; i++ ) {
+            // Reset modals list (just in case, since we're running in global scope).
+            // modals = [];
 
-        // Get the <span> element that closes the modal
-        let closeResponseModal = document.getElementsByClassName("close-response-modal")[0];
+            // Add modals by-id.
+            modals.push(document.getElementById(modal_ids[i]));
+            console.log("pushed: " + modal_ids[i]);
 
-        // When the user clicks on <span> (x), close (hide) the modal
-        closeResponseModal.onclick = function() {
-          responseModal.style.display = "none";
-        };
+           // Add close logic.
+           let closeCustomModal = document.getElementById(modal_ids[i] + "-close");//[i];
 
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-          if (event.target == responseModal) {
-            responseModal.style.display = "none";
-          }
-        };
+           // When the user clicks on <span> (x), close (hide) the modal
+           document.getElementById(modal_ids[i] + "-close").onclick = function() {
+             document.getElementById(modal_ids[i]).style.display = "none";
+           };
+
+           // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                for (let i = 0; i < modal_ids.length; i++) {
+                    if (event.target == document.getElementById(modal_ids[i])) {
+                        document.getElementById(modal_ids[i]).style.display = "none";
+                    }
+                }
+            };
+        }
 
         /**
          * Convenience: Shortens the line width when getting a CSS variable.
@@ -250,15 +282,15 @@
          *  - '-modal_background_*'
          *  - '-modal_color_*'
          */
-        function popupModal(header=null, body=null, footer=null, level=null) {
+        function popupModal(modal_id=null, header=null, body=null, footer=null, level=null) {
             // console.log("function popupModal(header=" + header + ", body=" + body + ", footer=" + footer + ", level=" + level + ")");
             // Modal element itself.
-            let modal = document.getElementById("response-modal-id");
+            let modal = document.getElementById(modal_id);
 
             // Modal sub-elements.
-            let modalHeader = document.getElementById("response-modal-header");
-            let modalBody = document.getElementById("response-modal-body");
-            let modalFooter = document.getElementById("response-modal-footer");
+            let modalHeader = document.getElementById(modal_id + "-header");
+            let modalBody = document.getElementById(modal_id + "-body");
+            let modalFooter = document.getElementById(modal_id + "-footer");
 
             // Set level (if null, set to info/default).
             level = (level != null) ? level : "info";
@@ -584,7 +616,7 @@
             // Define footer
             let footer = "Some footer";
 
-            popupModal(header, body, footer, level);
+            popupModal("response-modal", header, body, footer, level);
             // Make the JSON detailsCollapsible element actually collapsible.
             addCaseDetailsCollapsibleButtonLogic("response-modal-json-collapsible-button");
         }
@@ -612,6 +644,31 @@
 
             // Convert a JavaScript value to a JavaScript Object Notation (JSON) string (Required for POST).
             xhr.send(JSON.stringify(json));
+        }
+
+        function clearEditorDivContents() {
+            let editorDiv = document.getElementById("yara_rule_designer_editor");
+            editorDiv.textContent = '';
+        }
+
+        function clearRule() {
+            let editorDiv = document.getElementById("yara_rule_designer_editor");
+
+            // Define header
+            let header = "<h2>Are you sure?</h2>";
+
+            // Define body
+            let body = "<p>Are you sure you want to clear the current rule? This is irreversible.</p>";
+
+            // Add Yes/No buttons
+            body += "";
+
+            // Define footer
+            let footer = MODAL_DEFAULT_FOOTER;
+
+            popupModal("confirmation-modal", header, body, footer, "warning");
+
+            clearEditorDivContents(); // FIXME: Replace with Yes/No binding in confirmation modal!
         }
 
 

@@ -15,7 +15,7 @@
     --modal_color_info: white;
     --modal_background_success: #5cb85c;
     --modal_color_success: white;
-    --modal_background_warning: #ffed3e;
+    --modal_background_warning: #f4d03f;
     --modal_color_warning: white;
     --modal_background_error: #da423f;
     --modal_color_error: white;
@@ -75,6 +75,7 @@ html, body {
 #yara-rule-designer-buttons {
     border-right:1px solid var(--yara_rule_designer_border_color);
     border-bottom:1px solid var(--yara_rule_designer_border_color);
+    padding: 0;
 }
 
 #submit-rule-button {
@@ -90,6 +91,22 @@ html, body {
 
 #submit-rule-button:hover {
   background-color: #204d74;
+  color: white;
+}
+
+#clear-rule-button {
+    background-color: #c7254e;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+#clear-rule-button:hover {
+  background-color: #721c24;
   color: white;
 }
 
@@ -129,7 +146,7 @@ html, body {
 /* MODAL */
 
 /* The Modal (background) */
-.response-modal {
+.custom-modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
@@ -143,24 +160,24 @@ html, body {
 }
 
  /* Modal Header */
-.response-modal-header {
+.custom-modal-header {
   padding: 2px 16px;
   background: var(--modal_background_info);
   color: var(--modal_color_info);
 }
 
 /* Modal Body */
-.response-modal-body {padding: 2px 16px;}
+.custom-modal-body {padding: 2px 16px;}
 
 /* Modal Footer */
-.response-modal-footer {
+.custom-modal-footer {
   padding: 2px 16px;
   background: var(--modal_background_info);
   color: var(--modal_color_info);
 }
 
 /* Modal Content */
-.response-modal-content {
+.custom-modal-content {
   position: relative;
   background-color: #fefefe;
   margin: auto;
