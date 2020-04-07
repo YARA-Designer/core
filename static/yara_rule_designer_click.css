@@ -11,12 +11,13 @@
     --draggable_artifact_background: #4a90dd;
     --draggable_artifact_type_color: white;
     --draggable_artifact_type_background: #2e86c1;
-    --modal_background_info: #87898a;
+    /*--modal_background_info: #87898a;*/
+    --modal_background_info: #5dade2;
     --modal_color_info: white;
     --modal_background_success: #5cb85c;
     --modal_color_success: white;
     --modal_background_warning: #f4d03f;
-    --modal_color_warning: white;
+    --modal_color_warning: black;
     --modal_background_error: #da423f;
     --modal_color_error: white;
 }
@@ -103,6 +104,22 @@ html, body {
 
 #clear-rule-button:hover {
   background-color: #721c24;
+  color: white;
+}
+
+#show-help-button {
+    background-color:  #5d6d7e ;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+#show-help-button:hover {
+  background-color: #2e4053;
   color: white;
 }
 

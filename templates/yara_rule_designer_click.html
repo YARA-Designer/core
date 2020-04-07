@@ -31,6 +31,7 @@
                 <div class="col yara_rule_designer" id="yara-rule-designer-buttons" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
                     <button id="submit-rule-button"  onclick="postRule()">Submit</button>
                     <button id="clear-rule-button"  onclick="clearRule()">Clear</button>
+                    <button id="show-help-button"  onclick="popupHelpModal()">Help</button>
                 </div>
 
                 <div class="w-100"></div>
@@ -130,14 +131,6 @@
 
     </div> <!-- Row //-->
 </div> <!-- Container //-->
-
-<!--<div id="info">-->
-<!--    <h1>How to use:</h1>-->
-<!--     <ul>-->
-<!--      <li>Click to add items to editor.</li>-->
-<!--      <li>Middle click to remove item from editor.</li>-->
-<!--    </ul>-->
-<!--</div>-->
 
 <!-- Pre-define default modals (to be populated by JavaScript later). -->
 <div id="response-modal" class="custom-modal">
@@ -385,6 +378,18 @@
                 // Close modal.
                 document.getElementById("confirmation-modal").style.display = "none";
             };
+        }
+
+        function popupHelpModal() {
+            let header = "<h2>How to use.</h2>";
+            let body =
+                    "<ul>" +
+                    "<li>Click on items in the leftpane to add them to the editor.</li>" +
+                    "<li>Middle mouse-click on an item in the editor to remove it.</li>" +
+                    "</ul>";
+
+            popupModal("response-modal", header, body, null, "info");
+
         }
 
         ///////////////////////////////////// Core (designer) code ///////////////////////////////////
