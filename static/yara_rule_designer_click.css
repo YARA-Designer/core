@@ -1,5 +1,6 @@
 /* Define variables for colors etc so that themes can easily override them */
 :root {
+    --yara_rule_designer_text_color: black;
     --yara_rule_designer_color: white;
     --yara_rule_designer_span_box_shadow: grey;
     --yara_rule_designer_header_color: black;
@@ -127,7 +128,7 @@ html, body {
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
     /*border-right:1px solid transparent;*/
     /*border-bottom:1px solid transparent;*/
-    color: var(--yara_rule_designer_color);
+    color: var(--yara_rule_designer_text_color);
     margin-left: 10px;
     margin-top: 10px;
 }
