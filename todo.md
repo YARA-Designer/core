@@ -1,5 +1,4 @@
 ##Requests
-* Add tags to editor, separately.
 
 ##General
 
@@ -11,7 +10,6 @@
 
 ###Click:
 * Make encapsulator work with click (surround elements currently in editor div)
-* Style that submit rule button!
 
 ###Drag and drop:
 #### Priority 1
