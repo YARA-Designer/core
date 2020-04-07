@@ -26,23 +26,26 @@ def is_number(s: str) -> bool:
         return False
 
 
-def sanitize_rulename(rule_name: str) -> str:
+def sanitize_identifier(identifier: str) -> str:
     """
     Identifiers must follow the same lexical conventions of the C programming language,
     they can contain any alphanumeric character and the underscore character, but the
     first character can not be a digit. Rule identifiers are case sensitive and cannot
     exceed 128 characters.
 
-    :param rule_name:
+    :param identifier:
     :return:
     """
-    # If the first character is a digit, prepend an underscore as
-    # the first character can not be a digit.
-    if is_number(rule_name[0]):
-        rule_name = '_' + rule_name
+    if is_number(identifier[0]):
+        # If the first character is a digit, prepend an underscore as
+        # the first character can not be a digit.
+        identifier = '_' + identifier
+    elif identifier[0] == ' ':
+        # Strip leading whitespace.
+        identifier = identifier[1:]
 
-    # Replace all non-word characters (everything except numbers and letters) with underscore.
-    s = re.sub(r"[^\w\s+]", '_', rule_name)
+    # Replace all non-word characters and spaces (everything except numbers and letters) with underscore.
+    s = re.sub(r"([^\w\s+]|[^\w\S+])", '_', identifier)
 
     return s
 
@@ -344,10 +347,14 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
         },
     }
 
-    rule_name: str = sanitize_rulename(yara_sources_dict["rule"])
+    # Sanitize inputs (replace spaces with underscore, etc.)
+    sanitized_rule_name: str = sanitize_identifier(yara_sources_dict["rule"])
+    sanitized_tags: list = [sanitize_identifier(x) for x in yara_sources_dict["tags"]]
+    print("sanitized_tags: {}".format(sanitized_tags))
+
     retv["source (preprocessed)"]: str = generate_source_string({
-        "tags": yara_sources_dict["tags"],
-        "rule": rule_name,
+        "tags": sanitized_tags,
+        "rule": sanitized_rule_name,
         "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
         "strings": extract_yara_strings_dict(yara_sources_dict["artifacts"]),
         "condition": yara_sources_dict["condition"]
@@ -358,7 +365,7 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
     print("source: \n{}".format(source))    # FIXME: DEBUG
 
     # Save source rule to text file.
-    save_source(rules=source, filename=rule_name)
+    save_source(rules=source, filename=sanitized_rule_name)
 
     try:
         compiled_yara_rules: yara.Rules = yara.compile(source=source,
@@ -367,9 +374,9 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
         retv["compilable"] = True
 
         # Save compiled rule to binary file.  #FIXME: Change to verification/testing later.
-        save_compiled(rules=compiled_yara_rules, filename=rule_name)
+        save_compiled(rules=compiled_yara_rules, filename=sanitized_rule_name)
 
-        retv["source"] = compiled_rules_to_source_string(rule_name, condition=yara_sources_dict["condition"])
+        retv["source"] = compiled_rules_to_source_string(sanitized_rule_name, condition=yara_sources_dict["condition"])
 
         retv["success"] = True
 
@@ -383,8 +390,8 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
         condition_as_lines_str = newline_condition(yara_sources_dict["condition"])
         try:
             source_ = generate_source_string({
-                "tags": yara_sources_dict["tags"],
-                "rule": rule_name,
+                "tags": sanitized_tags,
+                "rule": sanitized_rule_name,
                 "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
                 "strings": extract_yara_strings_dict(yara_sources_dict["artifacts"]),
                 "condition": condition_as_lines_str

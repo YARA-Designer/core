@@ -3,13 +3,12 @@
 ##General
 
 ##Backend
-* TheHive tags may contain whitespace, which breaks YARA, make it replace them with underscores.
 
 ##Frontend
-* Add some sort of hashed "state" string to URL to reproduce the current editor elements from URL.
-
 ###Click:
 * Make encapsulator work with click (surround elements currently in editor div)
+* Add some sort of hashed "state" string to URL to reproduce the current editor elements from URL.
+* Properly implement showing of column error occured on (currently just appended to SyntaxError str).
 
 ###Drag and drop:
 #### Priority 1
