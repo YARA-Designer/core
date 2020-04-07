@@ -48,34 +48,34 @@
                 <div class="yara_rule_designer" id="yara_rule_designer_operators" ondrop="drop(event)" ondragover="dragOverDisallowedDrop(event)" ondragenter="dragEnterDenied(event)" ondragleave="dragLeaveDenied(event)">
                     <!--    Add conditional keywords-->
                     <!--    Boolean-->
-                    <span id="condition_keyword_and" class="condition_keyword" onclick="addToEditor(event)"> AND </span>
-                    <span id="condition_keyword_or" class="condition_keyword" onclick="addToEditor(event)"> OR </span>
-                    <span id="condition_keyword_not" class="condition_keyword" onclick="addToEditor(event)"> NOT </span>
+                    <span id="condition_keyword_and" class="condition_keyword" onclick="addToEditor(event)">AND</span>
+                    <span id="condition_keyword_or" class="condition_keyword" onclick="addToEditor(event)">OR</span>
+                    <span id="condition_keyword_not" class="condition_keyword" onclick="addToEditor(event)">NOT</span>
                     <!--    Arithmetic-->
-                    <span id="condition_keyword_equal" class="condition_keyword" onclick="addToEditor(event)"> == </span>
-                    <span id="condition_keyword_lt" class="condition_keyword" onclick="addToEditor(event)"> < </span>
-                    <span id="condition_keyword_gt" class="condition_keyword" onclick="addToEditor(event)"> > </span>
-                    <span id="condition_keyword_leq" class="condition_keyword" onclick="addToEditor(event)"> <= </span>
-                    <span id="condition_keyword_geq" class="condition_keyword" onclick="addToEditor(event)"> >= </span>
-                    <span id="condition_keyword_neq" class="condition_keyword" onclick="addToEditor(event)"> != </span>
+                    <span id="condition_keyword_equal" class="condition_keyword" onclick="addToEditor(event)">==</span>
+                    <span id="condition_keyword_lt" class="condition_keyword" onclick="addToEditor(event)"><</span>
+                    <span id="condition_keyword_gt" class="condition_keyword" onclick="addToEditor(event)">></span>
+                    <span id="condition_keyword_leq" class="condition_keyword" onclick="addToEditor(event)"><=</span>
+                    <span id="condition_keyword_geq" class="condition_keyword" onclick="addToEditor(event)">>=</span>
+                    <span id="condition_keyword_neq" class="condition_keyword" onclick="addToEditor(event)">!=</span>
                     <!--    Relational-->
-                    <span id="condition_keyword_add" class="condition_keyword" onclick="addToEditor(event)"> + </span>
-                    <span id="condition_keyword_sub" class="condition_keyword" onclick="addToEditor(event)"> - </span>
-                    <span id="condition_keyword_mul" class="condition_keyword" onclick="addToEditor(event)"> * </span>
-                    <span id="condition_keyword_div" class="condition_keyword" onclick="addToEditor(event)"> / </span>
-                    <span id="condition_keyword_pct" class="condition_keyword" onclick="addToEditor(event)"> % </span>
-                    <span id="condition_keyword_setminus" class="condition_keyword" onclick="addToEditor(event)"> \ </span>
+                    <span id="condition_keyword_add" class="condition_keyword" onclick="addToEditor(event)">+</span>
+                    <span id="condition_keyword_sub" class="condition_keyword" onclick="addToEditor(event)">-</span>
+                    <span id="condition_keyword_mul" class="condition_keyword" onclick="addToEditor(event)">*</span>
+                    <span id="condition_keyword_div" class="condition_keyword" onclick="addToEditor(event)">/</span>
+                    <span id="condition_keyword_pct" class="condition_keyword" onclick="addToEditor(event)">%</span>
+                    <span id="condition_keyword_setminus" class="condition_keyword" onclick="addToEditor(event)">\</span>
                     <!--    Bitwise-->
-                    <span id="condition_keyword_bitwise_and" class="condition_keyword" onclick="addToEditor(event)"> & </span>
-                    <span id="condition_keyword_bitwise_or" class="condition_keyword" onclick="addToEditor(event)"> | </span>
-                    <span id="condition_keyword_bitwise_not" class="condition_keyword" onclick="addToEditor(event)"> ~ </span>
-                    <span id="condition_keyword_bitwise_xor" class="condition_keyword" onclick="addToEditor(event)"> ^ </span>
-                    <span id="condition_keyword_bitwise_lshift" class="condition_keyword" onclick="addToEditor(event)"> << </span>
-                    <span id="condition_keyword_bitwise_rshift" class="condition_keyword" onclick="addToEditor(event)"> >> </span>
+                    <span id="condition_keyword_bitwise_and" class="condition_keyword" onclick="addToEditor(event)">&</span>
+                    <span id="condition_keyword_bitwise_or" class="condition_keyword" onclick="addToEditor(event)">|</span>
+                    <span id="condition_keyword_bitwise_not" class="condition_keyword" onclick="addToEditor(event)">~</span>
+                    <span id="condition_keyword_bitwise_xor" class="condition_keyword" onclick="addToEditor(event)">^</span>
+                    <span id="condition_keyword_bitwise_lshift" class="condition_keyword" onclick="addToEditor(event)"><<</span>
+                    <span id="condition_keyword_bitwise_rshift" class="condition_keyword" onclick="addToEditor(event)">>></span>
                     <!-- Parenthesis and wrappers       -->
-                    <span id="condition_keyword_lparen" class="condition_keyword" onclick="addToEditor(event)"> ( </span>
-                    <span id="condition_keyword_rparen" class="condition_keyword" onclick="addToEditor(event)"> ) </span>
-                    <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)"> () </span>
+                    <span id="condition_keyword_lparen" class="condition_keyword" onclick="addToEditor(event)">(</span>
+                    <span id="condition_keyword_rparen" class="condition_keyword" onclick="addToEditor(event)">)</span>
+                    <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)">()</span>
                 </div>
 
                 <div class="w-100"></div>
@@ -494,23 +494,12 @@
 
         function getEditorElementArtifactText(element) {
             // Get text string.
-            let text = $(element).text();
-
-            // Strip the head whitespace and return.
-            return text.substring(0, text.length - 1)
+            return $(element).text();
         }
 
         function getEditorElementKeywordText(element) {
             // Get text string.
-            let text = $(element).text();
-
-            // Strip the head and tail whitespace and return.
-            return text.substring(1, text.length - 1)
-        }
-
-        function getEditorElementIdString(elementId) {
-            // Strip the head whitespace and return.
-            return String(elementId).substring(0, elementId.length - 1)
+            return $(element).text();
         }
 
         function getEditorConditionString() {
