@@ -28,10 +28,10 @@
 
         <div id="yara_rule_designer_leftpane_container" class="col-2 yara_rule_designer">
             <div class="row">
-                <div class="col yara_rule_designer" id="yara-rule-designer-buttons" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
-                    <button id="submit-rule-button"  onclick="postRule()">Submit</button>
-                    <button id="clear-rule-button"  onclick="clearRule()">Clear</button>
-                    <button id="show-help-button"  onclick="popupHelpModal()">Help</button>
+                <div class="row m-row justify-content-between yara_rule_designer" id="yara-rule-designer-buttons" ondrop="drop(event)" ondragover="dragOverAllowedDrop(event)" ondragenter="dragEnterAllowed(event)" ondragleave="dragLeaveAllowed(event)">
+                    <button id="show-help-button" class="col-sm my-col" onclick="popupHelpModal()">Help</button>
+                    <button id="clear-rule-button" class="col-sm my-col" onclick="clearRule()">Clear</button>
+                    <button id="submit-rule-button" class="col-sm my-col" onclick="postRule()">Submit</button>
                 </div>
 
                 <div class="w-100"></div>
