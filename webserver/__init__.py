@@ -109,20 +109,7 @@ def new_rule_raw():
                            case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
 
 
-def new_rule_designer_drag_and_drop():
-    if 'id' not in request.args:
-        return "Please specify a case ID!"
-
-    case = dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id')))
-    theme = request.args.get('theme')
-
-    return render_template('yara_rule_designer_drag_and_drop.html',
-                           case=case,
-                           artifacts=case['data']['observables'],
-                           theme=theme)
-
-
-def new_rule_designer_click():
+def new_rule_designer():
     if 'id' not in request.args:
         return "Please specify a case ID!"
 
@@ -130,7 +117,7 @@ def new_rule_designer_click():
     print(json.dumps(case, indent=4))
     theme = request.args.get('theme')
 
-    return render_template('yara_rule_designer_click.html',
+    return render_template('yara_rule_designer.html',
                            case=case,
                            artifacts=case['data']['observables'],
                            theme=theme)
@@ -145,7 +132,6 @@ def generate_yara_rule(j: json):
     # Processing status, return values and so forth.
     retv = {"in": j, "out": yara_handling.compile_from_source(j)}
 
-    # FIXME: Send proper feedback to be handled by webpage instead of navigating to a JSON dump.
     return retv
 
 
