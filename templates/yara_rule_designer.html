@@ -130,8 +130,8 @@
             </div>
         </div>
 
-    </div> <!-- Row //-->
-</div> <!-- Container //-->
+    </div> {# Row #}
+</div> {# Container #}
 
 <!-- Pre-define default modals (to be populated by JavaScript later). -->
 <div id="response-modal" class="custom-modal">
@@ -247,6 +247,11 @@
 
         const ROOT_CLASS = 'yara_rule_designer';
         const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
+        const ELEMENT_OPERATORS = 'yara_rule_designer_operators';
+        const ELEMENT_ARTIFACT_TYPES = 'yara_rule_designer_artifact_types';
+        const ELEMENT_ARTIFACTS = 'yara_rule_designer_artifacts';
+        const LEFTPANE_DRAGGABLES = [ELEMENT_OPERATORS, ELEMENT_ARTIFACT_TYPES, ELEMENT_ARTIFACTS];
+        const ELEMENT_EDITOR = 'yara_rule_designer_editor';
         const SUCCESS_ICON = "<span style='color: green'>&#10003;</color>";
         const FAILED_ICON = "<span style='color: red'>&#10005;</span>";
         const YARA_VARIABLE_DENOMINATOR = "$";
@@ -275,7 +280,24 @@
 
         /////////////////////////////////// Dragula - drag 'n Drop //////////////////////////////////////////
 
-        dragula([document.getElementById('yara_rule_designer_editor')]);
+        // dragula([document.getElementById('yara_rule_designer_editor')]);
+        dragula([
+            // Enable drag and drop for these DIVs:
+            document.getElementById(ELEMENT_OPERATORS),
+            document.getElementById(ELEMENT_ARTIFACT_TYPES),
+            document.getElementById(ELEMENT_ARTIFACTS),
+            document.getElementById(ELEMENT_EDITOR)
+        ], { // Apply logic.
+            copy: function (el, source) {
+                // If the source is one of the draggable elements, allow copy.
+                return LEFTPANE_DRAGGABLES.includes(source.id);
+            },
+
+            accepts: function (el, target) {
+                // If the target is NOT one of the draggable elements, accept drop.
+                return !LEFTPANE_DRAGGABLES.includes(target.id);
+            }
+        });
 
         ///////////////// Response modal globals (Re-implementations and listeners) ////////////////////////
 
