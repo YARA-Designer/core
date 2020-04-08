@@ -1,12 +1,12 @@
 <!--suppress HtmlUnknownTarget -->
 <link rel="stylesheet" href="{{ url_for('static', filename='yara_rule_designer.css') }}">
 
-<!-- Define default values for variables  -->
+{# Define default values for variables #}
 {% if artifacts is not defined %}
     {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
 {% endif %}
 
-<!-- Load theme if specified -->
+{# Load theme if specified #}
 {% if theme is defined %}
     <!-- Set Jinja2 variables for use in JavaScript -->
     <!--    Theme handler: -->
@@ -17,6 +17,32 @@
     <meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}">
     <meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
 {% endif %}
+
+{#  Add artifacts and artifact dataTypes as individual draggable objects #}
+
+{# Define list to filter artifact types so that only unique occurrences are added. #}
+{% set added_artifact_types = [] %}
+
+{# For use in adding the HTML at a later time, to avoid looping multiple times. #}
+{% set artifact_span_elements = [] %}
+{% set artifact_type_span_elements = [] %}
+
+{% for artifact in artifacts %}
+    {# Add artifacts #}
+    {{ artifact_span_elements.append("<span id='artifact" + loop.index|string + "' class='draggable_artifact' onclick='addToEditor(event)'>" + artifact.data|string + '</span>')|ignore_none }}
+
+    {# Add artifact dataTypes #}
+    {# Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. #}
+    {% if artifact.dataType is not none and artifact.dataType != "None" %}
+        {# Only add unique items to editor #}
+        {% if artifact.dataType not in added_artifact_types %}
+
+            {# Add artifact types #}
+            {{ artifact_type_span_elements.append('<span id="artifact_type' + loop.index|string + '" class="draggable_artifact_type" onclick="addToEditor(event)">' + artifact.dataType|string + '</span>')|ignore_none }}
+            {{ added_artifact_types.append(artifact.dataType)|ignore_none }}
+        {% endif %}
+    {% endif %}
+{% endfor %}
 
 <div class="container mh-100 h-100 mw-100 w-100 yara_rule_designer" id="yara_rule_designer_container">
     <div class="row align-items-start">
@@ -81,32 +107,6 @@
                 </div>
 
                 <div class="w-100"></div>
-
-                    {#  Add artifacts and artifact dataTypes as individual draggable objects #}
-
-                    {# Define list to filter artifact types so that only unique occurrences are added. #}
-                    {% set added_artifact_types = [] %}
-
-                    {# For use in adding the HTML at a later time, to avoid looping multiple times. #}
-                    {% set artifact_span_elements = [] %}
-                    {% set artifact_type_span_elements = [] %}
-
-                    {% for artifact in artifacts %}
-                        {# Add artifacts #}
-                        {{ artifact_span_elements.append("<span id='artifact" + loop.index|string + "' class='draggable_artifact' onclick='addToEditor(event)'>" + artifact.data|string + '</span>')|ignore_none }}
-
-
-                        <!-- Add artifact dataTypes-->
-                        <!-- Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. -->
-                        {% if artifact.dataType is not none and artifact.dataType != "None" %}
-                            {% if artifact.dataType not in added_artifact_types %}
-                                <!-- Only add unique items to editor -->
-                                {# Add artifact types #}
-                                {{ artifact_type_span_elements.append('<span id="artifact_type' + loop.index|string + '" class="draggable_artifact_type" onclick="addToEditor(event)">' + artifact.dataType|string + '</span>')|ignore_none }}
-                                {{ added_artifact_types.append(artifact.dataType)|ignore_none }}
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
 
                 <div class="yara_rule_designer" id="yara_rule_designer_artifact_types">
                     {% for artifact_type_span_element in artifact_type_span_elements %}
