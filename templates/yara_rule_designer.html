@@ -395,7 +395,7 @@
             let header = "<h2>How to use.</h2>";
             let body =
                     "<ul>" +
-                    "<li>Click on items in the leftpane to add them to the editor.</li>" +
+                    "<li>Click on items in the left-pane to add them to the editor.</li>" +
                     "<li>Middle mouse-click on an item in the editor to remove it.</li>" +
                     "</ul>";
 
@@ -721,7 +721,7 @@
 
             // Add custom handling of the response returned by XHR POST URL.
             xhr.onreadystatechange = function () {
-                if (xhr.readyState == XMLHttpRequest.DONE) {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
                     handlePostRuleResponse(JSON.parse(xhr.responseText));
                 }
             };
