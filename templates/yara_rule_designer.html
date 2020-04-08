@@ -227,18 +227,18 @@
 
          for (let i = 0; i < document.styleSheets.length; i++)
          {
-          let mysheet = document.styleSheets[i];
-          let myrules = mysheet.cssRules ? mysheet.cssRules : mysheet.rules;
+          let mySheet = document.styleSheets[i];
+          let myRules = mySheet.cssRules ? mySheet.cssRules : mySheet.rules;
 
-          for (let j = 0; j < myrules.length; j++)
+          for (let j = 0; j < myRules.length; j++)
           {
-            if (myrules[j].selectorText)
+            if (myRules[j].selectorText)
             {
-             let check = myrules[j].selectorText.toLowerCase();
+             let check = myRules[j].selectorText.toLowerCase();
              switch (check)
              {
               case selector_compare  :
-              case selector_compare2 : return myrules[j].style[style];
+              case selector_compare2 : return myRules[j].style[style];
              }
             }
            }
@@ -283,9 +283,6 @@
         let modals = [];
         let modal_ids = ["response-modal", "confirmation-modal"];
         for (let i = 0; i < modal_ids.length; i++ ) {
-            // Reset modals list (just in case, since we're running in global scope).
-            // modals = [];
-
             // Add modals by-id.
             modals.push(document.getElementById(modal_ids[i]));
             console.log("pushed: " + modal_ids[i]);
@@ -312,7 +309,6 @@
          * Convenience: Shortens the line width when getting a CSS variable.
          */
         function getCSSVar(varName) {
-            // console.log("getCSSVar(" + varName + ") = " + getComputedStyle(document.documentElement).getPropertyValue('--' + varName));
             return getComputedStyle(document.documentElement).getPropertyValue('--' + varName);
         }
 
@@ -325,7 +321,6 @@
          *  - '-modal_color_*'
          */
         function popupModal(modal_id=null, header=null, body=null, footer=null, level=null) {
-            // console.log("function popupModal(header=" + header + ", body=" + body + ", footer=" + footer + ", level=" + level + ")");
             // Modal element itself.
             let modal = document.getElementById(modal_id);
 
@@ -418,31 +413,6 @@
           onAuxClick(ev);
         });
 
-        /**
-         * Because null == undefined is true, this will catch both null and undefined.
-         */
-        function hasRelatedTarget(ev) {
-            return ev.relatedTarget != null;
-        }
-
-        /**
-         * Because null == undefined is true, this will catch both null and undefined.
-         */
-        function hasTarget(ev) {
-            return ev.target != null;
-        }
-
-        /**
-         * Get the identifying property of the item when getAttribute isn't inherited.
-         */
-        function getIdentifier(target) {
-            if (target.nodeName === "#text") {
-                return target.data + " [type: #text]";
-            } else {
-                return target.getAttribute('id');
-            }
-        }
-
         function addToEditor(clickEvent) {
             let editorDiv = document.getElementById("yara_rule_designer_editor");
 
@@ -452,9 +422,6 @@
                 console.log(clickEvent);
                 return
             }
-
-            // console.log(clickEvent);
-
 
             console.log('addToEditor: ' + $(clickEvent.target).text());
             editorDiv.appendChild(makeClone(clickEvent.target));
@@ -619,13 +586,11 @@
             let level = "success";
 
             // Parse JSON:
-            let inJson = json["in"];
             let outJson = json["out"];
 
             let compilable = outJson["compilable"];
             let success = outJson["success"];
 
-            let source = outJson["source"];
             let sourcePreprocessed = outJson["source (preprocessed)"];
 
             if (!compilable) {
