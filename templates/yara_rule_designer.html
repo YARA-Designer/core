@@ -1,3 +1,4 @@
+<!--suppress HtmlUnknownTarget -->
 <link rel="stylesheet" href="{{ url_for('static', filename='yara_rule_designer.css') }}">
 
 <!-- Define default values for variables  -->
@@ -179,6 +180,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
     <!-- Dragula - Drag 'n Drop   -->
+    <!--suppress HtmlUnknownTarget -->
     <link rel="stylesheet" href="{{ url_for('static', filename='dragula.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
 
@@ -189,11 +191,10 @@
             return this.length !== 0;
         };
 
-        function loadTheme(themeData) {
+        function loadTheme(themeName, themePath) {
             const rootEl = document.querySelector(':root');
-            const themePath = themeData.path;
 
-            let themeFile = themeData.name + ".json";
+            let themeFile = themeName + ".json";
             let themeFilePath = themePath + themeFile;
 
             // Load corresponding theme JSON from file.
@@ -201,8 +202,10 @@
             $.getJSON(themeFilePath, function(json) {
                 console.log(json); // this will show the info it in firebug console
                 for (let key in json) {
-                    console.log("setProperty(" + key + ", " + json[key] + ")")
-                    rootEl.style.setProperty(key, json[key]);
+                    if (json.hasOwnProperty(key)) {
+                        console.log("setProperty(" + key + ", " + json[key] + ")");
+                        rootEl.style.setProperty(key, json[key]);
+                    }
                 }
 
             });
@@ -211,7 +214,7 @@
         let themeArg = $('#themeArg');
 
         if (themeArg.exists()) {
-            loadTheme(themeArg.data())
+            loadTheme(themeArg.data().name, themeArg.data().path)
         }
     </script>
 
@@ -298,7 +301,7 @@
            // When the user clicks anywhere outside of the modal, close it
             window.onclick = function (event) {
                 for (let i = 0; i < modal_ids.length; i++) {
-                    if (event.target == document.getElementById(modal_ids[i])) {
+                    if (event.target === document.getElementById(modal_ids[i])) {
                         document.getElementById(modal_ids[i]).style.display = "none";
                     }
                 }
