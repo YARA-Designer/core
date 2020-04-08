@@ -280,7 +280,6 @@
 
         /////////////////////////////////// Dragula - drag 'n Drop //////////////////////////////////////////
 
-        // dragula([document.getElementById('yara_rule_designer_editor')]);
         dragula([
             // Enable drag and drop for these DIVs:
             document.getElementById(ELEMENT_OPERATORS),
@@ -409,12 +408,18 @@
         }
 
         function popupHelpModal() {
-            let header = "<h2>How to use.</h2>";
+            let header = "<h2>How To Use</h2>";
             let body =
-                    "<ul>" +
-                    "<li>Click on items in the left-pane to add them to the editor.</li>" +
-                    "<li>Middle mouse-click on an item in the editor to remove it.</li>" +
-                    "</ul>";
+                    "<h4>Adding items</h4>" +
+                    "<p>Either click on or drag items from the left-pane to add them to the editor." + "<br/>" +
+                    "<i>NB: Drag and drop won't work until you've added at least one item to the editor.</i></p>" +
+                    // "<p></p>" +
+
+                    "<h4>Removing items</h4>" +
+                    "<p>Middle mouse-click on an item in the editor to remove it.</p>"+
+
+                    "<h4>Tags</h4>" +
+                    "<p>Check the checkboxes for which tags you want to include (if any).</p>";
 
             popupModal("response-modal", header, body, null, "info");
 
