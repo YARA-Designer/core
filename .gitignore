@@ -13,6 +13,9 @@ Pipfile.lock
 # Databases
 *.db
 
+# Configs
+config.json
+
 # Generated files
 ## YARA rules
-rules/
+theoracle/git/rules/
