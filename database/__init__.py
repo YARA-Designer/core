@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 # Create a database engine.
-engine = create_engine('sqlite:///rules.db', echo=True)
+engine = create_engine('sqlite:///rules.db')
 
 # Create a configured "Session" class.
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))

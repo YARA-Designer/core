@@ -1,14 +1,15 @@
 import os
-
 import yara
 import re
-
 from typing import overload, Union, List
 
-# Get config
 from handlers import config_handler
+from handlers.log_handler import create_logger
 
+# Get config
 config = config_handler.load_config()
+
+log = create_logger(__name__)
 
 SOURCE_FILE_EXTENSION = ".yar"
 COMPILED_FILE_EXTENSION = ".bin"
@@ -255,9 +256,7 @@ def compiled_rules_to_sources_str_callback(d: dict):
     """
     global CALLBACK_DICTS
 
-    print("CALLBACK:")
-    for key, value in d.items():
-        print("\t{}: {}".format(key, value))
+    log.info("CALLBACK: {}".format(d))
     CALLBACK_DICTS.append(d)
 
     # Continue/Step
@@ -305,11 +304,9 @@ def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: st
     # Reset the global callback data list.
     CALLBACK_DICTS = []
 
-    print("match:")
-    for key, value in match.items():
-        print("\t{}: {}".format(key, value))
+    log.info("match: {}".format(match))
 
-    print("compiled_rules_to_source_strings matches: {}".format(match["matches"]))  # FIXME: Debug
+    log.debug("compiled_rules_to_source_strings matches: {}".format(match["matches"]))  # FIXME: Debug
 
     return generate_source_string(match)
 
@@ -370,7 +367,7 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
     # Sanitize inputs (replace spaces with underscore, etc.)
     sanitized_rule_name: str = sanitize_identifier(yara_sources_dict["rule"])
     sanitized_tags: list = [sanitize_identifier(x) for x in yara_sources_dict["tags"]]
-    print("sanitized_tags: {}".format(sanitized_tags))
+    log.info("sanitized_tags: {}".format(sanitized_tags))
 
     retv["source (preprocessed)"]: str = generate_source_string({
         "tags": sanitized_tags,
@@ -382,7 +379,7 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
 
     source = retv["source (preprocessed)"]  # FIXME: Convenience for changing code.
 
-    print("source: \n{}".format(source))    # FIXME: DEBUG
+    log.debug("source: \n{}".format(source))    # FIXME: DEBUG
 
     # Save source rule to text file.
     save_source(rules=source, filename=sanitized_rule_name)

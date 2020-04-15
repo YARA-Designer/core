@@ -1,6 +1,9 @@
 {
     "debug": false,
     "log_to_file": false,
+    "log_level": 1,
+    "logging_port": 19995,
+    "logging_dir": "logs/",
     "hive_server": "127.0.0.1",
     "hive_port": 9000,
     "hive_listener_endpoint": "/YaraWhitelistRuleCreator",

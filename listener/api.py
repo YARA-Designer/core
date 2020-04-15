@@ -8,12 +8,15 @@ from database.operations import add_row
 from handlers import config_handler
 
 from database.models import PendingRule
+from handlers.log_handler import create_logger
+
+log = create_logger(__name__)
 
 
 def get_json_returnable_observables_list(observables: json):
     dict_list = {}
     for observable in observables:
-        print(observable)
+        log.info("observable: {}".format(observable))
         dict_list[observable['id']] = observable
 
     return dict_list
@@ -22,7 +25,7 @@ def get_json_returnable_observables_list(observables: json):
 def imd_to_dict(imd: ImmutableMultiDict):
     dct = {}
     for key, value in imd.items():
-        print("{}: {}".format(key, value))
+        log.debug("{}: {}".format(key, value))
         dct[key] = value
 
     return dct
@@ -36,12 +39,11 @@ def create_yara_whitelist_rule():
             return "ERROR: Received data was NOT JSON!\n{}".format(request.form)
 
         thehive_case = request.json
-        print(json.dumps(thehive_case, indent=4))
+        log.info("thehive_case: ".format(json.dumps(thehive_case, indent=4)))
 
         # rule = YaraWhitelistAlertRule(request.form['title'], description=request.form['description'])
         # js = json.loads(json.dumps(rule.get_dict()))
 
-        # FIXME: Make separate function
         # Get config
         config = config_handler.load_config()
 
@@ -53,7 +55,7 @@ def create_yara_whitelist_rule():
 
         # Add observables to thehive:case as its own sub-dict
         thehive_case['observables'] = observables_response.json()
-        # print("Case with observables:\n{}".format(json.dumps(thehive_case, indent=4)))
+        # log.debugs("Case with observables:\n{}".format(json.dumps(thehive_case, indent=4)))
 
         # Store the modified thehive:case JSON to database.
         add_row(PendingRule(data=thehive_case))

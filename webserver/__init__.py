@@ -1,17 +1,18 @@
 import json
-import pprint
 
-import yara
 from flask import render_template, request, jsonify, make_response
 from sqlalchemy.exc import SQLAlchemyError
 
 from database.models import PendingRule
 from database.operations import db_session
 import yara_handling
+from handlers.log_handler import create_logger
 
 tab_character = "&nbsp;"
 tab = tab_character*4
 routes = {}
+
+log = create_logger(__name__)
 
 
 def get_pending_rule_db_by_case_id(case_id: str):
@@ -114,8 +115,10 @@ def new_rule_designer():
         return "Please specify a case ID!"
 
     case = dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id')))
-    print(json.dumps(case, indent=4))
     theme = request.args.get('theme')
+    log.info("Rendering YARA Rule Designer template for case '{cname}' (ID: {cid})".format(
+        cname=case["data"]["title"], cid=request.args.get('id')))
+    log.debug(json.dumps(case, indent=4))
 
     return render_template('yara_rule_designer.html',
                            case=case,
@@ -124,13 +127,11 @@ def new_rule_designer():
 
 
 def generate_yara_rule(j: json):
-    print("========== DEBUG: Yara Dict ==========")
-    pp = pprint.PrettyPrinter(indent=4)
-    print(pp.pprint(j))
-    print("========== DEBUG: Yara Dict ==========")
+    log.debug("Received YARA Rule Dict: {}".format(j))
 
     # Processing status, return values and so forth.
     retv = {"in": j, "out": yara_handling.compile_from_source(j)}
+    log.debug("Returned YARA Rule Dict: {}".format(retv))
 
     return retv
 
@@ -154,8 +155,8 @@ def post_rule_raw_imd():
         condition: ""
     }
     """
-    print("keys: " + str([key for key in request.form.keys()]))
-    print("request.form: {}".format(request.form))
+    log.debug("keys: " + str([key for key in request.form.keys()]))
+    log.debug("request.form: {}".format(request.form))
 
     artifacts = {}
     for artifact, varname, artifact_type, artifact_id in zip(request.form.getlist('artifact'),
@@ -194,7 +195,7 @@ def post_rule_json():
         condition: ""
     }
     """
-    print("request.json: {}".format(json.dumps(request.json, indent=4)))
+    log.debug("Received HTTP POST Request (application/json): {}".format(json.dumps(request.json, indent=4)))
 
     # Workaround: JSON.Stringify() returns lists wrapped in string, so let's convert it to a proper list:
     #   1. Split on the human readable delimiter and transform it into a list (NB: items will still be quoted).
