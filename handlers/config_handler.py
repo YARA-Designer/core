@@ -4,7 +4,8 @@ import os
 CONFIG_FILE = "config.json"
 SAMPLE_CONFIG_FILE = "config.json.sample"
 DEFAULT_CONFIG = {
-    "debug": "False",
+    "debug": False,
+    "log_to_file": False,
     "hive_server": "127.0.0.1",
     "hive_port": 9000,
     "hive_listener_endpoint": "/YaraWhitelistRuleCreator",
@@ -17,7 +18,7 @@ DEFAULT_CONFIG = {
     "theoracle_user": "git",
     "theoracle_remote_repo": "",
     "theoracle_local_path": "theoracle/git/",
-    "theoracle_repo_rules_dir": "rules/"
+    "theoracle_repo_rules_dir": "theoracle/git/rules/"
 }
 
 

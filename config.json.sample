@@ -1,5 +1,6 @@
 {
-    "debug": "False",
+    "debug": false,
+    "log_to_file": false,
     "hive_server": "127.0.0.1",
     "hive_port": 9000,
     "hive_listener_endpoint": "/YaraWhitelistRuleCreator",
@@ -12,5 +13,5 @@
     "theoracle_user": "git",
     "theoracle_remote_repo": "",
     "theoracle_local_path": "theoracle/git/",
-    "theoracle_repo_rules_dir": "rules/"
+    "theoracle_repo_rules_dir": "theoracle/git/rules/"
 }

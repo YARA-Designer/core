@@ -5,7 +5,11 @@ import re
 
 from typing import overload, Union, List
 
-RULES_DIR = "rules"
+# Get config
+from handlers import config_handler
+
+config = config_handler.load_config()
+
 SOURCE_FILE_EXTENSION = ".yar"
 COMPILED_FILE_EXTENSION = ".bin"
 CALLBACK_DICTS: list = []
@@ -150,7 +154,7 @@ def generate_source_string(src: dict) -> str:
     return rule_string
 
 
-def save_compiled(rules: yara.Rules, filename: str, file_ext=COMPILED_FILE_EXTENSION, rules_dir=RULES_DIR):
+def save_compiled(rules: yara.Rules, filename: str, file_ext=COMPILED_FILE_EXTENSION, rules_dir=None):
     """
     Saves compiled (binary) YARA rules to file.
 
@@ -160,6 +164,10 @@ def save_compiled(rules: yara.Rules, filename: str, file_ext=COMPILED_FILE_EXTEN
     :param rules_dir:
     :return:
     """
+    # If no custom rules dir is given, use TheOracle's.
+    if rules_dir is None:
+        rules_dir = config["theoracle_repo_rules_dir"]
+
     # If destination directory does not exist, create it.
     if not os.path.isdir(rules_dir):
         os.mkdir(rules_dir)
@@ -173,7 +181,7 @@ def save_compiled(rules: yara.Rules, filename: str, file_ext=COMPILED_FILE_EXTEN
         raise ValueError("save_compiled: rules must be 'yara.Rules' object.")
 
 
-def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules_dir=RULES_DIR):
+def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules_dir=None):
     """
     Saves source (plaintext) YARA rules to file.
 
@@ -183,6 +191,10 @@ def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules
     :param rules_dir:
     :return:
     """
+    # If no custom rules dir is given, use TheOracle's.
+    if rules_dir is None:
+        rules_dir = config["theoracle_repo_rules_dir"]
+
     # If destination directory does not exist, create it.
     if not os.path.isdir(rules_dir):
         os.mkdir(rules_dir)
@@ -197,7 +209,11 @@ def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules
         raise ValueError("save_source: rules must be 'str'.")
 
 
-def load_file(filename: str, rules_dir=RULES_DIR):
+def load_file(filename: str, rules_dir=None):
+    # If no custom rules dir is given, use TheOracle's.
+    if rules_dir is None:
+        rules_dir = config["theoracle_repo_rules_dir"]
+
     rules = None
 
     # If destination directory does not exist, return.
@@ -268,6 +284,9 @@ def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: st
     """
     global CALLBACK_DICTS
 
+    # Use TheOracle's rules dir.
+    rules_dir = config["theoracle_repo_rules_dir"]
+
     if isinstance(rules, yara.Rules):
         complied_rules = rules
     elif isinstance(rules, str):
@@ -277,7 +296,7 @@ def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: st
 
     # The match method returns a list of instances of the class Match.
     # Instances of this class have the same attributes as the dictionary passed to the callback function.
-    matches: yara.Match = complied_rules.match(filepath=os.path.join(RULES_DIR, rules + SOURCE_FILE_EXTENSION),
+    matches: yara.Match = complied_rules.match(filepath=os.path.join(rules_dir, rules + SOURCE_FILE_EXTENSION),
                                                callback=compiled_rules_to_sources_str_callback)
 
     # Copy Matches attributes and misc over to a more malleable dict.
@@ -324,11 +343,12 @@ def determine_syntax_error_column(condition_as_lines_str: str, line_number: int,
         }
 
 
-def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs) -> dict:
+def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_compiled=False, **kwargs) -> dict:
     """
     Generates a yara rule based on a given dict on the form of:
      {rule: "", tags: [""], meta: {}, artifacts: [artifact: "", id: "", type: ""], condition: ""}.
 
+    :param keep_compiled: Whether or not to keep compiled binary files.
     :param error_on_warning: If true warnings are treated as errors, raising an exception.
     :param yara_sources_dict:
     :return:
@@ -373,10 +393,13 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, **kwargs
                                                        **kwargs)
         retv["compilable"] = True
 
-        # Save compiled rule to binary file.  #FIXME: Change to verification/testing later.
+        # Save compiled rule to binary file.
         save_compiled(rules=compiled_yara_rules, filename=sanitized_rule_name)
 
         retv["source"] = compiled_rules_to_source_string(sanitized_rule_name, condition=yara_sources_dict["condition"])
+
+        if not keep_compiled:
+            os.remove(os.path.join(config["theoracle_repo_rules_dir"], sanitized_rule_name + COMPILED_FILE_EXTENSION))
 
         retv["success"] = True
 

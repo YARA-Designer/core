@@ -17,5 +17,5 @@ Pipfile.lock
 config.json
 
 # Generated files
-## YARA rules
-theoracle/git/rules/
+## YARA rules and TheOracle Git.
+theoracle/git/
