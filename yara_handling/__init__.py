@@ -167,7 +167,7 @@ def save_compiled(rules: yara.Rules, filename: str, file_ext=COMPILED_FILE_EXTEN
     """
     # If no custom rules dir is given, use TheOracle's.
     if rules_dir is None:
-        rules_dir = config["theoracle_repo_rules_dir"]
+        rules_dir = os.path.join(config["theoracle_local_path"], config["theoracle_repo_rules_dir"])
 
     # If destination directory does not exist, create it.
     if not os.path.isdir(rules_dir):
@@ -194,7 +194,7 @@ def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules
     """
     # If no custom rules dir is given, use TheOracle's.
     if rules_dir is None:
-        rules_dir = config["theoracle_repo_rules_dir"]
+        rules_dir = os.path.join(config["theoracle_local_path"], config["theoracle_repo_rules_dir"])
 
     # If destination directory does not exist, create it.
     if not os.path.isdir(rules_dir):
@@ -213,7 +213,7 @@ def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules
 def load_file(filename: str, rules_dir=None):
     # If no custom rules dir is given, use TheOracle's.
     if rules_dir is None:
-        rules_dir = config["theoracle_repo_rules_dir"]
+        rules_dir = os.path.join(config["theoracle_local_path"], config["theoracle_repo_rules_dir"])
 
     rules = None
 
@@ -284,7 +284,7 @@ def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: st
     global CALLBACK_DICTS
 
     # Use TheOracle's rules dir.
-    rules_dir = config["theoracle_repo_rules_dir"]
+    rules_dir = os.path.join(config["theoracle_local_path"], config["theoracle_repo_rules_dir"])
 
     if isinstance(rules, yara.Rules):
         complied_rules = rules
@@ -396,7 +396,10 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
         retv["source"] = compiled_rules_to_source_string(sanitized_rule_name, condition=yara_sources_dict["condition"])
 
         if not keep_compiled:
-            os.remove(os.path.join(config["theoracle_repo_rules_dir"], sanitized_rule_name + COMPILED_FILE_EXTENSION))
+            path = os.path.join(config["theoracle_local_path"], config["theoracle_repo_rules_dir"],
+                                sanitized_rule_name + COMPILED_FILE_EXTENSION)
+            log.info("Removing compiled YARA binary: {}".format(path))
+            os.remove(path)
 
         retv["success"] = True
 
