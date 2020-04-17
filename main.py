@@ -2,6 +2,7 @@ from flask import Flask
 
 from handlers import config_handler
 from handlers.log_handler import create_logger
+import handlers.git_handler as git
 from listener import api
 import webserver
 from database import init_db
@@ -69,16 +70,19 @@ def add_app_route(flask_app: Flask, route: str, description: str, hide=False, **
 
 
 if __name__ == "__main__":
-    # Get config
+    # Get config.
     config = config_handler.load_config()
     log.info("Loaded configuration: '{}'.".format(
         config_handler.CONFIG_FILE if config_handler.has_custom_config() else 'default'))
 
-    # Initialize database
+    # Initialize database.
     init_db()
     log.info("Initialized database.")
 
-    # Set up Flask
+    # Set up TheOracle Git.
+    the_oracle_repo = git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
+
+    # Set up Flask.
     app = Flask(__name__)
     log.info("Configured Flask app.")
 
@@ -87,15 +91,15 @@ if __name__ == "__main__":
     log.info("Added Flask app context processor utility functions: {}.".format(
         [str(func) for func in utility_functions.__call__()]))
 
-    # Add filters
+    # Add filters.
     app.jinja_env.filters['ignore_none'] = filter_suppress_none
     log.info("Added Flask app Jinja2 filters: ['ignore_none'].")
 
-    # Add TheHive listener endpoint
+    # Add TheHive listener endpoint.
     app.add_url_rule(config["hive_listener_endpoint"], methods=['POST'], view_func=api.create_yara_whitelist_rule)
     log_added_route(config["hive_listener_endpoint"])
 
-    # Add other useful routes
+    # Add other useful routes.
     # -- Listing of all pending rules.
     add_app_route(app, '/list', "List all rules pending creation.", view_func=webserver.list_pending_rules)
 

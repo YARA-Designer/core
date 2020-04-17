@@ -20,8 +20,8 @@ DEFAULT_CONFIG = {
     "theoracle_port": 22,
     "theoracle_user": "git",
     "theoracle_remote_repo": "",
-    "theoracle_local_path": "theoracle/git/",
-    "theoracle_repo_rules_dir": "theoracle/git/rules/"
+    "theoracle_local_path": "the-oracle",
+    "theoracle_repo_rules_dir": "rules"
 }
 
 
