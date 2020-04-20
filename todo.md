@@ -2,6 +2,7 @@
 
 ##General
 *  Implement logging (both socket and file) instead of printing to console.
+*  Backend reports back to frontend if rule already exists in repo.
 
 ##Backend
 * Implement handling incoming YARA rule to be pushed to TheoOracle.
