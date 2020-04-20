@@ -226,14 +226,12 @@ def post_commit_json():
     """
     log.debug("Received HTTP POST Request (application/json): {}".format(json.dumps(request.json, indent=4)))
 
-    # Workaround: JSON.Stringify() returns lists wrapped in string, so let's convert it to a proper list:
-    #   1. Split on the human readable delimiter and transform it into a list (NB: items will still be quoted).
-    #   2. Strip head and tail string wrappers from each individual item using list comprehension.
-    # request.json["tags"]: list = [x[1:-1] for x in list(request.json["tags"][1:-1].split(", "))]
-
     # return make_response(jsonify(generate_yara_rule(request.json)), 200)
-    # log.info("post_commit_json: {}".format(request.json))
-    return make_response(jsonify({"message": "post_commit_json NOT IMPLEMENTED"}), 200)
+    return make_response(jsonify({"in": request.json,
+                                  "out": {
+                                      "message": "post_commit_json NOT IMPLEMENTED"
+                                         }
+                                  }), 200)
 
 
 def home():
