@@ -229,7 +229,7 @@ def post_commit_json():
     """
     log.debug("Received HTTP POST Request (application/json): {}".format(json.dumps(request.json, indent=4)))
 
-    json_result = {
+    result = {
         "in": request.json,
         "out": {
             "success": False,
@@ -274,13 +274,26 @@ def post_commit_json():
         #                         message=config["git_commit_msg_fmt"].format(rulename=request.json.rulename))
 
         # 4. Git Push
-        log.info("Git push commit '{msg}' ({binsha}) to {origin}".format(msg=last_commit.message,
-                                                                         binsha=str(last_commit.binsha),
+        log.info("Git push commit '{msg}' ({hexsha}) to {origin}".format(msg=last_commit.message,
+                                                                         hexsha=last_commit.hexsha,
                                                                          origin=the_oracle_repo.remotes.origin))
         the_oracle_repo.remotes.origin.push()
+
+        result["out"] = {
+            "success": True,
+            "commit": {
+                "message": last_commit.message,
+                "hexsha": last_commit.hexsha,
+                "author_username": last_commit.author.name,
+                "author_email": last_commit.author.email,
+                "committer_username": last_commit.committer.name,
+                "committer_email": last_commit.committer.email,
+                "committed_date": last_commit.committed_date
+            }
+        }
     except Exception as exc:
         log.exception("Unexpected exception!", exc_info=exc)
-        json_result["out"] = {
+        result["out"] = {
             "success": False,
             "error": {
                 "message": str(exc),
@@ -289,7 +302,8 @@ def post_commit_json():
         }
 
     # Make response.
-    return make_response(jsonify(json_result), 200)
+    log.debug("Return dict: {}".format(result))
+    return make_response(jsonify(result), 200)
 
 
 def home():
