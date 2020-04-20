@@ -80,7 +80,7 @@ if __name__ == "__main__":
     log.info("Initialized database.")
 
     # Set up TheOracle Git.
-    the_oracle_repo = git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
+    webserver.the_oracle_repo = git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
 
     # Set up Flask.
     app = Flask(__name__)

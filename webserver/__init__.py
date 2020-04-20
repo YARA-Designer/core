@@ -1,16 +1,19 @@
 import json
 
+import handlers.git_handler as git
 from flask import render_template, request, jsonify, make_response
 from sqlalchemy.exc import SQLAlchemyError
 
 from database.models import PendingRule
 from database.operations import db_session
 import yara_handling
+from handlers.config_handler import load_config
 from handlers.log_handler import create_logger
 
 tab_character = "&nbsp;"
 tab = tab_character*4
 routes = {}
+the_oracle_repo: git.Repo
 
 log = create_logger(__name__)
 
@@ -118,7 +121,7 @@ def new_rule_designer():
     theme = request.args.get('theme')
     log.info("Rendering YARA Rule Designer template for case '{cname}' (ID: {cid})".format(
         cname=case["data"]["title"], cid=request.args.get('id')))
-    log.debug(json.dumps(case, indent=4))
+    log.debug("TheHive Case: {}".format(json.dumps(case, indent=4)))
 
     return render_template('yara_rule_designer.html',
                            case=case,
@@ -226,16 +229,67 @@ def post_commit_json():
     """
     log.debug("Received HTTP POST Request (application/json): {}".format(json.dumps(request.json, indent=4)))
 
-    # return make_response(jsonify(generate_yara_rule(request.json)), 200)
-    return make_response(jsonify({"in": request.json,
-                                  "out": {
-                                      "success": False,
-                                      "error": {
-                                          "message": "post_commit_json NOT IMPLEMENTED",
-                                          "type": "Implementation"
-                                      }
-                                         }
-                                  }), 200)
+    json_result = {
+        "in": request.json,
+        "out": {
+            "success": False,
+            "error": {
+                "message": "post_commit_json NOT IMPLEMENTED",
+                "type": "Implementation"
+                }
+            }
+        }
+
+    file_to_add = request.json["filepath"]
+    try:
+        config = load_config()
+        log.critical(config["theoracle_repo"])
+        log.critical(git.get_repo_dir(the_oracle_repo))
+
+        # Do Git stuff.
+        # 1. Git Pull (Make sure we're in sync)
+        log.info("Pulling data from remote '{}'...".format(the_oracle_repo.remotes.origin))
+        the_oracle_repo.remotes.origin.pull()
+
+        # 2. Git Add the YARA rule file.
+        log.info("Git Add file to repo '{repo}': {fn}".format(repo=the_oracle_repo.git_dir, fn=file_to_add))
+        the_oracle_repo.index.add(file_to_add)
+
+        # 3. Git Commit
+        commit_message = config["git_commit_msg_fmt"].format(rulename=request.json["rulename"])
+        git_author = git.Actor(config["git_username"], config["git_email"])
+        git_committer = git_author  # git.gitpy.Actor(config["git_username"], config["git_email"]
+
+        log.info("Git Commit.")
+        log.debug("message={message}, author={author}, committer={committer}".format(
+            message=commit_message, author=git_author, committer=git_committer))
+
+        the_oracle_repo.index.commit(message=commit_message, author=git_author, committer=git_committer)
+
+        last_commit = the_oracle_repo.head.commit
+        # git_author = git.gitpy.Actor(config["git_username"], config["git_email"])
+        # new_commit = git.Commit(repo=the_oracle_repo,
+        #                         author=git.gitpy.Actor(config["git_username"], config["git_email"]),
+        #
+        #                         message=config["git_commit_msg_fmt"].format(rulename=request.json.rulename))
+
+        # 4. Git Push
+        log.info("Git push commit '{msg}' ({binsha}) to {origin}".format(msg=last_commit.message,
+                                                                         binsha=str(last_commit.binsha),
+                                                                         origin=the_oracle_repo.remotes.origin))
+        the_oracle_repo.remotes.origin.push()
+    except Exception as exc:
+        log.exception("Unexpected exception!", exc_info=exc)
+        json_result["out"] = {
+            "success": False,
+            "error": {
+                "message": str(exc),
+                "type": "Exception"
+            }
+        }
+
+    # Make response.
+    return make_response(jsonify(json_result), 200)
 
 
 def home():
