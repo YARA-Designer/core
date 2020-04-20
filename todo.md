@@ -15,6 +15,7 @@
 * Add some sort of hashed "state" string to URL to reproduce the current editor elements from URL.
 * Properly implement showing of column error occurred on (currently just appended to SyntaxError str).
 * Split (what's possible) of script blocks into separate .js files.
+* Make commit & push button close modal upon `onclick` event.
 
 ### Bugs:
 * Drag and drop won't work until you've added at least one item to the editor, 
