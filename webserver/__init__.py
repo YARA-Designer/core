@@ -229,7 +229,11 @@ def post_commit_json():
     # return make_response(jsonify(generate_yara_rule(request.json)), 200)
     return make_response(jsonify({"in": request.json,
                                   "out": {
-                                      "message": "post_commit_json NOT IMPLEMENTED"
+                                      "success": False,
+                                      "error": {
+                                          "message": "post_commit_json NOT IMPLEMENTED",
+                                          "type": "Implementation"
+                                      }
                                          }
                                   }), 200)
 

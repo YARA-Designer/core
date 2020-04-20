@@ -749,7 +749,70 @@
             // Convert a JavaScript value to a JavaScript Object Notation (JSON) string (Required for POST).
             xhr.send(JSON.stringify(json));
         }
-        
+
+        function handlePostCommitResponse(json) {
+            let errorType = "";
+            let errorMessage = "";
+            let level = "success";
+
+            // Parse JSON:
+            let outJson = json["out"];
+
+            // let compilable = outJson["compilable"];
+            let success = outJson["success"];
+
+            if (!success) {
+                errorMessage = outJson["error"]["message"];
+                errorType = outJson["error"]["type"];
+                level = "error";
+
+                console.log("errorMessage: " + errorMessage);
+                console.log("errorType: " + errorType);
+                console.log("level: " + level);
+            }
+
+            // Define header
+            let header = `<h2>YARA rule commit & push results: ${String(level).toUpperCase()}</h2>`;
+
+            // Define body
+            let body = "";
+
+            // Error message (if any).
+            if (!success) {
+                body += `<p>${errorType.replace(/^\w/, c => c.toUpperCase())} error message: ${errorMessage}</p>`;
+            }
+
+            // Collapsible raw JSON details.
+            body +=
+                "<button type='button' class='response-modal-json-collapsible-button'>Show JSON</button>" +
+                "<div class='response-modal-json-collapsible-content'>" +
+                    "<pre>" +
+                        JSON.stringify(json, undefined, 4) +
+                    "</pre>" +
+                "</div>";
+
+            // Spawn modal.
+            popupModal("response-modal", header, body, MODAL_DEFAULT_FOOTER, level);
+
+            // Perform changes that requires a spawned modal:
+
+            // // Add bindings to buttons.
+            // document.getElementById("response-modal-button-commit-onclick").onclick = function() {
+            //     // Perform bound action.
+            //     let jsonToCommit = {};
+            //     jsonToCommit["filepath"] = yaraRuleSourceFile;
+            //     jsonToCommit["rulename"] = json["in"]["rule"]; // FIXME: Make backend send the proper sanitized rulename in "out" dict.
+            //
+            //     postCommit(jsonToCommit);
+            //
+            //     // Close modal after handling button action.
+            //     document.getElementById("confirmation-modal").style.display = "none";
+            // };
+
+            // Make the JSON detailsCollapsible element actually collapsible.
+            addCaseDetailsCollapsibleButtonLogic("response-modal-json-collapsible-button");
+        }
+
         /**
          * Make a custom POST request for non-form elements like DIV and SPAN.
          */
@@ -765,7 +828,16 @@
             // Add custom handling of the response returned by XHR POST URL.
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
-                    handlePostCommitResponse(JSON.parse(xhr.responseText));  // FIXME: Unhandled response (as of yet).
+                    // Make sure to close any open modals.
+                    for ( let modalElement of document.getElementsByClassName("custom-modal") ) {
+                        if (modalElement.style.display !== "none") {
+                            console.log("[postCommit] xhr.onreadystatechange: Closed open modal: " + modalElement.id);
+                            modalElement.style.display = "none";
+                        }
+                    }
+
+                    // Handle response.
+                    handlePostCommitResponse(JSON.parse(xhr.responseText));
                 }
             };
 
