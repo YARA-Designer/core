@@ -190,7 +190,7 @@ def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules
     :param filename:
     :param file_ext:
     :param rules_dir:
-    :return:
+    :return: saved filepath.
     """
     # If no custom rules dir is given, use TheOracle's.
     if rules_dir is None:
@@ -206,6 +206,9 @@ def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules
         # Save YARA source rule to plaintext file using regular Python standard file I/O.
         with open(filepath, 'w') as f:
             f.write(rules)
+
+        log.info("Saved YARA rules to file: {}".format(filepath))
+        return filepath
     else:
         raise ValueError("save_source: rules must be 'str'.")
 
@@ -382,7 +385,17 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
     log.debug("source: \n{}".format(source))    # FIXME: DEBUG
 
     # Save source rule to text file.
-    save_source(rules=source, filename=sanitized_rule_name)
+    try:
+        retv["generated_yara_source_file"] = save_source(rules=source, filename=sanitized_rule_name)
+    except Exception as exc:
+        log.exception("Handing exception thrown by save_source(rules={rules}, filename={fname})".format(
+            rules=source, fname=sanitized_rule_name), exc_info=exc)
+        retv["generated_yara_source_file"] = None
+        retv["success"] = False
+        retv["compilable"] = False
+        retv["error"] = {"type": "Exception", "message": str(exc)}
+
+        return retv
 
     try:
         compiled_yara_rules: yara.Rules = yara.compile(source=source,
