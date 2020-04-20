@@ -7,6 +7,7 @@
 
 ##Backend
 * Implement handling incoming YARA rule to be pushed to TheoOracle.
+* Rename retv dict to be attribute compatible (no fancy characters).
 
 ##Frontend
 * Implement sending valid YARA rule to TheOracle/Backend.
