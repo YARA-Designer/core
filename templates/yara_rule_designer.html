@@ -12,8 +12,9 @@
     <!-- Set Jinja2 variables for use in JavaScript -->
     <!--    Theme handler: -->
     <meta id="themeArg" data-name="{{ theme }}" data-path="{{ url_for('static', filename='themes') + '/' }}">
-    <!--    JavaScript custom POST handler -->
-    <meta id="postUrl" data-url="{{ url_for('post_rule_json') }}">
+    <!--    JavaScript custom POST handlers -->
+    <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
+    <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
     <!--    YARA rule variables gathered from backend for use in POST request -->
     <meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}">
     <meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
@@ -403,7 +404,7 @@
                 // Perform bound action (if defined).
                 noAction && noAction();
 
-                // Close modal.
+                // Close modal after handling button action.
                 document.getElementById("confirmation-modal").style.display = "none";
             };
         }
@@ -621,6 +622,8 @@
 
             let sourcePreprocessed = outJson["source (preprocessed)"];
 
+            let yaraRuleSourceFile = outJson["generated_yara_source_file"];
+
             if (!compilable) {
                 level = "warning";
             }
@@ -684,6 +687,13 @@
             }
             body += "</pre>";
 
+            // Add commit button if valid result.
+            if (success) {
+                body += `<button id="response-modal-button-commit-onclick" class="response-modal-button-commit">Commit & Push</button>`;
+            } else {
+                body += `<button id="response-modal-button-commit-onclick" class="response-modal-button-commit-disabled" disabled>Commit & Push</button>`;
+            }
+
             // Collapsible raw JSON details.
             body +=
                 "<button type='button' class='response-modal-json-collapsible-button'>Show JSON</button>" +
@@ -692,8 +702,25 @@
                         JSON.stringify(json, undefined, 4) +
                     "</pre>" +
                 "</div>";
-
+            
+            // Spawn modal.
             popupModal("response-modal", header, body, MODAL_DEFAULT_FOOTER, level);
+            
+            // Perform changes that requires a spawned modal:
+            
+            // Add bindings to buttons.
+            document.getElementById("response-modal-button-commit-onclick").onclick = function() {
+                // Perform bound action.
+                let jsonToCommit = {};
+                jsonToCommit["filepath"] = yaraRuleSourceFile;
+                jsonToCommit["rulename"] = json["in"]["rule"]; // FIXME: Make backend send the proper sanitized rulename in "out" dict.
+
+                postCommit(jsonToCommit);
+                
+                // Close modal after handling button action.
+                document.getElementById("confirmation-modal").style.display = "none";
+            };
+            
             // Make the JSON detailsCollapsible element actually collapsible.
             addCaseDetailsCollapsibleButtonLogic("response-modal-json-collapsible-button");
         }
@@ -705,17 +732,40 @@
             let json = getRuleJsonFromEditorElements();
 
             let xhr = new XMLHttpRequest();
-            let postUrl = $('#postUrl').data().url;
+            let postDesignedRuleUrl = $('#postDesignedRuleUrl').data().url;
 
-            console.log("POST URL: " + postUrl);
+            console.log("POST URL: " + postDesignedRuleUrl);
 
-            xhr.open("POST", postUrl, true);
+            xhr.open("POST", postDesignedRuleUrl, true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             // Add custom handling of the response returned by XHR POST URL.
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     handlePostRuleResponse(JSON.parse(xhr.responseText));
+                }
+            };
+
+            // Convert a JavaScript value to a JavaScript Object Notation (JSON) string (Required for POST).
+            xhr.send(JSON.stringify(json));
+        }
+        
+        /**
+         * Make a custom POST request for non-form elements like DIV and SPAN.
+         */
+        function postCommit(json) {
+            let xhr = new XMLHttpRequest();
+            let postCommitUrl = $('#postCommitUrl').data().url;
+
+            console.log("POST URL: " + postCommitUrl);
+
+            xhr.open("POST", postCommitUrl, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            // Add custom handling of the response returned by XHR POST URL.
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    handlePostCommitResponse(JSON.parse(xhr.responseText));  // FIXME: Unhandled response (as of yet).
                 }
             };
 
