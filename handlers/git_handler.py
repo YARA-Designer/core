@@ -1,6 +1,10 @@
 import os
+from pathlib import Path
 
-import git
+import git as gitpy
+from git import Repo, Remote
+from git.objects import Blob, Commit, TagObject, Tree, Submodule
+from git.util import Actor
 
 from handlers.config_handler import load_config
 from handlers.log_handler import create_logger
@@ -16,13 +20,17 @@ def is_repo(path):
     :return:        Boolean.
     """
     try:
-        _ = git.Repo(path).git_dir
+        _ = gitpy.Repo(path).git_dir
         return True
-    except git.exc.InvalidGitRepositoryError:
+    except gitpy.exc.InvalidGitRepositoryError:
         return False
 
 
-def get_or_init_repo(path: str) -> git.Repo:
+def get_repo_dir(repo: Repo, strict=True) -> str:
+    return str(Path(repo.git_dir).parent.resolve(strict=strict))
+
+
+def get_or_init_repo(path: str) -> gitpy.Repo:
     """
     Gets a Git repo, if one doesn't already exist inits one and returns that.
 
@@ -33,14 +41,14 @@ def get_or_init_repo(path: str) -> git.Repo:
     if is_repo(path):
         # An existing repo as a base.
         log.info("'{}' is already a Git repository, skipping init.".format(path))
-        return git.Repo(path)
+        return gitpy.Repo(path)
     else:
         # An empty repo as a base.
         log.info("Initializing Git repository: '{}'.".format(path))
-        return git.Repo.init(path)
+        return gitpy.Repo.init(path)
 
 
-def add_remote(remote_name: str, repo: git.Repo, url: str) -> git.Remote:
+def add_remote(remote_name: str, repo: gitpy.Repo, url: str) -> gitpy.Remote:
     """
     Adds a remote to a Git repository.
 
@@ -77,7 +85,7 @@ def add_remote(remote_name: str, repo: git.Repo, url: str) -> git.Remote:
     return remote
 
 
-def pull(remote: git.Remote):
+def pull(remote: gitpy.Remote):
     """
     Performs a Git pull from a given remote repository.
 
@@ -88,7 +96,7 @@ def pull(remote: git.Remote):
     remote.pull()
 
 
-def clone_if_not_exist(url: str, path: str) -> git.Repo:
+def clone_if_not_exist(url: str, path: str) -> gitpy.Repo:
     """
     Sets up and clones a Git repository of Repo and/or remote "origin" does not exist,
     else it performs a Git pull on an existing one.
