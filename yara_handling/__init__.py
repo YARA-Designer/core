@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+
 import yara
 import re
 from typing import overload, Union, List
@@ -190,7 +192,7 @@ def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules
     :param filename:
     :param file_ext:
     :param rules_dir:
-    :return: saved filepath.
+    :return: saved filepath as a Path(PurePath) object.
     """
     # If no custom rules dir is given, use TheOracle's.
     if rules_dir is None:
@@ -200,7 +202,7 @@ def save_source(rules: str, filename: str, file_ext=SOURCE_FILE_EXTENSION, rules
     if not os.path.isdir(rules_dir):
         os.mkdir(rules_dir)
 
-    filepath = os.path.join(rules_dir, filename + file_ext)
+    filepath = Path(os.path.join(rules_dir, filename + file_ext))
 
     if isinstance(rules, str):
         # Save YARA source rule to plaintext file using regular Python standard file I/O.
@@ -386,7 +388,8 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
 
     # Save source rule to text file.
     try:
-        retv["generated_yara_source_file"] = save_source(rules=source, filename=sanitized_rule_name)
+        retv["generated_yara_source_file"] = str(save_source(rules=source,
+                                                             filename=sanitized_rule_name).resolve(strict=True))
     except Exception as exc:
         log.exception("Handing exception thrown by save_source(rules={rules}, filename={fname})".format(
             rules=source, fname=sanitized_rule_name), exc_info=exc)
