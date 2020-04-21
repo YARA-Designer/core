@@ -750,6 +750,18 @@
             xhr.send(JSON.stringify(json));
         }
 
+        function printGitLogEntry(hexSha, authorUsername, authorEmail, dateString, msg) {
+            let retv = `<span>
+                           commit ${hexSha}<br/>
+                           Author: ${authorUsername} &lt;<a href="mailto:${authorEmail}">${authorEmail}</a>&gt;<br/>
+                           Date: &nbsp;&nbsp; ${dateString}<br/>
+                           <br/>
+                           &nbsp;&nbsp;&nbsp;&nbsp;${msg}
+                       </span>`;
+
+            return retv;
+        }
+
         function handlePostCommitResponse(json) {
             let errorType = "";
             let errorMessage = "";
@@ -780,6 +792,13 @@
             // Error message (if any).
             if (!success) {
                 body += `<p>${errorType.replace(/^\w/, c => c.toUpperCase())} error message: ${errorMessage}</p>`;
+            }
+
+            // Main (body) contents.
+            if (success) {
+                let commit = outJson["commit"];
+                body += printGitLogEntry(commit["hexsha"], commit["author_username"], commit["author_email"],
+                                         commit["committed_date_custom"], commit["message"]);
             }
 
             // Collapsible raw JSON details.

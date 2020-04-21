@@ -1,3 +1,4 @@
+import datetime
 import json
 
 import handlers.git_handler as git
@@ -288,7 +289,11 @@ def post_commit_json():
                 "author_email": last_commit.author.email,
                 "committer_username": last_commit.committer.name,
                 "committer_email": last_commit.committer.email,
-                "committed_date": last_commit.committed_date
+                "committed_date_epoch": last_commit.committed_date,
+                # Include some formatted dates to avoid dealing with it in Frontend/JavaScript.
+                "committed_date_iso": datetime.datetime.isoformat(last_commit.committed_datetime),
+                "committed_date_custom": datetime.datetime.strftime(last_commit.committed_datetime,
+                                                                    config["git_datetime_custom_fmt"])
             }
         }
     except Exception as exc:

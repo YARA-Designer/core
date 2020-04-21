@@ -19,6 +19,7 @@ DEFAULT_CONFIG = {
     "git_username": "",
     "git_email": "",
     "git_commit_msg_fmt": "Update YARA Rule: {rulename}",
+    "git_datetime_custom_fmt": "%a %b %d %H:%M:%S %Y %z",
     "theoracle_server": "127.0.0.1",
     "theoracle_port": 22,
     "theoracle_user": "git",
