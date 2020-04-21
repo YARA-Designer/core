@@ -752,35 +752,39 @@
         }
 
         function printGitLogEntry(hexSha, authorUsername, authorEmail, dateString, msg) {
-            let retv = `<span>
-                           commit ${hexSha}<br/>
-                           Author: ${authorUsername} &lt;<a href="mailto:${authorEmail}">${authorEmail}</a>&gt;<br/>
-                           Date: &nbsp;&nbsp; ${dateString}<br/>
-                           <br/>
-                           &nbsp;&nbsp;&nbsp;&nbsp;${msg}
-                       </span>`;
-
-            return retv;
+            return `<span>
+                        commit ${hexSha}<br/>
+                        Author: ${authorUsername} &lt;<a href="mailto:${authorEmail}">${authorEmail}</a>&gt;<br/>
+                        Date: &nbsp;&nbsp; ${dateString}<br/>
+                        <br/>
+                        &nbsp;&nbsp;&nbsp;&nbsp;${msg}
+                    </span>`;
         }
 
         function printGitDiff(diffString, color=true) {
+            if (diffString === "") {
+                return "<p>There were no differences between this and the previous commit.</p>"
+            }
+
             let retv = "<pre class='numbered_lines'>";
 
             if (color) {
                 for (let line of diffString.split('\n')) {
                     if (line.startsWith("+")) {
-                        retv += `<mark class='red-text'>${line}</mark>\n`
+                        retv += `<span><mark class='red-text'>${line}</mark>\n</span>`
                     } else if (line.startsWith("-")) {
-                        retv += `<mark class='green-text'>${line}</mark>\n`
+                        retv += `<span><mark class='green-text'>${line}</mark>\n</span>`
                     }
                     else {
-                        retv += `${line}\n`;
+                        retv += `<span>${line}\n</span>`;
                     }
                 }
-                retv += "</pre>";
             } else {
-                retv += `${diffString}</pre>`
+                for (let line of diffString.split('\n')) {
+                    retv += `<span>${line}</span>`
+                }
             }
+                retv += "</pre>";
 
             return retv;
         }
