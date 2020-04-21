@@ -762,6 +762,12 @@
             return retv;
         }
 
+        function printGitDiff(diffString) {
+            let retv = `<pre>${diffString}</pre>`
+
+            return retv;
+        }
+
         function handlePostCommitResponse(json) {
             let errorType = "";
             let errorMessage = "";
@@ -799,6 +805,8 @@
                 let commit = outJson["commit"];
                 body += printGitLogEntry(commit["hexsha"], commit["author_username"], commit["author_email"],
                                          commit["committed_date_custom"], commit["message"]);
+                body += "<br/><br/>";
+                body += printGitDiff(commit["diff"]);
             }
 
             // Collapsible raw JSON details.

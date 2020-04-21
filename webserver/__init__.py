@@ -293,7 +293,8 @@ def post_commit_json():
                 # Include some formatted dates to avoid dealing with it in Frontend/JavaScript.
                 "committed_date_iso": datetime.datetime.isoformat(last_commit.committed_datetime),
                 "committed_date_custom": datetime.datetime.strftime(last_commit.committed_datetime,
-                                                                    config["git_datetime_custom_fmt"])
+                                                                    config["git_datetime_custom_fmt"]),
+                "diff": the_oracle_repo.git.diff('HEAD~1')
             }
         }
     except Exception as exc:
