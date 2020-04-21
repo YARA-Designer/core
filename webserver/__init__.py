@@ -235,7 +235,7 @@ def post_commit_json():
         "out": {
             "success": False,
             "error": {
-                "message": "post_commit_json NOT IMPLEMENTED",
+                "message": "post_commit_json body (try) never ran",
                 "type": "Implementation"
                 }
             }
@@ -244,11 +244,8 @@ def post_commit_json():
     file_to_add = request.json["filepath"]
     try:
         config = load_config()
-        log.critical(config["theoracle_repo"])
-        log.critical(git.get_repo_dir(the_oracle_repo))
 
-        # Do Git stuff.
-        # 1. Git Pull (Make sure we're in sync)
+        # 1. Git Pull (Make sure we're in sync with remote/origin).
         log.info("Pulling data from remote '{}'...".format(the_oracle_repo.remotes.origin))
         the_oracle_repo.remotes.origin.pull()
 
@@ -257,46 +254,57 @@ def post_commit_json():
         the_oracle_repo.index.add(file_to_add)
 
         # 3. Git Commit
-        commit_message = config["git_commit_msg_fmt"].format(rulename=request.json["rulename"])
-        git_author = git.Actor(config["git_username"], config["git_email"])
-        git_committer = git_author  # git.gitpy.Actor(config["git_username"], config["git_email"]
+        # Only commit if working tree differs (i.e. there is an actual change).
+        tree_differs = False if the_oracle_repo.index.diff('HEAD') == [] else True
+        log.debug("Tree differs: {}".format(tree_differs))
 
-        log.info("Git Commit.")
-        log.debug("message={message}, author={author}, committer={committer}".format(
-            message=commit_message, author=git_author, committer=git_committer))
+        if tree_differs:
+            commit_message = config["git_commit_msg_fmt"].format(rulename=request.json["rulename"])
+            git_author = git.Actor(config["git_username"], config["git_email"])
+            git_committer = git_author  # git.gitpy.Actor(config["git_username"], config["git_email"]
 
-        the_oracle_repo.index.commit(message=commit_message, author=git_author, committer=git_committer)
+            log.info("Git Commit.")
+            log.debug("message={message}, author={author}, committer={committer}".format(
+                message=commit_message, author=git_author, committer=git_committer))
 
-        last_commit = the_oracle_repo.head.commit
-        # git_author = git.gitpy.Actor(config["git_username"], config["git_email"])
-        # new_commit = git.Commit(repo=the_oracle_repo,
-        #                         author=git.gitpy.Actor(config["git_username"], config["git_email"]),
-        #
-        #                         message=config["git_commit_msg_fmt"].format(rulename=request.json.rulename))
+            the_oracle_repo.index.commit(message=commit_message, author=git_author, committer=git_committer)
 
-        # 4. Git Push
-        log.info("Git push commit '{msg}' ({hexsha}) to {origin}".format(msg=last_commit.message,
-                                                                         hexsha=last_commit.hexsha,
-                                                                         origin=the_oracle_repo.remotes.origin))
-        the_oracle_repo.remotes.origin.push()
+            last_commit = the_oracle_repo.head.commit
 
-        result["out"] = {
-            "success": True,
-            "commit": {
-                "message": last_commit.message,
-                "hexsha": last_commit.hexsha,
-                "author_username": last_commit.author.name,
-                "author_email": last_commit.author.email,
-                "committer_username": last_commit.committer.name,
-                "committer_email": last_commit.committer.email,
-                "committed_date_epoch": last_commit.committed_date,
-                # Include some formatted dates to avoid dealing with it in Frontend/JavaScript.
-                "committed_date_iso": datetime.datetime.isoformat(last_commit.committed_datetime),
-                "committed_date_custom": datetime.datetime.strftime(last_commit.committed_datetime,
-                                                                    config["git_datetime_custom_fmt"]),
-                "diff": the_oracle_repo.git.diff('HEAD~1')
+            # 4. Git Push
+            log.info("Git push commit '{msg}' ({hexsha}) to {origin}".format(msg=last_commit.message,
+                                                                             hexsha=last_commit.hexsha,
+                                                                             origin=the_oracle_repo.remotes.origin))
+            the_oracle_repo.remotes.origin.push()
+
+            result["out"] = {
+                "success": True,
+                "commit": {
+                    "message": last_commit.message,
+                    "hexsha": last_commit.hexsha,
+                    "author_username": last_commit.author.name,
+                    "author_email": last_commit.author.email,
+                    "committer_username": last_commit.committer.name,
+                    "committer_email": last_commit.committer.email,
+                    "committed_date_epoch": last_commit.committed_date,
+                    # Include some formatted dates to avoid dealing with it in Frontend/JavaScript.
+                    "committed_date_iso": datetime.datetime.isoformat(last_commit.committed_datetime),
+                    "committed_date_custom": datetime.datetime.strftime(last_commit.committed_datetime,
+                                                                        config["git_datetime_custom_fmt"]),
+                    "diff": the_oracle_repo.git.diff('HEAD~1')
+                }
             }
-        }
+        else:
+            log.warning("Git Commit ignored, file added to repo does not differ from working tree: '{fn}".format(fn=file_to_add))
+            result["out"] = {
+                "success": False,
+                "commit": None,
+                "error": {
+                    "message": "Nothing to commit, working tree clean (file added didn't differ).",
+                    "type": "Git diff",
+                    "level": "warning"
+                }
+            }
     except Exception as exc:
         log.exception("Unexpected exception!", exc_info=exc)
         result["out"] = {

@@ -272,7 +272,7 @@
         const KEYWORD_CLASSES = ["condition_keyword"];
         const MODAL_DEFAULT_HEADER = "";
         const MODAL_DEFAULT_BODY = "";
-        const MODAL_DEFAULT_FOOTER = "<p>Tip: Click anywhere outside of this modal to cancel the current operation.</p>";
+        const MODAL_DEFAULT_FOOTER = "<p>Tip: Click anywhere outside of this modal to close.</p>";
         const MODAL_DEFAULT_CONFIRMATION_HEADER = "<h2>Are you sure?</h2>";
         const MODAL_DEFAULT_CONFIRMATION_BODY = "";
         const MODAL_DEFAULT_CONFIRMATION_FOOTER = MODAL_DEFAULT_FOOTER;
@@ -803,7 +803,7 @@
             if (!success) {
                 errorMessage = outJson["error"]["message"];
                 errorType = outJson["error"]["type"];
-                level = "error";
+                level = outJson["error"].hasOwnProperty("level") ? outJson["error"]["level"] : "error";
 
                 console.log("errorMessage: " + errorMessage);
                 console.log("errorType: " + errorType);
@@ -818,7 +818,7 @@
 
             // Error message (if any).
             if (!success) {
-                body += `<p>${errorType.replace(/^\w/, c => c.toUpperCase())} error message: ${errorMessage}</p>`;
+                body += `<p>${errorType.replace(/^\w/, c => c.toUpperCase())} ${level} message: ${errorMessage}</p>`;
             }
 
             // Main (body) contents.
