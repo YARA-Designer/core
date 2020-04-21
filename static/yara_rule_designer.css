@@ -22,6 +22,8 @@
     --modal_color_warning: black;
     --modal_background_error: #da423f;
     --modal_color_error: white;
+    --mark-green-text-color: #218820;
+    --mark-red-text-color: #af2a1c;
 }
 
 /* DEBUG Helper: Make ghost items visible */
@@ -365,7 +367,7 @@ html, body {
 }
 
 mark.red-text {
-    color: var(--modal_background_error);
+    color: var(--mark-red-text-color);
     /* background is required to override Bootstrap's CSS. */
     background-color: var(--custom_modal-background);
 }
@@ -375,7 +377,7 @@ mark.red-bg {
 }
 
 mark.green-text {
-    color: var(--modal_background_success);
+    color: var(--mark-green-text-color);
     /* background is required to override Bootstrap's CSS. */
     background-color: var(--custom_modal-background);
 }
