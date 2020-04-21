@@ -674,11 +674,12 @@
                         let stringToMark = lines[i].substring(errorColumnNumber -1, errorColumnRange - 1);
                         let stringPastMark = lines[i].substring(errorColumnRange -1, lines[i].length);
 
+                        // FIXME: Debug (not sure it is quite over yet).
                         // console.log("stringUpToMark: " + stringUpToMark);
                         // console.log(`stringToMark: '${stringToMark}'`);
                         // console.log("stringPastMark: " + stringPastMark);
 
-                        lines[i] = `${stringUpToMark}<mark class='red'>${stringToMark}</mark>${stringPastMark}`;
+                        lines[i] = `${stringUpToMark}<mark class='red-bg'>${stringToMark}</mark>${stringPastMark}`;
                     }
                 }
 
@@ -762,8 +763,24 @@
             return retv;
         }
 
-        function printGitDiff(diffString) {
-            let retv = `<pre>${diffString}</pre>`
+        function printGitDiff(diffString, color=true) {
+            let retv = "<pre class='numbered_lines'>";
+
+            if (color) {
+                for (let line of diffString.split('\n')) {
+                    if (line.startsWith("+")) {
+                        retv += `<mark class='red-text'>${line}</mark>\n`
+                    } else if (line.startsWith("-")) {
+                        retv += `<mark class='green-text'>${line}</mark>\n`
+                    }
+                    else {
+                        retv += `${line}\n`;
+                    }
+                }
+                retv += "</pre>";
+            } else {
+                retv += `${diffString}</pre>`
+            }
 
             return retv;
         }
@@ -806,7 +823,7 @@
                 body += printGitLogEntry(commit["hexsha"], commit["author_username"], commit["author_email"],
                                          commit["committed_date_custom"], commit["message"]);
                 body += "<br/><br/>";
-                body += printGitDiff(commit["diff"]);
+                body += printGitDiff(commit["diff"], true);
             }
 
             // Collapsible raw JSON details.

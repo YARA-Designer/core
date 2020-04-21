@@ -12,6 +12,7 @@
     --draggable_artifact_background: #4a90dd;
     --draggable_artifact_type_color: white;
     --draggable_artifact_type_background: #2e86c1;
+    --custom_modal-background: white;
     /*--modal_background_info: #87898a;*/
     --modal_background_info: #5dade2;
     --modal_color_info: white;
@@ -363,7 +364,23 @@ html, body {
   color: #888
 }
 
-mark.red {
-    /*color:#ff0000;*/
+mark.red-text {
+    color: var(--modal_background_error);
+    /* background is required to override Bootstrap's CSS. */
+    background-color: var(--custom_modal-background);
+}
+
+mark.red-bg {
     background-color: var(--modal_background_error);
+}
+
+mark.green-text {
+    color: var(--modal_background_success);
+    /* background is required to override Bootstrap's CSS. */
+    background-color: var(--custom_modal-background);
+}
+
+
+mark.green-bg {
+    background-color: var(--modal_background_success);
 }
