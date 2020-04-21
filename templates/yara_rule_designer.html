@@ -16,7 +16,7 @@
     <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
     <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
     <!--    YARA rule variables gathered from backend for use in POST request -->
-    <meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}">
+    <meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}" data-id="{{ case.data.id }}">
     <meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
 {% endif %}
 
@@ -715,6 +715,7 @@
                 let jsonToCommit = {};
                 jsonToCommit["filepath"] = yaraRuleSourceFile;
                 jsonToCommit["rulename"] = json["in"]["rule"]; // FIXME: Make backend send the proper sanitized rulename in "out" dict.
+                jsonToCommit["case_id"] = $('#yaraRule').data().id;
 
                 postCommit(jsonToCommit);
                 

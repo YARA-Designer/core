@@ -1,12 +1,14 @@
 import datetime
 import json
+import os
+from pathlib import Path
 
 import handlers.git_handler as git
 from flask import render_template, request, jsonify, make_response
 from sqlalchemy.exc import SQLAlchemyError
 
-from database.models import PendingRule
-from database.operations import db_session
+from database.models import Rule
+from database.operations import db_session, update_rule
 import yara_handling
 from handlers.config_handler import load_config
 from handlers.log_handler import create_logger
@@ -19,14 +21,15 @@ the_oracle_repo: git.Repo
 log = create_logger(__name__)
 
 
-def get_pending_rule_db_by_case_id(case_id: str):
-    rule = None
+def get_rule_db_dict_by_case_id(case_id: str) -> dict:
     session = db_session()
 
     try:
         # Get the first item in the list of queries
-        query = session.query(PendingRule).filter(PendingRule.case_id == case_id)[0]
-        rule = {'added_on': query.added_on, 'data': query.data, 'case_id': query.case_id, 'id': query.id}
+        query = session.query(Rule).filter(Rule.case_id == case_id)[0]
+        rule = {'added_on': query.added_on, 'data': query.data, 'case_id': query.case_id,
+                'id': query.id, 'pending': query.pending, 'yara_file': query.yara_file,
+                'last_modified': query.last_modified}
 
         # Commit transaction (NB: makes detached instances expire)
         session.commit()
@@ -38,13 +41,12 @@ def get_pending_rule_db_by_case_id(case_id: str):
     return rule
 
 
-def get_pending_rules_db():
-    pending_rules = []
+def get_db_rule_by_case_id(case_id: str) -> Rule:
     session = db_session()
 
     try:
-        for row in session.query(PendingRule).all():
-            pending_rules.append({'added_on': row.added_on, 'data': row.data, 'case_id': row.case_id, 'id': row.id})
+        # Get the first item in the list of queries
+        rule: Rule = session.query(Rule).filter(Rule.case_id == case_id)[0]
 
         # Commit transaction (NB: makes detached instances expire)
         session.commit()
@@ -53,12 +55,49 @@ def get_pending_rules_db():
     finally:
         session.close()
 
-    return pending_rules
+    return rule
+
+
+def get_db_rules():
+    rules = []
+    session = db_session()
+
+    try:
+        for rule in session.query(Rule).all():
+            rules.append(rule)
+
+        # Commit transaction (NB: makes detached instances expire)
+        session.commit()
+    except SQLAlchemyError:
+        raise
+    finally:
+        session.close()
+
+    return rules
+
+
+def get_db_rules_dict():
+    rules = []
+    session = db_session()
+
+    try:
+        for rule in session.query(Rule).all():
+            rules.append(rule.as_dict())
+            log.debug("get_db_rules_dict rule: {}".format(json.dumps(dict_to_json(rule.as_dict()), indent=4)))
+
+        # Commit transaction (NB: makes detached instances expire)
+        session.commit()
+    except SQLAlchemyError:
+        raise
+    finally:
+        session.close()
+
+    return rules
 
 
 def list_pending_rules_rawhtml():
     # Get pending rules from database.
-    pending_rules = get_pending_rules_db()
+    pending_rules = get_db_rules()
 
     line = ""
     for rule in pending_rules:
@@ -83,15 +122,18 @@ def dict_to_json(d: dict):
     return json.loads(rule_json_str)
 
 
-def list_pending_rules():
+def list_rules():
     # Get pending rules from database.
-    pending_rules_dict = get_pending_rules_db()
+    rule_dicts = get_db_rules_dict()
 
-    pending_rules_json = []
-    for rule_dict in pending_rules_dict:
-        pending_rules_json.append(dict_to_json(rule_dict))
+    rules_json = []
+    for rule_dict in rule_dicts:
+        if rule_dict["yara_file"]:
+            # Strip path down to only filename itself.
+            rule_dict["yara_file"] = rule_dict["yara_file"].split(os.path.sep)[-1]
+        rules_json.append(dict_to_json(rule_dict))
 
-    return render_template('list_pending_rules.html', cases=pending_rules_json)
+    return render_template('list_rules.html', rules=rules_json)
 
 
 def new_rule():
@@ -103,7 +145,7 @@ def new_rule():
         return "Please specify a case ID!"
 
     return render_template('new_yara_rule.html',
-                           case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
+                           case=dict_to_json(get_rule_db_dict_by_case_id(request.args.get('id'))))
 
 
 def new_rule_raw():
@@ -111,14 +153,14 @@ def new_rule_raw():
         return "Please specify a case ID!"
 
     return render_template('yara_rule_raw.html',
-                           case=dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id'))))
+                           case=dict_to_json(get_rule_db_dict_by_case_id(request.args.get('id'))))
 
 
 def new_rule_designer():
     if 'id' not in request.args:
         return "Please specify a case ID!"
 
-    case = dict_to_json(get_pending_rule_db_by_case_id(request.args.get('id')))
+    case = dict_to_json(get_rule_db_dict_by_case_id(request.args.get('id')))
     theme = request.args.get('theme')
     log.info("Rendering YARA Rule Designer template for case '{cname}' (ID: {cid})".format(
         cname=case["data"]["title"], cid=request.args.get('id')))
@@ -294,6 +336,11 @@ def post_commit_json():
                     "diff": the_oracle_repo.git.diff('HEAD~1')
                 }
             }
+
+            log.info("update_rule(case_id={cid}, "
+                     "yara_file={yara_filepath})".format(cid=request.json["case_id"],
+                                                         yara_filepath=request.json["filepath"]))
+            update_rule(request.json["case_id"], yara_file=request.json["filepath"], pending=False)
         else:
             log.warning("Git Commit ignored, file added to repo does not differ from working tree: '{fn}".format(fn=file_to_add))
             result["out"] = {

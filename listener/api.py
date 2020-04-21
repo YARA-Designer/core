@@ -7,7 +7,7 @@ from werkzeug.datastructures import ImmutableMultiDict
 from database.operations import add_row
 from handlers import config_handler
 
-from database.models import PendingRule
+from database.models import Rule
 from handlers.log_handler import create_logger
 
 log = create_logger(__name__)
@@ -58,7 +58,7 @@ def create_yara_whitelist_rule():
         # log.debugs("Case with observables:\n{}".format(json.dumps(thehive_case, indent=4)))
 
         # Store the modified thehive:case JSON to database.
-        add_row(PendingRule(data=thehive_case))
+        add_row(Rule(data=thehive_case))
 
         return jsonify(thehive_case)
 

@@ -5,29 +5,33 @@
         <tr>
             <th style="width: 10px" class="p-0"></th>
             <th>Title</th>
+            <th>Pending</th>
             <th style="width: 100px;text-align:center">Severity</th>
             <th style="width: 100px">Observables</th>
             <th style="width: 60px">Owner</th>
             <th style="width: 120px">Added on</th>
+            <th>YARA file</th>
             <th>ID</th>
         </tr>
-        {% for case in cases %}
-             {% if case.data.tlp == 1 %}
+        {% for rule in rules %}
+             {% if rule.data.tlp == 1 %}
                 {% set tlp_class = "p-0 bg-tlp-1 clickable" %}
-             {% elif case.data.tlp == 2 %}
+             {% elif rule.data.tlp == 2 %}
                 {% set tlp_class = "p-0 bg-tlp-2 clickable" %}
-            {% elif case.data.tlp == 3 %}
+            {% elif rule.data.tlp == 3 %}
                 {% set tlp_class = "p-0 bg-tlp-3 clickable" %}
             {% endif %}
 
             <tr onclick="window.location='#';">
                 <td class={{ tlp_class }}></td>
-                <td><a href="{{ url_for('new_rule_designer', id=case.data.id) }}">{{ case.data.title }}</a></td>
-                <td>{{ case.data.severity }}</td>
-                <td>{{ case.data.observables|length }}</td>
-                <td>{{ case.data.owner }}</td>
-                <td>{{ case.added_on }} </td>
-                <td>{{ case.data.id }}</td>
+                <td><a href="{{ url_for('new_rule_designer', id=rule.data.id) }}">{{ rule.data.title }}</a></td>
+                <td>{{ rule.pending }}</td>
+                <td>{{ rule.data.severity }}</td>
+                <td>{{ rule.data.observables|length }}</td>
+                <td>{{ rule.data.owner }}</td>
+                <td>{{ rule.added_on }} </td>
+                <td>{{ rule.yara_file }}</td>
+                <td>{{ rule.data.id }}</td>
             </tr>
         {% endfor %}
     </table>
