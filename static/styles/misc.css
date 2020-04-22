@@ -1,6 +1,4 @@
-html {
-    /*background-color: #8ac640;*/
-}
+/* FIXME: Deprecated? */
 
 .caseDetailsCollapsible {
   background-color: #777;
@@ -36,10 +34,6 @@ th, td {
 }
 
 tr:nth-child(even) {background-color: #f2f2f2;}
-
-/*#yara_rule_designer*/
-
-/*#artifact_varname*/
 
 .raw_yara_condition_input {
   height:1.5%;

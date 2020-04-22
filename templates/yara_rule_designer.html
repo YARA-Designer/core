@@ -1,6 +1,6 @@
 <title>YARA Rule Designer: {{ case.data.title }}</title>
 <!--suppress HtmlUnknownTarget -->
-<link rel="stylesheet" href="{{ url_for('static', filename='yara_rule_designer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/yara_rule_designer.css') }}">
 
 {# Define default values for variables #}
 {% if artifacts is not defined %}
@@ -183,12 +183,12 @@
 
     <!-- Dragula - Drag 'n Drop   -->
     <!--suppress HtmlUnknownTarget -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='dragula.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/dragula.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
 
     <!-- Theme handler -->
-    <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/themes.js') }}"></script>
 
     <!-- Core Designer script block -->
-    <script src="{{ url_for('static', filename='js/designer.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/designer.js') }}"></script>
 {% endblock %}
