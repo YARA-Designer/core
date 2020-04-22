@@ -579,9 +579,9 @@ function printGitDiff(diffString, color=true) {
     if (color) {
         for (let line of diffString.split('\n')) {
             if (line.startsWith("+")) {
-                retv += `<span><mark class='red-text'>${line}</mark>\n</span>`
-            } else if (line.startsWith("-")) {
                 retv += `<span><mark class='green-text'>${line}</mark>\n</span>`
+            } else if (line.startsWith("-")) {
+                retv += `<span><mark class='red-text'>${line}</mark>\n</span>`
             }
             else {
                 retv += `<span>${line}\n</span>`;
@@ -651,7 +651,6 @@ function handlePostCommitResponse(json) {
     popupModal("response-modal", header, body, MODAL_DEFAULT_FOOTER, level);
 
     // Perform changes that requires a spawned modal:
-
     // Make the JSON detailsCollapsible element actually collapsible.
     addCaseDetailsCollapsibleButtonLogic("response-modal-json-collapsible-button");
 }
