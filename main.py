@@ -1,10 +1,9 @@
 from flask import Flask
 
-from handlers import config_handler
+from handlers import config_handler, webserver
 from handlers.log_handler import create_logger
 import handlers.git_handler as git
 from listener import api
-import webserver
 from database import init_db
 
 log = create_logger(__name__)
