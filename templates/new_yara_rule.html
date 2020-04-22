@@ -1,8 +1,0 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='styles/misc.css') }}">
-
-<!-- Set Jinja2 variables for use in JavaScript -->
-<meta id="post_rule_url" data-name="{{ url_for('post_rule') }}" data-other="{{other}}">
-
-{% set artifacts = case.data.observables %}
-{% include 'yara_rule_raw.html' %}
-{% include 'yara_rule_designer.html' %}

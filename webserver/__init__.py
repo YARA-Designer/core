@@ -136,18 +136,6 @@ def list_rules():
     return render_template('list_rules.html', rules=rules_json)
 
 
-def new_rule():
-    """
-    Renders a web page containing both raw rule cli and the designer.
-    :return:
-    """
-    if 'id' not in request.args:
-        return "Please specify a case ID!"
-
-    return render_template('new_yara_rule.html',
-                           case=dict_to_json(get_rule_db_dict_by_case_id(request.args.get('id'))))
-
-
 def new_rule_raw():
     if 'id' not in request.args:
         return "Please specify a case ID!"

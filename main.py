@@ -103,9 +103,6 @@ if __name__ == "__main__":
     # -- Listing of all pending rules.
     add_app_route(app, '/list', "List all rules pending creation.", view_func=webserver.list_rules)
 
-    # -- Page containing both raw rule cli and the designer.
-    add_app_route(app, '/yara_rule', "Create Yara rule.", view_func=webserver.new_rule)
-
     # -- Page to create raw yara rules on.
     add_app_route(app, '/yara_rule_raw', "Create Yara rule using only raw CLI.",
                   view_func=webserver.new_rule_raw, methods=['GET', 'POST'])
