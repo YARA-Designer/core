@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-from pathlib import Path
 
 import handlers.git_handler as git
 from flask import render_template, request, jsonify, make_response
@@ -9,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from database.models import Rule
 from database.operations import db_session, update_rule
-import yara_handling
+import handlers.yara
 from handlers.config_handler import load_config
 from handlers.log_handler import create_logger
 
@@ -164,7 +163,7 @@ def generate_yara_rule(j: json):
     log.debug("Received YARA Rule Dict: {}".format(j))
 
     # Processing status, return values and so forth.
-    retv = {"in": j, "out": yara_handling.compile_from_source(j)}
+    retv = {"in": j, "out": handlers.yara.compile_from_source(j)}
     log.debug("Returned YARA Rule Dict: {}".format(retv))
 
     return retv
