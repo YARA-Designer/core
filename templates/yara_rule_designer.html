@@ -222,6 +222,12 @@
 
     <!-- Core script block -->
     <script>
+        // Exceptions
+        function NoContentsException(message) {
+            this.message = message;
+            this.name = "NoContentsException"
+        }
+
         // https://stackoverflow.com/a/26272668
         function getStyleRuleValue(selector, style) {
          let selector_compare=selector.toLowerCase();
@@ -376,6 +382,18 @@
             return modal;
         }
 
+        function popupWarningModal(header, body, footer=null) {
+            let hdr = `<h2>Warning: ${header}</h2>`;
+            let bdy = `<h3>${body}</h3>`;
+            popupModal("response-modal", hdr, bdy, footer, "warning");
+        }
+
+        function popupErrorModal(header, body, footer=null) {
+            let hdr = `<h2>Warning: ${header}</h2>`;
+            let bdy = `<h3>${body}</h3>`;
+            popupModal("response-modal", hdr, bdy, footer, "error");
+        }
+
         /**
         *   Adds Yes/No confirmation buttons to a custom modal and binds actions to them.
         */
@@ -487,6 +505,9 @@
         function getEditorArtifactsAndTypes(unique=true) {
             let artifacts = [];
             let children = getEditorContents();
+            if (children.length === 0) {
+                throw new NoContentsException("Editor had no contents");
+            }
 
             for (let i = 0; i < children.length; i++) {
                 if ( ARTIFACT_CLASSES.includes(children[i].className) ) {
@@ -731,25 +752,35 @@
          * Make a custom POST request for non-form elements like DIV and SPAN.
          */
         function postRule() {
-            let json = getRuleJsonFromEditorElements();
+            try {
+                let json = getRuleJsonFromEditorElements();
 
-            let xhr = new XMLHttpRequest();
-            let postDesignedRuleUrl = $('#postDesignedRuleUrl').data().url;
+                let xhr = new XMLHttpRequest();
+                let postDesignedRuleUrl = $('#postDesignedRuleUrl').data().url;
 
-            console.log("POST URL: " + postDesignedRuleUrl);
+                console.log("POST URL: " + postDesignedRuleUrl);
 
-            xhr.open("POST", postDesignedRuleUrl, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.open("POST", postDesignedRuleUrl, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
 
-            // Add custom handling of the response returned by XHR POST URL.
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    handlePostRuleResponse(JSON.parse(xhr.responseText));
+                // Add custom handling of the response returned by XHR POST URL.
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        handlePostRuleResponse(JSON.parse(xhr.responseText));
+                    }
+                };
+
+                // Convert a JavaScript value to a JavaScript Object Notation (JSON) string (Required for POST).
+                xhr.send(JSON.stringify(json));
+            } catch (e) {
+                if (e.name === "NoContentsException") {
+                    console.warn(e.message, e.name);
+                    popupWarningModal(e.message, "Please add contents to the editor before submitting.");
+                } else {
+                    console.error(e.message, e.name);
+                    popupErrorModal(e.name, e.message);
                 }
-            };
-
-            // Convert a JavaScript value to a JavaScript Object Notation (JSON) string (Required for POST).
-            xhr.send(JSON.stringify(json));
+            }
         }
 
         function printGitLogEntry(hexSha, authorUsername, authorEmail, dateString, msg) {
