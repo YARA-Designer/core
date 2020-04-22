@@ -11,6 +11,7 @@
             <th style="width: 60px">Owner</th>
             <th style="width: 120px">Added on</th>
             <th>YARA file</th>
+            <th style="width: 120px">Last modified</th>
             <th>ID</th>
         </tr>
         {% for rule in rules %}
@@ -30,7 +31,8 @@
                 <td>{{ rule.data.observables|length }}</td>
                 <td>{{ rule.data.owner }}</td>
                 <td>{{ rule.added_on }} </td>
-                <td>{{ rule.yara_file }}</td>
+                <td>{{ rule.yara_file if rule.yara_file else '' }}</td>
+                <td>{{ rule.last_modified if rule.last_modified else 'Never' }}</td>
                 <td>{{ rule.data.id }}</td>
             </tr>
         {% endfor %}
