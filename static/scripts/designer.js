@@ -402,6 +402,23 @@ function addCaseDetailsCollapsibleButtonLogic(className) {
     }
 }
 
+function getRules() {
+    let url = $('#getRules').data().url;
+
+    fetch(url).then(function(response) {
+      return response.json();
+    }).then(function(data) {
+      console.log(data);
+    }).catch(function() {
+      console.log("Booo");
+    });
+}
+
+function loadRuleDialog() {
+    let rules = getRules();
+
+}
+
 function handlePostRuleResponse(json) {
     let errorType = "";
     let errorMessage = "";

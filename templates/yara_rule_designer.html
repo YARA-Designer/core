@@ -19,6 +19,8 @@
 <!--    YARA rule variables gathered from backend for use in POST request -->
 <meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}" data-id="{{ case.data.id }}">
 <meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
+<!--    JavaScript GET handlers -->
+<meta id="getRules" data-url="{{ url_for('get_rules_request') }}">
 
 {#  Add artifacts and artifact dataTypes as individual draggable objects #}
 

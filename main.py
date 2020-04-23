@@ -110,10 +110,13 @@ if __name__ == "__main__":
     add_app_route(app, '/yara_rule_designer', "Create Yara rule using only the designer.",
                   view_func=webserver.new_rule_designer, methods=['GET', 'POST'])
 
-    # -- Page to receive POST request from new_yara_rule so it can be processed by the codebase.
+    # -- Pages to receive POST request from new_yara_rule so it can be processed by the codebase.
     add_app_route(app, '/post_yara_rule_imd', "", hide=True, view_func=webserver.post_rule_raw_imd, methods=['POST'])
     add_app_route(app, '/post_yara_rule_json', "", hide=True, view_func=webserver.post_rule_json, methods=['POST'])
     add_app_route(app, '/post_yara_commit_json', "", hide=True, view_func=webserver.post_commit_json, methods=['POST'])
+
+    # -- Pages to receive GET requests on.
+    add_app_route(app, '/get_rules_request', "", hide=True, view_func=webserver.get_rules_request, methods=['GET'])
 
     # Add root endpoint for frontend Web GUI (NB: Add this last to account for populating of webserver routes dict)
     add_app_route(app, '/', "Home.", hide=True, view_func=webserver.home)

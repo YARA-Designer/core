@@ -44,7 +44,7 @@ def get_rules():
     try:
         for rule in session.query(Rule).all():
             rules.append(rule.as_dict())
-            log.debug("get_rule_dicts rule: {}".format(json.dumps(dict_to_json(rule.as_dict()), indent=4)))
+            log.debug("get_rules rule: {}".format(json.dumps(dict_to_json(rule.as_dict()), indent=4)))
 
         # Commit transaction (NB: makes detached instances expire)
         session.commit()
@@ -54,6 +54,10 @@ def get_rules():
         session.close()
 
     return rules
+
+
+def get_rules_request():
+    return jsonify(get_rules())
 
 
 def dict_to_json(d: dict):
