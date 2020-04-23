@@ -428,6 +428,15 @@ function getRules() {
       });
 }
 
+/**
+ * Generates a (nicely formatted/indented) HTML <TABLE> based on a list of header:column maps.
+ *
+ * @param id                    (Unique) ID for <TABLE>.
+ * @param headerContentMaps     List of header:column maps (e.g. [{"title": "a title}].
+ * @param className             (Unique) class name for <TABLE>.
+ *
+ * @returns {string}            Generated HTML <TABLE>.
+ */
 function makeTable(id, headerContentMaps, className="my-custom-table") {
     // Header row:
     let headerColumns = "";
@@ -452,7 +461,7 @@ function makeTable(id, headerContentMaps, className="my-custom-table") {
         let keys = Object.keys(item);
         for (let key of keys) {
             let keyIndex = Object.keys(item).indexOf(key);
-            tableContents += `        <td id="${id}-col-${keyIndex}">${item[key]}</td>\n`;
+            tableContents += `        <td id="${id}-row-${i}-col-${keyIndex}">${item[key]}</td>\n`;
         }
         tableContents +=
             `    </tr>\n`;
@@ -488,15 +497,10 @@ function makeRuleTableRows(rules) {
 
 function printRulesTable(rules) {
     let headerContentMaps = makeRuleTableRows(rules);
-    let myBody = makeTable("fetched-yara-rules-table", headerContentMaps);
+    let myBody = makeTable("fetched-rules", headerContentMaps);
     console.log(myBody);
 
-    popupModal(
-        "response-modal",
-        "<h3>Fetched rules</h3>",
-        myBody,
-        null,
-        "info");
+    popupModal("response-modal", "<h3>Fetched rules</h3>", myBody, null, "info");
 }
 
 function loadRuleDialog() {
