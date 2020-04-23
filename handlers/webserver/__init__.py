@@ -37,24 +37,6 @@ def get_rule(case_id: str) -> dict:
     return rule_dict
 
 
-def get_rules():
-    rules = []
-    session = db_session()
-
-    try:
-        for rule in session.query(Rule).all():
-            rules.append(rule)
-
-        # Commit transaction (NB: makes detached instances expire)
-        session.commit()
-    except SQLAlchemyError:
-        raise
-    finally:
-        session.close()
-
-    return rules
-
-
 def get_rule_dicts():
     rules = []
     session = db_session()
@@ -133,7 +115,7 @@ def generate_yara_rule(j: json):
     return retv
 
 
-def post_rule_raw_imd():
+def post_rule_raw_imd():  # FIXME: Should probably be deprecated along with raw CLI (HTML page).
     """
     Receives an ImmutableMultiDict of the operators which needs to be matched against the original list of artifacts.
     :return: JSON on the form of:
