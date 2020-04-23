@@ -37,7 +37,7 @@ def get_rule(case_id: str) -> dict:
     return rule_dict
 
 
-def get_db_rules():
+def get_rules():
     rules = []
     session = db_session()
 
@@ -55,14 +55,14 @@ def get_db_rules():
     return rules
 
 
-def get_db_rules_dict():
+def get_rule_dicts():
     rules = []
     session = db_session()
 
     try:
         for rule in session.query(Rule).all():
             rules.append(rule.as_dict())
-            log.debug("get_db_rules_dict rule: {}".format(json.dumps(dict_to_json(rule.as_dict()), indent=4)))
+            log.debug("get_rule_dicts rule: {}".format(json.dumps(dict_to_json(rule.as_dict()), indent=4)))
 
         # Commit transaction (NB: makes detached instances expire)
         session.commit()
@@ -72,22 +72,6 @@ def get_db_rules_dict():
         session.close()
 
     return rules
-
-
-def list_pending_rules_rawhtml():
-    # Get pending rules from database.
-    pending_rules = get_db_rules()
-
-    line = ""
-    for rule in pending_rules:
-        line += "{}{} Case '{}': {}".format(rule['added_on'], tab, rule['data']['id'], rule['data']['title'])
-
-        for observable in rule['data']['observables']:
-            line += ("<br/>{}Observable: {} ({})".format(tab, observable['data'], observable['dataType']))
-
-        line += "<br/>"
-
-    return line
 
 
 def dict_to_json(d: dict):
@@ -103,7 +87,7 @@ def dict_to_json(d: dict):
 
 def list_rules():
     # Get pending rules from database.
-    rule_dicts = get_db_rules_dict()
+    rule_dicts = get_rule_dicts()
 
     rules_json = []
     for rule_dict in rule_dicts:
