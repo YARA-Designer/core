@@ -7,18 +7,18 @@
     {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
 {% endif %}
 
+    <!-- Set Jinja2 variables for use in JavaScript -->
 {# Load theme if specified #}
 {% if theme is defined %}
-    <!-- Set Jinja2 variables for use in JavaScript -->
     <!--    Theme handler: -->
     <meta id="themeArg" data-name="{{ theme }}" data-path="{{ url_for('static', filename='themes') + '/' }}">
-    <!--    JavaScript custom POST handlers -->
-    <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
-    <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
-    <!--    YARA rule variables gathered from backend for use in POST request -->
-    <meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}" data-id="{{ case.data.id }}">
-    <meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
 {% endif %}
+<!--    JavaScript custom POST handlers -->
+<meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
+<meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
+<!--    YARA rule variables gathered from backend for use in POST request -->
+<meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}" data-id="{{ case.data.id }}">
+<meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
 
 {#  Add artifacts and artifact dataTypes as individual draggable objects #}
 
@@ -58,6 +58,7 @@
         <div id="yara_rule_designer_leftpane_container" class="col-2 yara_rule_designer">
             <div class="row">
                 <div class="row m-row justify-content-between yara_rule_designer" id="yara-rule-designer-buttons">
+                    <button id="load-rule-button" class="col-sm my-col" onclick="loadRuleDialog()">Open</button>
                     <button id="show-help-button" class="col-sm my-col" onclick="popupHelpModal()">Help</button>
                     <button id="clear-rule-button" class="col-sm my-col" onclick="clearRule()">Clear</button>
                     <button id="submit-rule-button" class="col-sm my-col" onclick="postRule()">Submit</button>
