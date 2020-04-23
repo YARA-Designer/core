@@ -437,7 +437,7 @@ function getRules() {
  *
  * @returns {string}            Generated HTML <TABLE>.
  */
-function makeTable(id, headerContentMaps, className="my-custom-table") {
+function makeTable(id, headerContentMaps, className="custom-table") {
     // Header row:
     let headerColumns = "";
     // For key in arbitrary JSON (they all share the same keys).
@@ -481,10 +481,11 @@ function makeRuleTableRows(rules) {
 
     for (let rule of rules) {
         headerContentMaps.push({
+            // " ": rule.pending === true ? `<div class="bar-pendidng" title="Pending"> </div>` : "",
+            "": "",  // Intentionally left blank (to be filled with pending bar later).
             "Title": rule.data.title,
-            "Pending": rule.pending,
             "Sev": rule.data.severity,
-            "Observables": rule.data.observables.length,
+            "<img src='/static/images/searchicon.png' title='Observables'>": rule.data.observables.length,
             "Added": rule.added_on,
             "YARA File": rule.yara_filename,
             "Modified": rule.last_modified,
@@ -495,12 +496,29 @@ function makeRuleTableRows(rules) {
     return headerContentMaps;
 }
 
-function printRulesTable(rules) {
-    let headerContentMaps = makeRuleTableRows(rules);
-    let myBody = makeTable("fetched-rules", headerContentMaps);
-    console.log(myBody);
+function filterFetchedRules() {
 
-    popupModal("response-modal", "<h3>Fetched rules</h3>", myBody, null, "info");
+}
+
+function printRulesTable(rules) {
+    let body = "";
+
+    // Filter/Search
+    body += `<input type="text" id="fetched-rules-input-filter" onkeyup="filterFetchedRules()" placeholder="Filter table..">`;
+    body += "<br>";
+
+    // Table
+    let headerContentMaps = makeRuleTableRows(rules);
+    body += makeTable("fetched-rules", headerContentMaps);
+    console.log(body);
+
+    popupModal("response-modal", "<h3>Fetched rules</h3>", body, null, "info");
+    // document.getElementById("response-modal").style.width = "100%";
+    for (let i = 0; i < rules.length; i++) {
+        if (rules[i]["pending"] === true) {
+            document.getElementById(`fetched-rules-row-${i}-col-0`).style.backgroundColor = "#f4d03f";
+        }
+    }
 }
 
 function loadRuleDialog() {
