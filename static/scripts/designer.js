@@ -405,18 +405,102 @@ function addCaseDetailsCollapsibleButtonLogic(className) {
 function getRules() {
     let url = $('#getRules').data().url;
 
-    fetch(url).then(function(response) {
-      return response.json();
-    }).then(function(data) {
-      console.log(data);
-    }).catch(function() {
-      console.log("Booo");
-    });
+    function status(response) {
+        if (response.status >= 200 && response.status < 300) {
+            return Promise.resolve(response)
+        } else {
+            return Promise.reject(new Error(response.statusText))
+        }
+    }
+
+    function json(response) {
+        return response.json()
+    }
+
+    fetch(url)
+    .then(status)
+    .then(json)
+    .then(function(data) {
+        console.log('Request succeeded with JSON response', data);
+        printRulesTable(data);
+      }).catch(function(error) {
+        console.log('Request failed', error);
+      });
+}
+
+function makeTable(id, headerContentMaps, className="my-custom-table") {
+    // Header row:
+    let headerColumns = "";
+    // For key in arbitrary JSON (they all share the same keys).
+    for (let key of Object.keys(headerContentMaps[0])) {
+        headerColumns += `        <th id="${id}-header-${key}">${key}</th>\n`;
+    }
+
+    let headerRow =
+        `    <tr id="${id}-headers" class='header ${className}-header'>\n` +
+        `${headerColumns}` +
+        `    </tr>`;
+
+    // Content rows:
+    let tableContents = "";
+    // For JSON in list.
+    for (let i = 0; i < headerContentMaps.length; i++) {
+        let item = headerContentMaps[i];
+        tableContents += `    <tr id="${id}-row-${i}">\n`;
+
+        // For item in JSON.
+        let keys = Object.keys(item);
+        for (let key of keys) {
+            let keyIndex = Object.keys(item).indexOf(key);
+            tableContents += `        <td id="${id}-col-${keyIndex}">${item[key]}</td>\n`;
+        }
+        tableContents +=
+            `    </tr>\n`;
+    }
+
+    let htmlTable =
+        `<table id="${id}" class="${className}">\n` +
+        `${headerRow}\n` +
+        `${tableContents}` +
+        `</table>`;
+
+    return htmlTable;
+}
+
+function makeRuleTableRows(rules) {
+    let headerContentMaps = [];
+
+    for (let rule of rules) {
+        headerContentMaps.push({
+            "Title": rule.data.title,
+            "Pending": rule.pending,
+            "Sev": rule.data.severity,
+            "Observables": rule.data.observables.length,
+            "Added": rule.added_on,
+            "YARA File": rule.yara_filename,
+            "Modified": rule.last_modified,
+            "ID": rule.data.id
+        });
+    }
+
+    return headerContentMaps;
+}
+
+function printRulesTable(rules) {
+    let headerContentMaps = makeRuleTableRows(rules);
+    let myBody = makeTable("fetched-yara-rules-table", headerContentMaps);
+    console.log(myBody);
+
+    popupModal(
+        "response-modal",
+        "<h3>Fetched rules</h3>",
+        myBody,
+        null,
+        "info");
 }
 
 function loadRuleDialog() {
-    let rules = getRules();
-
+    getRules();
 }
 
 function handlePostRuleResponse(json) {
