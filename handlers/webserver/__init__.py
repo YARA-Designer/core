@@ -56,8 +56,18 @@ def get_rules():
     return rules
 
 
+def add_yara_filename(rules: list) -> list:
+    modified_rules = []
+    for rule in rules:
+        if rule["yara_file"] is not None:
+            rule["yara_filename"] = rule["yara_file"].split(os.path.sep)[-1]
+        modified_rules.append(rule)
+
+    return modified_rules
+
+
 def get_rules_request():
-    return jsonify(get_rules())
+    return jsonify(add_yara_filename(get_rules()))
 
 
 def dict_to_json(d: dict):
