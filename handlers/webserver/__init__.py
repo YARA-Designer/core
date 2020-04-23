@@ -20,15 +20,12 @@ the_oracle_repo: git.Repo
 log = create_logger(__name__)
 
 
-def get_rule_db_dict_by_case_id(case_id: str) -> dict:
+def get_rule(case_id: str) -> dict:
     session = db_session()
 
     try:
         # Get the first item in the list of queries
-        query = session.query(Rule).filter(Rule.case_id == case_id)[0]
-        rule = {'added_on': query.added_on, 'data': query.data, 'case_id': query.case_id,
-                'id': query.id, 'pending': query.pending, 'yara_file': query.yara_file,
-                'last_modified': query.last_modified}
+        rule_dict: dict = session.query(Rule).filter(Rule.case_id == case_id)[0].as_dict()
 
         # Commit transaction (NB: makes detached instances expire)
         session.commit()
@@ -37,24 +34,7 @@ def get_rule_db_dict_by_case_id(case_id: str) -> dict:
     finally:
         session.close()
 
-    return rule
-
-
-def get_db_rule_by_case_id(case_id: str) -> Rule:
-    session = db_session()
-
-    try:
-        # Get the first item in the list of queries
-        rule: Rule = session.query(Rule).filter(Rule.case_id == case_id)[0]
-
-        # Commit transaction (NB: makes detached instances expire)
-        session.commit()
-    except SQLAlchemyError:
-        raise
-    finally:
-        session.close()
-
-    return rule
+    return rule_dict
 
 
 def get_db_rules():
@@ -140,14 +120,14 @@ def new_rule_raw():
         return "Please specify a case ID!"
 
     return render_template('yara_rule_raw.html',
-                           case=dict_to_json(get_rule_db_dict_by_case_id(request.args.get('id'))))
+                           case=dict_to_json(get_rule(request.args.get('id'))))
 
 
 def new_rule_designer():
     if 'id' not in request.args:
         return "Please specify a case ID!"
 
-    case = dict_to_json(get_rule_db_dict_by_case_id(request.args.get('id')))
+    case = dict_to_json(get_rule(request.args.get('id')))
     theme = request.args.get('theme')
     log.info("Rendering YARA Rule Designer template for case '{cname}' (ID: {cid})".format(
         cname=case["data"]["title"], cid=request.args.get('id')))
