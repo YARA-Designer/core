@@ -37,7 +37,7 @@ def get_rule(case_id: str) -> dict:
     return rule_dict
 
 
-def get_rule_dicts():
+def get_rules():
     rules = []
     session = db_session()
 
@@ -69,7 +69,7 @@ def dict_to_json(d: dict):
 
 def list_rules():
     # Get pending rules from database.
-    rule_dicts = get_rule_dicts()
+    rule_dicts = get_rules()
 
     rules_json = []
     for rule_dict in rule_dicts:
