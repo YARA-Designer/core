@@ -15,6 +15,6 @@
 * Style modals more sensibly and make them fit width of their content, not span page width (more or less).
 * Strip deprecated yara_rule_raw for parts and delete it.
 
-### Bugs:
+## Bugs
 * Drag and drop won't work until you've added at least one item to the editor, 
   likely issue with no existing items to sort with.
