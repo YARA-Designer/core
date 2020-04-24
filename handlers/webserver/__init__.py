@@ -66,17 +66,6 @@ def add_yara_filename(rules: list) -> list:
     return modified_rules
 
 
-def serialize_dates(rules: list) -> list:
-    modified_rules = []
-    for rule in rules:
-        for key, value in rule.items():
-            if type(value) is datetime.datetime:
-                value = value.isoformat()
-        modified_rules.append(rule)
-
-    return modified_rules
-
-
 def get_rules_request():
     rules = get_rules()
     rules_modified = add_yara_filename(rules)
