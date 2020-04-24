@@ -1,8 +1,3 @@
-// extend jQuery with this tiny convenience to allow for simple existence tests.
-$.fn.exists = function () {
-    return this.length !== 0;
-};
-
 function loadTheme(themeName, themePath) {
     const rootEl = document.querySelector(':root');
 
@@ -23,8 +18,20 @@ function loadTheme(themeName, themePath) {
     });
 }
 
-let themeArg = $('#themeArg');
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
 
-if (themeArg.exists()) {
-    loadTheme(themeArg.data().name, themeArg.data().path)
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+// Global code
+let themeParm = getParameterByName('theme');
+
+if (themeParm !== null && themeParm !== "") {
+    loadTheme(themeParm, $('#theme').data().path)
 }

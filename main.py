@@ -130,6 +130,7 @@ if __name__ == "__main__":
     add_app_route(app, '/post_yara_rule_imd', "", hide=True, view_func=webserver.post_rule_raw_imd, methods=['POST'])
     add_app_route(app, '/post_yara_rule_json', "", hide=True, view_func=webserver.post_rule_json, methods=['POST'])
     add_app_route(app, '/post_yara_commit_json', "", hide=True, view_func=webserver.post_commit_json, methods=['POST'])
+    add_app_route(app, '/post_get_rule_request', "", hide=True, view_func=webserver.post_get_rule_request, methods=['POST'])
 
     # -- Pages to receive GET requests on.
     add_app_route(app, '/get_rules_request', "", hide=True, view_func=webserver.get_rules_request, methods=['GET'])

@@ -1,59 +1,21 @@
-<title>YARA Rule Designer: {{ case.data.title }}</title>
+<title id="yara-designer-title">YARA Rule Designer: No rule loaded</title>
 {# <!--suppress HtmlUnknownTarget --> #}
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/yara_rule_designer.css') }}">
 
-{# Define default values for variables #}
-{% if artifacts is not defined %}
-    {% set artifacts = {"data:" : "ERROR: NO ARTIFACTS WERE GIVEN!"} %}
-{% endif %}
-
-    <!-- Set Jinja2 variables for use in JavaScript -->
-{# Load theme if specified #}
-{% if theme is defined %}
-    <!--    Theme handler: -->
-    <meta id="themeArg" data-name="{{ theme }}" data-path="{{ url_for('static', filename='themes') + '/' }}">
-{% endif %}
+<!-- Set Jinja2 variables for use in JavaScript -->
+<!--    Theme handler: -->
+<meta id="theme" data-path="{{ url_for('static', filename='themes') + '/' }}">
 <!--    JavaScript custom POST handlers -->
 <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
 <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
-<!--    YARA rule variables gathered from backend for use in POST request -->
-<meta id="yaraRule" data-name="Whitelist_{{ case.data.title }}" data-tags="{{ case.data.tags }}" data-id="{{ case.data.id }}">
-<meta id="yaraMeta" data-description="Whitelist regler for alarmen: Whitelist_{{ case.data.title }}">
 <!--    JavaScript GET handlers -->
 <meta id="getRules" data-url="{{ url_for('get_rules_request') }}">
-
-{#  Add artifacts and artifact dataTypes as individual draggable objects #}
-
-{# Define list to filter artifact types so that only unique occurrences are added. #}
-{% set added_artifact_types = [] %}
-
-{# For use in adding the HTML at a later time, to avoid looping multiple times. #}
-{% set artifact_span_elements = [] %}
-{% set artifact_type_span_elements = [] %}
-
-{% for artifact in artifacts %}
-    {# Add artifacts #}
-    {{ artifact_span_elements.append("<span id='artifact" + loop.index|string + "' class='draggable_artifact' onclick='addToEditor(event)'>" + artifact.data|string + '</span>')|ignore_none }}
-
-    {# Add artifact dataTypes #}
-    {# Remove NoneType entries by assigning the value to a new variable, if it is not NoneType. #}
-    {% if artifact.dataType is not none and artifact.dataType != "None" %}
-        {# Only add unique items to editor #}
-        {% if artifact.dataType not in added_artifact_types %}
-
-            {# Add artifact types #}
-            {{ artifact_type_span_elements.append('<span id="artifact_type' + loop.index|string + '" class="draggable_artifact_type" onclick="addToEditor(event)">' + artifact.dataType|string + '</span>')|ignore_none }}
-            {{ added_artifact_types.append(artifact.dataType)|ignore_none }}
-        {% endif %}
-    {% endif %}
-{% endfor %}
+<meta id="getRule" data-url="{{ url_for('post_get_rule_request') }}">
 
 <div class="container mh-100 h-100 mw-100 w-100 yara_rule_designer" id="yara_rule_designer_container">
     <div class="row align-items-start">
 
-        <div id="yara_rule_designer_header" class="col yara_rule_designer">
-            <p> Case: {{ case.data.title }} [ID: {{ case.data.id }}] </p>
-        </div>
+        <div id="yara_rule_designer_header" class="col yara_rule_designer"><p>No rule loaded.</p></div>
 
         <div class="w-100"></div>
 
@@ -68,13 +30,7 @@
 
                 <div class="w-100"></div>
 
-                <div id="yara-rule-designer-tags" class="yara_rule_designer">
-                    {% for tag in case.data.tags %}
-                        <input type="checkbox" id="tagCheckbox{{ loop.index|string }}" class="yara-tag-checkbox" value="{{ tag|string }}">
-                        <label for="tagCheckbox{{ loop.index|string }}" title="{{ tag|string }}">{{ tag|string }}</label>
-                        <div class="w-100"></div>
-                    {% endfor %}
-                </div>
+                <div id="yara-rule-designer-tags" class="yara_rule_designer"></div>
 
                 <div class="w-100"></div>
 
@@ -113,19 +69,11 @@
 
                 <div class="w-100"></div>
 
-                <div class="yara_rule_designer" id="yara_rule_designer_artifact_types">
-                    {% for artifact_type_span_element in artifact_type_span_elements %}
-                        {{ artifact_type_span_element|safe }}
-                    {% endfor %}
-                </div>
+                <div class="yara_rule_designer" id="yara_rule_designer_artifact_types"></div>
 
                 <div class="w-100"></div>
 
-                <div class="yara_rule_designer" id="yara_rule_designer_artifacts">
-                    {% for artifact_span_element in artifact_span_elements %}
-                        {{ artifact_span_element|safe }}
-                    {% endfor %}
-                </div>
+                <div class="yara_rule_designer" id="yara_rule_designer_artifacts"></div>
             </div>
         </div>
 
@@ -135,8 +83,8 @@
             </div>
         </div>
 
-    </div> {# Row #}
-</div> {# Container #}
+    </div> <!-- Row -->
+</div> <!-- Container -->
 
 <!-- Pre-define default modals (to be populated by JavaScript later). -->
 <div id="response-modal" class="custom-modal">

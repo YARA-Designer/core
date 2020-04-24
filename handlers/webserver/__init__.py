@@ -66,6 +66,16 @@ def add_yara_filename(rules: list) -> list:
     return modified_rules
 
 
+def post_get_rule_request():
+    rule = get_rule(request.json["id"])
+    rule_modified = add_yara_filename([rule])[0]
+
+    retv = jsonify(rule_modified)
+    log.info("GET rule return JSON: {}".format(json.dumps(retv.json, indent=4)))
+
+    return retv
+
+
 def get_rules_request():
     rules = get_rules()
     rules_modified = add_yara_filename(rules)
@@ -110,27 +120,28 @@ def new_rule_raw():
 
 
 def new_rule_designer():
-    if 'id' not in request.args:
-        return "Please specify a case ID!"
-
-    case = dict_to_json(get_rule(request.args.get('id')))
-    theme = request.args.get('theme')
-    log.info("Rendering YARA Rule Designer template for case '{cname}' (ID: {cid})".format(
-        cname=case["data"]["title"], cid=request.args.get('id')))
-    log.debug("TheHive Case: {}".format(json.dumps(case, indent=4)))
-
-    return render_template('yara_rule_designer.html',
-                           case=case,
-                           artifacts=case['data']['observables'],
-                           theme=theme)
+    log.info("Rendering YARA Rule Designer template...")
+    return render_template('yara_rule_designer.html')
 
 
 def generate_yara_rule(j: json):
     log.debug("Received YARA Rule Dict: {}".format(j))
 
     # Processing status, return values and so forth.
-    retv = {"in": j, "out": handlers.yara.compile_from_source(j)}
-    log.debug("Returned YARA Rule Dict: {}".format(retv))
+    try:
+        retv = {"in": j, "out": handlers.yara.compile_from_source(j)}
+        log.debug("Returned YARA Rule Dict: {}".format(retv))
+    except Exception as exc:
+        retv = {"in": j, "out": {
+            "success": False,
+            # "commit": None,
+            "error": {
+                "message": str(exc),
+                "type": "exception",
+                "level": "error"
+            }
+        }}
+        log.error("Exception occured: {}".format(retv), exc_info=exc)
 
     return retv
 

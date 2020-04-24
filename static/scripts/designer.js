@@ -62,6 +62,8 @@ const LEVEL_ERROR = "error";
 const LEVEL_WARNING = "warning";
 const LEVEL_SUCCESS = "success";
 
+var currentlyLoadedRule = null;
+
 /////////////////////////////////// Dragula - drag 'n Drop //////////////////////////////////////////
 
 dragula([
@@ -355,16 +357,15 @@ function getEnabledTags() {
  */
 function getRuleJsonFromEditorElements() {
     let json = {};
-    let yaraRule = $('#yaraRule').data();
-
-    // Get rule name.
-    let ruleName = yaraRule.name;
+    let yaraRule = window.currentlyLoadedRule;
+    let yaraRuleName = `Whitelist_${yaraRule.data.title}`;
+    let yaraMetaDescription = `Whitelist regler for alarmen: Whitelist_${yaraRule.data.title}`;
 
     // Set meta FIXME: sub-dicts hardcoded!
-    json["meta"] = {"description" : $('#yaraMeta').data().description};
+    json["meta"] = {"description" : yaraMetaDescription};
 
     // Set rule name.
-    json["rule"] = ruleName;
+    json["rule"] = yaraRuleName;
 
     // Set tags.
     json["tags"] = getEnabledTags();
@@ -402,9 +403,8 @@ function addCaseDetailsCollapsibleButtonLogic(className) {
     }
 }
 
-function getRules() {
-    let url = $('#getRules').data().url;
 
+function fetchGetRequest(url, callback) {
     function status(response) {
         if (response.status >= 200 && response.status < 300) {
             return Promise.resolve(response)
@@ -421,11 +421,61 @@ function getRules() {
     .then(status)
     .then(json)
     .then(function(data) {
-        console.log('Request succeeded with JSON response', data);
-        printRulesTable(data);
+        console.log(`fetchRequest succeeded with JSON response`, data);
+        callback(data);
       }).catch(function(error) {
         console.log('Request failed', error);
       });
+}
+
+async function fetchPostRequest(url = '', data = {}, callback) {
+    function status(response) {
+        if (response.status >= 200 && response.status < 300) {
+            return Promise.resolve(response)
+        } else {
+            return Promise.reject(new Error(response.statusText))
+        }
+    }
+
+    function json(response) {
+        return response.json()
+    }
+
+    // Default options are marked with *
+    const response = await fetch(url, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+          'Content-Type': 'application/json'
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+        })
+        .then(status)
+        .then(json)
+        .then(function(data) {
+            console.log(`fetchPostRequest succeeded with JSON response`, data);
+            callback(data);
+          }).catch(function(error) {
+            console.log('Request failed', error);
+          });
+
+    // return response.json(); // parses JSON response into native JavaScript objects
+}
+
+
+function getRule(ruleId, callback=printRulesTable) {
+    let url = $('#getRule').data().url;
+
+    fetchPostRequest(url, { id:  ruleId}, callback);
+}
+
+function getRules(callback=printRulesTable) {
+    fetchGetRequest($('#getRules').data().url, callback);
 }
 
 /**
@@ -489,8 +539,20 @@ function humanizeISODate(isoDateString) {
     return `${date} ${time}`;
 }
 
+function isIterable(obj) {
+    // checks for null and undefined
+    if (obj == null) {
+        return false;
+    }
+        return typeof obj[Symbol.iterator] === 'function';
+}
+
 function makeRuleTableRows(rules) {
     let headerContentMaps = [];
+
+    if (isIterable(rules) !== true) {
+        rules = Array(rules);
+    }
 
     for (let rule of rules) {
         headerContentMaps.push({
@@ -522,7 +584,7 @@ function printRulesTable(rules) {
     // Table
     let headerContentMaps = makeRuleTableRows(rules);
     body += makeTable("fetched-rules", headerContentMaps);
-    console.log(body);
+    // console.log(body);
 
     popupModal("response-modal", "<h3>Fetched rules</h3>", body, null, "info");
     // document.getElementById("response-modal").style.width = "100%";
@@ -535,6 +597,90 @@ function printRulesTable(rules) {
 
 function loadRuleDialog() {
     getRules();
+}
+
+function setTitle(title, id, description=null) {
+    document.getElementById('yara-designer-title').innerText = title;
+    document.getElementById('yara_rule_designer_header').innerHTML =
+        `<p> Case: ${title} [ID: ${id}] </p>`;
+    document.getElementById('yara_rule_designer_header').innerHTML +=
+        `<h6>${description}</h6>`;
+}
+
+function setTags(tags) {
+    let html ="";
+    for (let i = 0; i < tags.length; i++) {
+        html += `<input type="checkbox" id="tagCheckbox${i}" class="yara-tag-checkbox" value="${tags[i]}">\n` +
+                `<label for="tagCheckbox${i}" title="${tags[i]}">${tags[i]}</label>\n`;
+                `<div class="w-100"></div>\n`;
+    }
+    document.getElementById('yara-rule-designer-tags').innerHTML = html;
+}
+
+function setObservableTypes(types) {
+    let html = "";
+
+    for (let i = 0; i < types.length; i++) {
+        html +=
+            `<span id='artifact_type${i}' class='draggable_artifact_type' onclick='addToEditor(event)'>${types[i]}</span>'`;
+    }
+
+    document.getElementById('yara_rule_designer_artifact_types').innerHTML = html;
+}
+
+function setObservableData(data) {
+    let html = "";
+
+    for (let i = 0; i < data.length; i++) {
+        html +=
+            `<span id='artifact${i}' class='draggable_artifact' onclick='addToEditor(event)'>${data[i]}</span>'`;
+    }
+
+    document.getElementById('yara_rule_designer_artifacts').innerHTML = html;
+}
+
+function setAllObservables(observables) {
+    let uniqueTypes = [];
+    let uniqueData = [];
+
+    for (let observable of observables) {
+        if (observable.hasOwnProperty("dataType")) {
+            if (observable.dataType !== null && !uniqueTypes.includes(observable.dataType)) {
+                uniqueTypes.push(observable.dataType);
+            }
+        }
+        if (observable.hasOwnProperty("data")) {
+            if (observable.data !== null && !uniqueData.includes(observable.data)) {
+                uniqueData.push(observable.data);
+            }
+        }
+    }
+
+    setObservableTypes(uniqueTypes);
+    setObservableData(uniqueData);
+}
+
+function loadRuleCallback(rule) {
+    console.log("Got rule", rule);
+
+    // Clear editor.
+    clearEditorDivContents();
+
+    // Set the currently loaded rule global variable (used in other functions).
+    window.currentlyLoadedRule = rule;
+
+    // Set title tag and title div.
+    setTitle(rule.data.title, rule.data.id, rule.data.description);
+
+    // Set tags div.
+    setTags(rule.data.tags);
+
+    // Set observables divs.
+    setAllObservables(rule.data.observables);
+}
+
+function loadRule(ruleId) {
+    getRule(ruleId, loadRuleCallback);
 }
 
 function handlePostRuleResponse(json) {
@@ -645,9 +791,10 @@ function handlePostRuleResponse(json) {
     document.getElementById("response-modal-button-commit-onclick").onclick = function() {
         // Perform bound action.
         let jsonToCommit = {};
+        let yaraRule = window.currentlyLoadedRule;
         jsonToCommit["filepath"] = yaraRuleSourceFile;
         jsonToCommit["rulename"] = json["in"]["rule"]; // FIXME: Make backend send the proper sanitized rulename in "out" dict.
-        jsonToCommit["case_id"] = $('#yaraRule').data().id;
+        jsonToCommit["case_id"] = yaraRule.data.id;
 
         postCommit(jsonToCommit);
 
@@ -845,4 +992,23 @@ function makeClone(node) {
     node.parentNode.insertBefore(clone, node);
 
     return clone;
+}
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+// Global code
+let idParm = getParameterByName('id');
+
+if (idParm !== null && idParm !== "") {
+    console.log("Load rule: " + idParm);
+    loadRule(idParm);
 }
