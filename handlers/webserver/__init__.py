@@ -37,7 +37,7 @@ def get_rule(case_id: str) -> dict:
     return rule_dict
 
 
-def get_rules():
+def get_rules() -> list:
     rules = []
     session = db_session()
 
@@ -66,8 +66,25 @@ def add_yara_filename(rules: list) -> list:
     return modified_rules
 
 
+def serialize_dates(rules: list) -> list:
+    modified_rules = []
+    for rule in rules:
+        for key, value in rule.items():
+            if type(value) is datetime.datetime:
+                value = value.isoformat()
+        modified_rules.append(rule)
+
+    return modified_rules
+
+
 def get_rules_request():
-    return jsonify(add_yara_filename(get_rules()))
+    rules = get_rules()
+    rules_modified = add_yara_filename(rules)
+
+    retv = jsonify(rules_modified)
+    log.info("GET rules return JSON: {}".format(json.dumps(retv.json, indent=4)))
+
+    return retv
 
 
 def dict_to_json(d: dict):
