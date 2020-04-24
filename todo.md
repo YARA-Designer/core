@@ -1,4 +1,6 @@
 ##Requests
+*  Compare YARA rules' similarity (particularly conditions)
+    * Change generator to use descriptive names.
 
 ##General
 *  Rename post_rule_json and post_commit_json far more sensibly / unambiguously.
