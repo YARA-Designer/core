@@ -1,4 +1,7 @@
+from datetime import date
+
 from flask import Flask
+from flask.json import JSONEncoder
 
 from handlers import config_handler, webserver
 from handlers.log_handler import create_logger
@@ -8,6 +11,19 @@ from database import init_db
 
 log = create_logger(__name__)
 log_utility_functions = create_logger("{}.utility_functions".format(__name__))
+
+
+class MyJSONEncoder(JSONEncoder):
+    def default(self, o):
+        # Override Flask JSONEncoder's date serializer (RFC 1123) to use ISO8601..
+        if isinstance(o, date):
+            return o.isoformat()
+
+        return super().default(o)
+
+
+class MyFlask(Flask):
+    json_encoder = MyJSONEncoder
 
 
 def utility_functions():
@@ -82,7 +98,7 @@ if __name__ == "__main__":
     webserver.the_oracle_repo = git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
 
     # Set up Flask.
-    app = Flask(__name__)
+    app = MyFlask(__name__)
     log.info("Configured Flask app.")
 
     # Add utility functions like print_in_console ('mdebug' in Jinja2 code)
