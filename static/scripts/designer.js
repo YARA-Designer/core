@@ -476,19 +476,31 @@ function makeTable(id, headerContentMaps, className="custom-table") {
     return htmlTable;
 }
 
+/**
+ * Makes a ISO8601 datetime string more human readable.
+ *
+ * @param isoDateString     "YYYY-MM-DDTHH:MM:SS.f"
+ * @returns {string}        "YYYY-MM-DD HH:MM:SS"
+ */
+function humanizeISODate(isoDateString) {
+    let date = isoDateString.split('T')[0];
+    let time = isoDateString.split('T')[1].split('.')[0];
+
+    return `${date} ${time}`;
+}
+
 function makeRuleTableRows(rules) {
     let headerContentMaps = [];
 
     for (let rule of rules) {
         headerContentMaps.push({
-            // " ": rule.pending === true ? `<div class="bar-pendidng" title="Pending"> </div>` : "",
             "": "",  // Intentionally left blank (to be filled with pending bar later).
             "Title": rule.data.title,
             "Sev": rule.data.severity,
             "<img src='/static/images/searchicon.png' title='Observables'>": rule.data.observables.length,
-            "Added": rule.added_on,
-            "YARA File": rule.yara_filename,
-            "Modified": rule.last_modified,
+            "Added": rule.added_on !== null ? humanizeISODate(rule.added_on) : "N/A",
+            "YARA File": rule.yara_filename !== undefined ? rule.yara_filename : "N/A",
+            "Modified": rule.last_modified !== null ? humanizeISODate(rule.last_modified): "N/A",
             "ID": rule.data.id
         });
     }
