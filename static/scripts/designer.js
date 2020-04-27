@@ -172,6 +172,26 @@ function popupErrorModal(header, body, footer=null) {
     popupModal("response-modal", hdr, bdy, footer, "error");
 }
 
+function performAction(actionObj) {
+    if ( actionObj.hasOwnProperty("action") ) {
+        // Apply arguments (if defined).
+        if (actionObj.hasOwnProperty("args")) {
+            if (actionObj.args.length > 0) {
+                // Perform action with arguments.
+                actionObj.action(...actionObj.args);
+            } else {
+                console.error("performAction was given actionObj with empty arguments list!", actionObj)
+            }
+        } else {
+            // Perform action without arguments.
+            actionObj.action();
+        }
+    } else {
+        console.error("performAction was given actionObj with no action key!", actionObj)
+    }
+}
+
+
 /**
 *   Adds Yes/No confirmation buttons to a custom modal and binds actions to them.
 */
@@ -190,8 +210,7 @@ function popupConfirmationModal(yesAction, noAction=undefined,
 
     // Add bindings to buttons.
     document.getElementById("confirmation-modal-button-yes-onclick").onclick = function() {
-        // Perform bound action (if defined).
-        yesAction && yesAction();
+        yesAction && performAction(yesAction);
 
         // Close modal.
         document.getElementById("confirmation-modal").style.display = "none";
@@ -598,9 +617,15 @@ function printRulesTable(rules) {
 
         // Add onclick action for each row to load the corresponding rule.
         document.getElementById(`${tableId}-row-${i}`).onclick = function() {
-            loadRule(rules[i].data.id);
-            document.getElementById("response-modal-footer").innerText =
-                `Loaded rule: ${rules[i].data.title} [ID: ${rules[i].data.id}]`;
+            // If editor isn't empty, prompt for confirmation to avoid possible work loss.
+            if (getEditorContents().length > 0) {
+                popupConfirmationModal({"action": loadRule, "args": [rules[i].data.id]}, null,
+                    "<h3>You currently have contents in the editor, loading a rule clears the editor.</h3>")
+            } else {
+                loadRule(rules[i].data.id);
+                document.getElementById("response-modal-footer").innerText =
+                    `Loaded rule: ${rules[i].data.title} [ID: ${rules[i].data.id}]`;
+            }
         };
 
         // Set pointer cursor in each row to indicate onclick presence.
@@ -992,7 +1017,7 @@ function clearRule() {
     let body = "<h3>Are you sure you want to clear the current rule? This is action is <em>irreversible</em>.</h3>";
 
     // yesAction, noAction, body, args...
-    popupConfirmationModal(clearEditorDivContents, undefined, body);
+    popupConfirmationModal({"action": clearEditorDivContents}, null, body);
 }
 
 function makeClone(node) {
