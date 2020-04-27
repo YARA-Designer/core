@@ -517,13 +517,10 @@ function makeTable(id, headerContentMaps, className="custom-table") {
             `    </tr>\n`;
     }
 
-    let htmlTable =
-        `<table id="${id}" class="${className}">\n` +
-        `${headerRow}\n` +
-        `${tableContents}` +
-        `</table>`;
-
-    return htmlTable;
+    return `<table id="${id}" class="${className}">\n` +
+            `${headerRow}\n` +
+            `${tableContents}` +
+            `</table>`;
 }
 
 /**
