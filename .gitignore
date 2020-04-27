@@ -19,3 +19,6 @@ config.json
 # Generated files
 ## YARA rules and TheOracle Git.
 the-oracle/
+the-oracle/*
+the-oracle/rules/
+the-oracle/rules/*
