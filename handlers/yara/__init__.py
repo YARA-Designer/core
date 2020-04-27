@@ -57,6 +57,10 @@ def sanitize_identifier(identifier: str) -> str:
     return s
 
 
+def determine_yara_source_filename(rule_name: str):
+    return "{fname}{ext}".format(fname=sanitize_identifier(rule_name), ext=SOURCE_FILE_EXTENSION)
+
+
 def extract_yara_strings_dict(yara_artifacts: dict) -> dict:
     """
     Takes a yara artifacts dict (varname: {artifact, id, type} and returns a dict with only varname: {artifact}.
@@ -265,7 +269,9 @@ def compiled_rules_to_sources_str_callback(d: dict):
     CALLBACK_DICTS.append(d)
 
     # Continue/Step
-    yara.CALLBACK_CONTINUE
+    # return CALLBACK_CONTINUE to proceed to the next rule or
+    # CALLBACK_ABORT to stop applying rules to your data.
+    return yara.CALLBACK_CONTINUE
 
 
 @overload
@@ -464,10 +470,12 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
     except yara.Error as e:
         retv["success"] = False
         retv["error"] = {"type": "error", "message": str(e)}
+        log.exception("yara Error Exception!", exc_info=e)
         pass
     except Exception as e:
         retv["success"] = False
         retv["error"] = {"type": "exception", "message": str(e)}
+        log.exception("Unexpected Exception!", exc_info=e)
         pass
 
     return retv
