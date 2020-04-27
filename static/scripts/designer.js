@@ -511,7 +511,14 @@ function makeTable(id, headerContentMaps, className="custom-table") {
     let headerColumns = "";
     // For key in arbitrary JSON (they all share the same keys).
     for (let key of Object.keys(headerContentMaps[0])) {
-        headerColumns += `        <th id="${id}-header-${key}">${key}</th>\n`;
+        let friendlyName = key;
+
+        // Encountered header is a HTML comment, attempt to extract its hidden friendly name.
+        if ( containsHtmlComment(friendlyName) ) {
+            friendlyName = getHtmlCommentData(friendlyName);
+        }
+
+        headerColumns += `        <th id="${id}-header-${friendlyName}">${key}</th>\n`;
     }
 
     let headerRow =
@@ -572,10 +579,10 @@ function makeRuleTableRows(rules) {
 
     for (let rule of rules) {
         headerContentMaps.push({
-            "": "",  // Intentionally left blank (to be filled with pending bar later).
+            "<!--Pending-->": "",  // Value intentionally left blank (to be filled with pending bar later).
             "Title": rule.data.title,
             "Sev": rule.data.severity,
-            "<img src='/static/images/searchicon.png' title='Observables'>": rule.data.observables.length,
+            "<!--Observables--><img src='/static/images/searchicon.png' title='Observables'>": rule.data.observables.length,
             "Added": rule.added_on !== null ? humanizeISODate(rule.added_on) : "N/A",
             "YARA File": rule.yara_filename !== undefined ? rule.yara_filename : "N/A",
             "Modified": rule.last_modified !== null ? humanizeISODate(rule.last_modified): "N/A",
@@ -590,17 +597,71 @@ function filterFetchedRules() {
 
 }
 
+/**
+ * Takes a string and returns a boolean of whether it's a HTML comment.
+ *
+ * @param s
+ */
+function isHtmlComment(s) {
+    return ( s.startsWith("<!--") && s.endsWith("-->") );
+}
+
+/**
+ * Takes a string and returns a boolean of whether contains a HTML comment.
+ *
+ * @param s
+ */
+function containsHtmlComment(s) {
+    const regex = /<!--.*-->/g;
+    return s.search(regex) !== -1;
+}
+
+/**
+ * Takes a string and returns the substring in-between the HTML comment delimiters.
+ *
+ * @param s
+ */
+function getHtmlCommentData(s) {
+    const regex = /<!--(.*)-->/;
+
+    // Return the second item which is the 1st capturing group,
+    // (the first group entry is the complete match).
+    return s.match(regex)[1].toString();
+}
+
+
 function printRulesTable(rules) {
     let body = "";
     let footer = "Tip: Click any row to load its corresponding rule.";
     let tableId = "fetched-rules";
+    let headerContentMaps = makeRuleTableRows(rules);
 
-    // Filter/Search
+    // Filter/Search input text box:
     body += `<input type="text" id="fetched-rules-input-filter" onkeyup="filterFetchedRules()" placeholder="Filter table..">`;
+
+    // Checkboxes:
+    let checkboxes = "";
+    let columns = Object.keys(headerContentMaps[0]);
+    for (let i = 0; i < columns.length; i++) {
+        let column = columns[i];
+
+        // Encountered header is a HTML comment, attempt to extract its hidden friendly name.
+        if ( containsHtmlComment(column) ) {
+            column = getHtmlCommentData(column); // FIXME: Figure out what to do with things like 'Pending' which is a true/false filter.
+        }
+
+        // Ignore empty keys (If they have no name, they were probably not meant to be automatically added like this).
+        if (column !== "" && column !== null) {
+            checkboxes += `<input type="checkbox" class="form-check-input" id="fetched-rules-input-filter-checkbox-${i}" title="${column}">\n`;
+            checkboxes += `<label class="form-check-label" for="fetched-rules-input-filter-checkbox-${i}">${column}</label>\n`;
+        }
+    }
+
+    // Assemble checkboxes HTML.
+    body += `<div class="fetched-rules-input-filter-checkboxes form-check form-check-inline" id="fetched-rules-input-filter-checkboxes">\n${checkboxes}\n</div>`;
     body += "<br>";
 
-    // Table
-    let headerContentMaps = makeRuleTableRows(rules);
+    // Table:
     body += makeTable(tableId, headerContentMaps);
     // console.log(body);
 

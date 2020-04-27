@@ -432,3 +432,11 @@ mark.green-bg {
     height:50px;
     background: #f4d03f;
 }
+
+.fetched-rules-input-filter-checkboxes input {
+    margin: 0;
+}
+
+.fetched-rules-input-filter-checkboxes label {
+    margin: 0 20px 0 0;
+}
