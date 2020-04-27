@@ -576,6 +576,8 @@ function filterFetchedRules() {
 
 function printRulesTable(rules) {
     let body = "";
+    let footer = "Tip: Click any row to load its corresponding rule.";
+    let tableId = "fetched-rules";
 
     // Filter/Search
     body += `<input type="text" id="fetched-rules-input-filter" onkeyup="filterFetchedRules()" placeholder="Filter table..">`;
@@ -583,15 +585,29 @@ function printRulesTable(rules) {
 
     // Table
     let headerContentMaps = makeRuleTableRows(rules);
-    body += makeTable("fetched-rules", headerContentMaps);
+    body += makeTable(tableId, headerContentMaps);
     // console.log(body);
 
-    popupModal("response-modal", "<h3>Fetched rules</h3>", body, null, "info");
+    popupModal("response-modal", "<h3>Fetched rules</h3>", body, footer, "info");
+
+    // Apply actions to modal and table that couldn't be applied before it was spawned:
     // document.getElementById("response-modal").style.width = "100%";
+
     for (let i = 0; i < rules.length; i++) {
+        // Add pending bar to rules that have never been designed.
         if (rules[i]["pending"] === true) {
-            document.getElementById(`fetched-rules-row-${i}-col-0`).style.backgroundColor = "#f4d03f";
+            document.getElementById(`${tableId}-row-${i}-col-0`).style.backgroundColor = "#f4d03f";
         }
+
+        // Add onclick action for each row to load the corresponding rule.
+        document.getElementById(`${tableId}-row-${i}`).onclick = function() {
+            loadRule(rules[i].data.id);
+            document.getElementById("response-modal-footer").innerText =
+                `Loaded rule: ${rules[i].data.title} [ID: ${rules[i].data.id}]`;
+        };
+
+        // Set pointer cursor in each row to indicate onclick presence.
+        document.getElementById(`${tableId}-row-${i}`).style.cursor = "pointer";
     }
 }
 
