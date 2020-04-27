@@ -124,24 +124,66 @@ def new_rule_designer():
     return render_template('yara_rule_designer.html')
 
 
+def reset_invalid_yara_rule(rule_name):
+    """
+    Reset invalid changed file to avoid git-within-git changelist issues.
+
+    Performs a `git checkout` on the generated file using GitPython.
+
+    :param rule_name:
+    :return:
+    """
+    config = load_config()
+    invalid_file = handlers.yara.determine_yara_source_filename(rule_name)
+    path = os.path.join(config["theoracle_repo_rules_dir"], invalid_file)
+
+    log.info("Invalid file: {}".format(invalid_file))
+    log.info("Checking out (resetting) file that failed validation: {}".format(invalid_file))
+    # Checkout with force due to local modifications (else CheckoutError Exception is raised).
+    the_oracle_repo.index.checkout([path], force=True)
+
+
 def generate_yara_rule(j: json):
     log.debug("Received YARA Rule Dict: {}".format(j))
+    retv = {"in": j}
 
     # Processing status, return values and so forth.
     try:
-        retv = {"in": j, "out": handlers.yara.compile_from_source(j)}
+        retv["out"] = handlers.yara.compile_from_source(j)
         log.debug("Returned YARA Rule Dict: {}".format(retv))
+
+        if not retv["out"]["success"]:
+            if not retv["out"]["compilable"]:
+                # Reset invalid changed file to avoid git-within-git changelist issues,
+                reset_invalid_yara_rule(j["rule"])
+
     except Exception as exc:
-        retv = {"in": j, "out": {
-            "success": False,
-            # "commit": None,
-            "error": {
-                "message": str(exc),
-                "type": "exception",
-                "level": "error"
+        try:
+            if "rule" in j:
+                # Reset invalid changed file to avoid git-within-git changelist issues,
+                reset_invalid_yara_rule(j["rule"])
+            else:
+                log.error("Received JSON is missing VITAL key 'rule'!\nj = {}".format(json.dumps(j, indent=4)))
+
+            retv["out"] = {
+                "success": False,
+                "error": {
+                    "message": str(exc),
+                    "type": "exception",
+                    "level": "error"
+                }
             }
-        }}
-        log.error("Exception occured: {}".format(retv), exc_info=exc)
+            log.error("Exception occurred during YARA compile from source: {}".format(retv), exc_info=exc)
+        except Exception as exc2:
+            retv["out"] = {
+                "success": False,
+                "error": {
+                    "message": str(exc2),
+                    "type": "exception",
+                    "level": "error"
+                }
+            }
+            log.error("Exception occurred git checkout: {}".format(retv), exc_info=exc2)
 
     return retv
 
