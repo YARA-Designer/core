@@ -24,5 +24,12 @@
     "--numbered-lines-background": "#191c1f",
     "--numbered-lines-color": "white",
     "--mark-green-text-color": "#78c46a",
-    "--mark-red-text-color": "#bf3535"
+    "--mark-red-text-color": "#bf3535",
+
+    "--table-header-color": "white",
+    "--table-header-background": "#191c1f",
+    "--table-row-background": "#191c1f",
+    "--table-row-color": "white",
+    "--table-row-background-hover": "#373d43",
+    "--table-row-color-hover": "white"
 }

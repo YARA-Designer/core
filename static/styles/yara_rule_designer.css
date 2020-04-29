@@ -76,6 +76,14 @@
     /* Text marking. */
     --mark-green-text-color: #218820;
     --mark-red-text-color: #af2a1c;
+
+    /* Table */
+    --table-header-color: black;
+    --table-header-background: white;
+    --table-row-background: white;
+    --table-row-color: black;
+    --table-row-background-hover: #e2e2e2;
+    --table-row-color-hover: black;
 }
 
 /* DEBUG Helper: Make ghost items visible */
@@ -90,6 +98,23 @@ html, body {
     margin:0;
     padding:0;
     border:0;
+}
+
+th {
+    background: var(--table-header-background);
+    color: var(--table-header-color);
+}
+
+tr {
+    background: #721c24;
+    background: var(--table-row-background);
+    color: var(--table-row-color);
+}
+
+/* <tr>s themselves are very hard to access with CSS; thus the 'td' bit.. */
+tr:hover td {
+    background: var(--table-row-background-hover);
+    color: var(--table-row-color-hover);
 }
 
 .yara_rule_designer {
@@ -461,6 +486,8 @@ mark.green-bg {
 
 #fetched-rules-input-filter {
     background-image: url('/static/images/searchicon.png'); /* Add a search icon to input */
+    background-color: var(--modal-background);
+    color: var(--modal-color);
     background-position: 10px 12px; /* Position the search icon */
     background-repeat: no-repeat; /* Do not repeat the icon image */
     width: 100%; /* Full-width */
