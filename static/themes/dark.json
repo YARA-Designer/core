@@ -14,5 +14,15 @@
     "--draggable_artifact_color": "#67c1f5",
     "--draggable_artifact_background": "#1d365d",
     "--draggable_artifact_type_color": "#67c1f5",
-    "--draggable_artifact_type_background": "#2e86c1"
+    "--draggable_artifact_type_background": "#2e86c1",
+
+    "--modal-background": "#191c1f",
+    "--modal-color": "white",
+    "--modal-a-color": "#6db0ec",
+    "--modal-collapsible-content-details-color": "white",
+    "--modal-collapsible-content-details-background": "#191c1f",
+    "--numbered-lines-background": "#191c1f",
+    "--numbered-lines-color": "white",
+    "--mark-green-text-color": "#78c46a",
+    "--mark-red-text-color": "#bf3535"
 }

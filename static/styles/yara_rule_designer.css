@@ -275,6 +275,7 @@ html, body {
     color: var(--modal-color);
     padding: 2px 16px;
 }
+
 .custom-modal-body a {
     color: var(--modal-a-color);
 }
