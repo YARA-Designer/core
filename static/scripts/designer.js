@@ -593,7 +593,7 @@ function makeRuleTableRows(rules) {
     return headerContentMaps;
 }
 
-function filterFetchedRules(inputId, tableId, filterRadioId) {
+function filterFetchedRules(inputId, tableId, filterRadioId, filterCountCallback=null) {
     let input = document.getElementById(inputId);
     let filter = input.value.toUpperCase();
     let table = document.getElementById(tableId);
@@ -612,6 +612,7 @@ function filterFetchedRules(inputId, tableId, filterRadioId) {
     }
 
     // Loop through all table rows, and hide those who don't match the search query
+    let filterCount = 0;
     for (let i = 0; i < tr.length; i++) {
         let td = tr[i].getElementsByTagName("td")[enabledTd];
 
@@ -622,9 +623,13 @@ function filterFetchedRules(inputId, tableId, filterRadioId) {
                 tr[i].style.display = "";
             } else {
                 tr[i].style.display = "none";
+                filterCount++;
             }
         }
     }
+
+    // Report statistics to a callback (if defined).
+    filterCountCallback && filterCountCallback(filterCount);
 }
 
 /**
@@ -659,6 +664,12 @@ function getHtmlCommentData(s) {
     return s.match(regex)[1].toString();
 }
 
+function filterCountCallback(filterCount) {
+    let filtercountElement = document.getElementById("response-modal-header-filter-count");
+
+    filtercountElement.innerText = filterCount > 0 ? `(filtered: ${filterCount})` : "";
+}
+
 /**
  * Print fetched rules table.
  *
@@ -668,6 +679,7 @@ function getHtmlCommentData(s) {
  * @param defaultCheckedRadio
  */
 function printRulesTable(rules, defaultCheckedRadio="Title") {
+    let header = `<h3>Fetched rules <span id='response-modal-header-filter-count'</span></h3>`;
     let body = "";
     let footer = "Tip: Click any row to load its corresponding rule.";
     let tableId = "fetched-rules";
@@ -677,7 +689,7 @@ function printRulesTable(rules, defaultCheckedRadio="Title") {
     let filterRadioClassName = `${tableId}-input-filter-radios`;
     let filterRadioId = `${tableId}-input-filter-radios`;
     let filterInputId = `${tableId}-input-filter`;
-    body += `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', '${tableId}', '${filterRadioId}')" placeholder="Filter table..">`;
+    body += `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', '${tableId}', '${filterRadioId}', filterCountCallback)" placeholder="Filter table..">`;
 
     // Checkboxes:
     let radioHTML = "";
@@ -710,7 +722,7 @@ function printRulesTable(rules, defaultCheckedRadio="Title") {
     body += makeTable(tableId, headerContentMaps);
     // console.log(body);
 
-    popupModal("response-modal", "<h3>Fetched rules</h3>", body, footer, "info");
+    popupModal("response-modal", header, body, footer, "info");
 
     // Apply actions to modal and table that couldn't be applied before it was spawned:
     // document.getElementById("response-modal").style.width = "100%";
