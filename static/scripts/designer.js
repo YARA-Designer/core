@@ -593,15 +593,15 @@ function makeRuleTableRows(rules) {
     return headerContentMaps;
 }
 
-function filterFetchedRules(inputId, tableId, filterCheckboxId) {
-    console.log(`filterFetchedRules(inputId="${inputId}", tableId="${tableId}", filterCheckboxId="${filterCheckboxId}")`);
+function filterFetchedRules(inputId, tableId, filterRadioId) {
+    console.log(`filterFetchedRules(inputId="${inputId}", tableId="${tableId}", filterRadioId="${filterRadioId}")`);
 
     // Declare variables
     let input = document.getElementById(inputId);
     let filter = input.value.toUpperCase();
     let table = document.getElementById(tableId);
-    let filterCheckboxes = document.getElementById(filterCheckboxId).getElementsByTagName('input');
-    console.log("filterCheckboxes", filterCheckboxes);
+    let filterRadios = document.getElementById(filterRadioId).getElementsByTagName('input');
+    console.log("filterCheckboxes", filterRadios);
 
     // Get all table row elements.
     let tr = table.getElementsByTagName("tr");
@@ -613,9 +613,9 @@ function filterFetchedRules(inputId, tableId, filterCheckboxId) {
 
     // Get a list of which checkboxes are check (what to filter by).
     let enabledTds = [];
-    for (let idx = 0; idx < filterCheckboxes.length; idx++) {
-        console.log(`filterCheckboxes[${idx}]`, filterCheckboxes[idx]);
-        if (filterCheckboxes[idx].checked) {
+    for (let idx = 0; idx < filterRadios.length; idx++) {
+        console.log(`filterCheckboxes[${idx}]`, filterRadios[idx]);
+        if (filterRadios[idx].checked) {
             // enabledTds.push(filterCheckboxes[idx]);
             enabledTds.push(idx);
         }
@@ -672,21 +672,28 @@ function getHtmlCommentData(s) {
     return s.match(regex)[1].toString();
 }
 
-
-function printRulesTable(rules) {
+/**
+ * Print fetched rules table.
+ *
+ * Customised printTable code for fetched rules.
+ *
+ * @param rules
+ * @param defaultCheckedRadio
+ */
+function printRulesTable(rules, defaultCheckedRadio="Title") {
     let body = "";
     let footer = "Tip: Click any row to load its corresponding rule.";
     let tableId = "fetched-rules";
     let headerContentMaps = makeRuleTableRows(rules);
 
     // Filter/Search input text box:
-    let filterCheckboxClassName = "fetched-rules-input-filter-checkboxes";
-    let filterCheckboxId = "fetched-rules-input-filter-checkboxes";
+    let filterRadioClassName = "fetched-rules-input-filter-radios";
+    let filterRadioId = "fetched-rules-input-filter-radios";
     let filterInputId = "fetched-rules-input-filter";
-    body += `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', '${tableId}', '${filterCheckboxId}')" placeholder="Filter table..">`;
+    body += `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', '${tableId}', '${filterRadioId}')" placeholder="Filter table..">`;
 
     // Checkboxes:
-    let checkboxes = "";
+    let radios = "";
     let columns = Object.keys(headerContentMaps[0]);
     for (let i = 0; i < columns.length; i++) {
         let column = columns[i];
@@ -698,13 +705,18 @@ function printRulesTable(rules) {
 
         // Ignore empty keys (If they have no name, they were probably not meant to be automatically added like this).
         if (column !== "" && column !== null) {
-            checkboxes += `<input type="checkbox" class="form-check-input" id="fetched-rules-input-filter-checkbox-${i}" title="${column}">\n`;
-            checkboxes += `<label class="form-check-label" for="fetched-rules-input-filter-checkbox-${i}">${column}</label>\n`;
+            let checked = "";
+            if (defaultCheckedRadio) {
+                checked = column === defaultCheckedRadio ? " checked": "";
+            }
+
+            radios += `<input type="radio" name="${filterRadioClassName}" class="form-check-input" id="${filterRadioId}-${i}" title="${column}"${checked}>\n`;
+            radios += `<label class="form-check-label" for="${filterRadioId}-${i}">${column}</label>\n`;
         }
     }
 
     // Assemble checkboxes HTML.
-    body += `<div class="${filterCheckboxClassName} form-check form-check-inline" id="${filterCheckboxId}">\n${checkboxes}\n</div>`;
+    body += `<div class="${filterRadioClassName} form-check form-check-inline" id="${filterRadioId}">\n${radios}\n</div>`;
     body += "<br>";
 
     // Table:

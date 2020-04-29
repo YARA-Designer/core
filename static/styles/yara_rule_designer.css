@@ -433,10 +433,10 @@ mark.green-bg {
     background: #f4d03f;
 }
 
-.fetched-rules-input-filter-checkboxes input {
+.fetched-rules-input-filter-radios input {
     margin: 0;
 }
 
-.fetched-rules-input-filter-checkboxes label {
+.fetched-rules-input-filter-radios label {
     margin: 0 20px 0 0;
 }
