@@ -593,8 +593,51 @@ function makeRuleTableRows(rules) {
     return headerContentMaps;
 }
 
-function filterFetchedRules() {
+function filterFetchedRules(inputId, tableId, filterCheckboxId) {
+    console.log(`filterFetchedRules(inputId="${inputId}", tableId="${tableId}", filterCheckboxId="${filterCheckboxId}")`);
 
+    // Declare variables
+    let input = document.getElementById(inputId);
+    let filter = input.value.toUpperCase();
+    let table = document.getElementById(tableId);
+    let filterCheckboxes = document.getElementById(filterCheckboxId).getElementsByTagName('input');
+    console.log("filterCheckboxes", filterCheckboxes);
+
+    // Get all table row elements.
+    let tr = table.getElementsByTagName("tr");
+    console.log("tr", tr);
+
+    // Get a HTMLCollection of mapping between header and a row index (both by numbered index and key name).
+    let rowMap = tr["fetched-rules-headers"].children;
+    console.log("rowMap", rowMap);
+
+    // Get a list of which checkboxes are check (what to filter by).
+    let enabledTds = [];
+    for (let idx = 0; idx < filterCheckboxes.length; idx++) {
+        console.log(`filterCheckboxes[${idx}]`, filterCheckboxes[idx]);
+        if (filterCheckboxes[idx].checked) {
+            // enabledTds.push(filterCheckboxes[idx]);
+            enabledTds.push(idx);
+        }
+    }
+    console.log("enabledTds", enabledTds);
+
+    // Loop through all table rows, and hide those who don't match the search query
+    for (let i = 0; i < tr.length; i++) {
+        // td = tr[i].getElementsByTagName("td")[1];
+        for (let enabledTd of enabledTds) {
+            let td = tr[i].getElementsByTagName("td")[enabledTd];
+            if (td) {
+                let txtValue = td.textContent || td.innerText;
+
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -637,7 +680,10 @@ function printRulesTable(rules) {
     let headerContentMaps = makeRuleTableRows(rules);
 
     // Filter/Search input text box:
-    body += `<input type="text" id="fetched-rules-input-filter" onkeyup="filterFetchedRules()" placeholder="Filter table..">`;
+    let filterCheckboxClassName = "fetched-rules-input-filter-checkboxes";
+    let filterCheckboxId = "fetched-rules-input-filter-checkboxes";
+    let filterInputId = "fetched-rules-input-filter";
+    body += `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', '${tableId}', '${filterCheckboxId}')" placeholder="Filter table..">`;
 
     // Checkboxes:
     let checkboxes = "";
@@ -658,7 +704,7 @@ function printRulesTable(rules) {
     }
 
     // Assemble checkboxes HTML.
-    body += `<div class="fetched-rules-input-filter-checkboxes form-check form-check-inline" id="fetched-rules-input-filter-checkboxes">\n${checkboxes}\n</div>`;
+    body += `<div class="${filterCheckboxClassName} form-check form-check-inline" id="${filterCheckboxId}">\n${checkboxes}\n</div>`;
     body += "<br>";
 
     // Table:
