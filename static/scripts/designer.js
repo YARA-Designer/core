@@ -678,7 +678,7 @@ function filterCountCallback(filterCount) {
  * @param rules
  * @param defaultCheckedRadio
  */
-function printRulesTable(rules, defaultCheckedRadio="Title") {
+function printRulesTable(rules, defaultCheckedRadio="Title", hideRadios=["Pending"]) {
     let header = `<h3>Fetched rules <span id='response-modal-header-filter-count'</span></h3>`;
     let body = "";
     let footer = "Tip: Click any row to load its corresponding rule.";
@@ -695,22 +695,38 @@ function printRulesTable(rules, defaultCheckedRadio="Title") {
     let radioHTML = "";
     let columns = Object.keys(headerContentMaps[0]);
     for (let i = 0; i < columns.length; i++) {
+        let style = "";
         let column = columns[i];
 
         // Encountered header is a HTML comment, attempt to extract its hidden friendly name.
         if ( containsHtmlComment(column) ) {
-            column = getHtmlCommentData(column); // FIXME: Figure out what to do with things like 'Pending' which is a true/false filter.
+            column = getHtmlCommentData(column);
+        }
+
+        // Skip radios if told to.
+        if (hideRadios) {
+            if (hideRadios.includes(column)) {
+                console.log(`Hide added radio button: ${column}`);
+                style += "display: none;"
+            }
         }
 
         // Ignore empty keys (If they have no name, they were probably not meant to be automatically added like this).
         if (column !== "" && column !== null) {
             let checked = "";
+
+            // Set checked property if column matched the defaultCheckedRadio (and defaultCheckedRadio is defined).
             if (defaultCheckedRadio) {
                 checked = column === defaultCheckedRadio ? " checked": "";
             }
 
-            radioHTML += `<input type="radio" name="${filterRadioClassName}" class="form-check-input" id="${filterRadioId}-${i}" title="${column}"${checked}>\n`;
-            radioHTML += `<label class="form-check-label" for="${filterRadioId}-${i}">${column}</label>\n`;
+            // Make styles applicable if any are defined.
+            if (style !== "") {
+                style = `style="${style}"`;
+            }
+
+            radioHTML += `<input type="radio" name="${filterRadioClassName}" class="form-check-input" id="${filterRadioId}-${i}" title="${column}"${checked}${style}>\n`;
+            radioHTML += `<label class="form-check-label" for="${filterRadioId}-${i}"${style}>${column}</label>\n`;
         }
     }
 
