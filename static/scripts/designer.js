@@ -670,6 +670,17 @@ function filterCountCallback(filterCount) {
     filtercountElement.innerText = filterCount > 0 ? `(filtered: ${filterCount})` : "";
 }
 
+function getCellValue(tr, idx) {
+    return tr.children[idx].innerText || tr.children[idx].textContent;
+}
+
+
+function comparer(idx, asc) {
+    return function(a, b) { return function(v1, v2) {
+        return v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2);
+    }(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+}}
+
 /**
  * Print fetched rules table.
  *
@@ -742,6 +753,17 @@ function printRulesTable(rules, defaultCheckedRadio="Title", hideRadios=["Pendin
 
     // Apply actions to modal and table that couldn't be applied before it was spawned:
     // document.getElementById("response-modal").style.width = "100%";
+
+    // Add onclick action for sorting headers.
+    for ( let headerElem of document.getElementById(`${tableId}-headers`).children ) {
+        headerElem.onclick = function () {
+            let table = document.getElementById(tableId);
+            while(table.tagName.toUpperCase() !== 'TABLE') table = table.parentNode;
+            Array.prototype.slice.call(table.querySelectorAll('tr:nth-child(n+2)'))
+                .sort(comparer(Array.prototype.slice.call(headerElem.parentNode.children).indexOf(headerElem), this.asc = !this.asc))
+                .forEach(function(tr) { table.appendChild(tr) });
+        }
+    }
 
     for (let i = 0; i < rules.length; i++) {
         // Add pending bar to rules that have never been designed.
