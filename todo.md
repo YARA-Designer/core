@@ -18,6 +18,7 @@
 * Strip deprecated yara_rule_raw for parts and delete it.
 * Style the open button.
 * Replace all antiquated XHR requests with fetch.
+* Figure out some sort of scroll overflow for modals when they vertically size beyond reason (or beyond viewport).
 
 ## Bugs
 * Drag and drop won't work until you've added at least one item to the editor, 
