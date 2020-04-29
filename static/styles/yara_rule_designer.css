@@ -55,9 +55,10 @@
     --button-collapsible-content-details-background-hover: #555;
 
     /* Modals. */
-    --custom_modal-background: white;
-    /*--modal_background_info: #87898a;*/
-    --modal_background_info: #5dade2;
+    --modal-background: white;
+    --modal-color: black;
+    --modal-a-color: rgb(0, 123, 255);
+    --modal_background_info: #5dade2; /*grey ver: #87898a;*/
     --modal_color_info: white;
     --modal_background_success: #5cb85c;
     --modal_color_success: white;
@@ -66,7 +67,11 @@
     --modal_background_error: #da423f;
     --modal_color_error: white;
     --modal-collapsible-content-details-color: black;
-    --modal-collapsible-content-details-background: f1f1f1;
+    --modal-collapsible-content-details-background: #f1f1f1;
+
+    /* Numbered lines. */
+    --numbered-lines-color: black;
+    --numbered-lines-background: white;
 
     /* Text marking. */
     --mark-green-text-color: #218820;
@@ -205,9 +210,9 @@ html, body {
 
 /* Override designer span properties for items that are put in the editor element */
 #yara_rule_designer_editor > span {
-    margin: 5px 0px 5px 0px;    /* Spacing between inline span elements (top, right, bottom, left)*/
+    margin: 5px 0 5px 0;    /* Spacing between inline span elements (top, right, bottom, left)*/
     padding: 10px;
-    border-radius: 0px;
+    border-radius: 0;
 }
 
 .condition_keyword {
@@ -265,7 +270,14 @@ html, body {
 }
 
 /* Modal Body */
-.custom-modal-body {padding: 2px 16px;}
+.custom-modal-body {
+    background: var(--modal-background);
+    color: var(--modal-color);
+    padding: 2px 16px;
+}
+.custom-modal-body a {
+    color: var(--modal-a-color);
+}
 
 /* Modal Footer */
 .custom-modal-footer {
@@ -352,6 +364,10 @@ html, body {
     color: var(--modal-collapsible-content-details-color);
 }
 
+.response-modal-json-collapsible-content pre {
+    color: var(--modal-collapsible-content-details-color);
+}
+
 #confirmation-modal-body {
     text-align: center;
     /* center contents by setting top and bottom margins to 0, and left and right margins to auto. */
@@ -398,33 +414,33 @@ html, body {
 /* Textbox with line numbering styling */
 
 .numbered_lines {
-  /*background: #303030;*/
-  /*color: #f1f1f1;*/
-  padding: 10px 16px;
-  border-radius: 2px;
-  /*border-top: 4px solid #00aeef;*/
-  /*-moz-box-shadow: inset 0 0 10px #000;*/
-  /*box-shadow: inset 0 0 10px #000;*/
-  counter-reset: line;
+    background: var(--numbered-lines-background);
+    color: var(--numbered-lines-color);
+    padding: 10px 16px;
+    border-radius: 2px;
+    /*border-top: 4px solid #00aeef;*/
+    /*-moz-box-shadow: inset 0 0 10px #000;*/
+    /*box-shadow: inset 0 0 10px #000;*/
+    counter-reset: line;
 }
 .numbered_lines span {
-  display: block;
-  line-height: 1.5rem;
-  counter-increment: line;
+    display: block;
+    line-height: 1.5rem;
+    counter-increment: line;
 }
 .numbered_lines span:before {
-  content: counter(line, decimal-leading-zero);
-  display: inline-block;
-  border-right: 1px solid #ddd;
-  padding: 0 .5em;
-  margin-right: .5em;
-  color: #888
+    content: counter(line, decimal-leading-zero);
+    display: inline-block;
+    border-right: 1px solid #ddd;
+    padding: 0 .5em;
+    margin-right: .5em;
+    color: #888
 }
 
 mark.red-text {
     color: var(--mark-red-text-color);
     /* background is required to override Bootstrap's CSS. */
-    background-color: var(--custom_modal-background);
+    background-color: var(--modal-background);
 }
 
 mark.red-bg {
@@ -434,7 +450,7 @@ mark.red-bg {
 mark.green-text {
     color: var(--mark-green-text-color);
     /* background is required to override Bootstrap's CSS. */
-    background-color: var(--custom_modal-background);
+    background-color: var(--modal-background);
 }
 
 
