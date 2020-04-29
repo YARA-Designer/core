@@ -3,8 +3,12 @@
     "--yara_rule_designer_color": "white",
     "--yara_rule_designer_span_box_shadow": "black",
     "--yara_rule_designer_header_color": "#67c1f5",
+    "--yara_rule_designer_header_background": "#191c1f",
+    "--yara_rule_designer_leftpane_background": "#191c1f",
+    "--yara_rule_designer_tags_color": "white",
     "--yara_rule_designer_border_color": "#67c1f5",
     "--yara_rule_designer_background": "#191c1f",
+
     "--condition_keyword_color": "67c1f5",
     "--condition_keyword_background": "#77209b",
     "--draggable_artifact_color": "#67c1f5",

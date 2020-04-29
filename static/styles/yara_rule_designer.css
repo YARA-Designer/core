@@ -1,17 +1,60 @@
 /* Define variables for colors etc so that themes can easily override them */
 :root {
-    --yara_rule_designer_text_color: black;
+    /* Main editor elements. */
+    --yara_rule_designer_text_color: white;
     --yara_rule_designer_color: white;
     --yara_rule_designer_span_box_shadow: grey;
-    --yara_rule_designer_header_color: black;
-    --yara_rule_designer_border_color: black;
+    --yara_rule_designer_header_color: white;
+    --yara_rule_designer_header_background: rgb(41, 128, 185);
+    --yara_rule_designer_leftpane_background: white;
+    --yara_rule_designer_tags_color: black;
+    --yara_rule_designer_border_color: rgb(41, 128, 185);
     --yara_rule_designer_background: white;
+
+    /* Draggables. */
     --condition_keyword_color: white;
-    --condition_keyword_background: #dd63ba;
+    --condition_keyword_background: #8a3ab9;
     --draggable_artifact_color: white;
-    --draggable_artifact_background: #4a90dd;
+    --draggable_artifact_background: #2879af;
     --draggable_artifact_type_color: white;
-    --draggable_artifact_type_background: #2e86c1;
+    --draggable_artifact_type_background: #28af9f;
+
+    /* Buttons. */
+    --button-submit-color: white;
+    --button-submit-background: #008CBA;
+    --button-submit-color-hover: white;
+    --button-submit-background-hover: #204d74;
+    --button-clear-color: white;
+    --button-clear-background: #c7254e;
+    --button-clear-color-hover: white;
+    --button-clear-background-hover: #721c24;
+    --button-help-color: white;
+    --button-help-background: #5d6d7e;
+    --button-help-color-hover: white;
+    --button-help-background-hover: #2e4053;
+
+    --button-yes-color: white;
+    --button-yes-background: #5cb85c;
+    --button-yes-color-hover: white;
+    --button-yes-background-hover: #3c763d;
+    --button-no-color: white;
+    --button-no-background: #da423f;
+    --button-no-color-hover: white;
+    --button-no-background-hover: #761c19;
+    --button-commit-color: white;
+    --button-commit-background: #5cb85c;
+    --button-commit-color-hover: white;
+    --button-commit-background-hover: #3c763d;
+    --button-commit-disabled-color: white;
+    --button-commit-disabled-background: #888888;
+    --button-commit-disabled-color-hover: white;
+    --button-commit-disabled-background-hover: #888888;
+    --button-collapsible-content-details-color: white;
+    --button-collapsible-content-details-background: #777;
+    --button-collapsible-content-details-color-hover: white;
+    --button-collapsible-content-details-background-hover: #555;
+
+    /* Modals. */
     --custom_modal-background: white;
     /*--modal_background_info: #87898a;*/
     --modal_background_info: #5dade2;
@@ -22,6 +65,10 @@
     --modal_color_warning: black;
     --modal_background_error: #da423f;
     --modal_color_error: white;
+    --modal-collapsible-content-details-color: black;
+    --modal-collapsible-content-details-background: f1f1f1;
+
+    /* Text marking. */
     --mark-green-text-color: #218820;
     --mark-red-text-color: #af2a1c;
 }
@@ -51,17 +98,17 @@ html, body {
     font-size: 12px;
     border: 0px solid;
     /*border-radius: 25px;*/
-    box-shadow: 5px 5px 5px var(--yara_rule_designer_span_box_shadow);
+    /*box-shadow: 5px 5px 5px var(--yara_rule_designer_span_box_shadow);*/
     color: var(--yara_rule_designer_color);
 }
 
 #yara_rule_designer_header {
-    /*background: #204d74;*/
     overflow: hidden;
     text-align: center;
     font-size: 22pt;
     font-weight: bold;
     border-bottom:1px solid var(--yara_rule_designer_border_color);
+    background: var(--yara_rule_designer_header_background);
     color: var(--yara_rule_designer_header_color);
 }
 
@@ -70,6 +117,8 @@ html, body {
        needs their own (transparent) border to stay in-bounds. */
     border-right:1px solid var(--yara_rule_designer_border_color);
     border-bottom: 1px solid var(--yara_rule_designer_border_color);
+    background: var(--yara_rule_designer_leftpane_background);
+    overflow-x: hidden;
 }
 
 #yara-rule-designer-buttons {
@@ -80,9 +129,9 @@ html, body {
 }
 
 #submit-rule-button {
-    background-color: #008CBA;
+    background: var(--button-submit-background);
     border: none;
-    color: white;
+    color: var(--button-submit-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -90,14 +139,14 @@ html, body {
 }
 
 #submit-rule-button:hover {
-  background-color: #204d74;
-  color: white;
+    background: var(--button-submit-background-hover);
+    color: var(--button-submit-color-hover);
 }
 
 #clear-rule-button {
-    background-color: #c7254e;
+    background: var(--button-clear-background);
     border: none;
-    color: white;
+    color: var(--button-clear-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -105,14 +154,14 @@ html, body {
 }
 
 #clear-rule-button:hover {
-  background-color: #721c24;
-  color: white;
+    background: var(--button-clear-background-hover);
+    color: var(--button-clear-color-hover);
 }
 
 #show-help-button {
-    background-color:  #5d6d7e ;
+    background: var(--button-help-background);
     border: none;
-    color: white;
+    color: var(--button-help-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -120,17 +169,15 @@ html, body {
 }
 
 #show-help-button:hover {
-  background-color: #2e4053;
-  color: white;
+  background: var(--button-help-background-hover);
+  color: var(--button-help-color-hover);
 }
 
 #yara-rule-designer-tags {
-    /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
-    /*border-right:1px solid transparent;*/
-    /*border-bottom:1px solid transparent;*/
-    color: var(--yara_rule_designer_text_color);
+    color: var(--yara_rule_designer_tags_color);
     margin-left: 10px;
     margin-top: 10px;
+    background: transparent;
 }
 
 #yara_rule_designer_operators {
@@ -139,12 +186,13 @@ html, body {
     border-top: 1px solid var(--yara_rule_designer_border_color);
     border-right:1px solid transparent;
     border-bottom:1px solid var(--yara_rule_designer_border_color);
+    background: transparent;
 }
 
 #yara_rule_designer_artifact_types {
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
     border-right:1px solid transparent;
-    /*border-bottom:1px solid var(--yara_rule_designer_border_color);*/
+    background: transparent;
 }
 
 #yara_rule_designer_artifacts {
@@ -152,6 +200,7 @@ html, body {
     border-right:1px solid transparent;
     border-top: 1px solid var(--yara_rule_designer_border_color);
     border-bottom:1px solid transparent;
+    background: transparent;
 }
 
 /* Override designer span properties for items that are put in the editor element */
@@ -227,15 +276,15 @@ html, body {
 
 /* Modal Content */
 .custom-modal-content {
-  position: relative;
-  background-color: #fefefe;
-  margin: auto;
-  padding: 0;
-  border: 1px solid #888;
-  width: 80%;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-  animation-name: animatetop;
-  animation-duration: 0.4s
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
 }
 
 /* Add Animation */
@@ -246,9 +295,9 @@ html, body {
 
 /* Commit etc buttons */
 .response-modal-button-commit {
-    background-color: #5cb85c;
+    background: var(--button-commit-background);
     border: none;
-    color: white;
+    color: var(--button-commit-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -257,14 +306,14 @@ html, body {
 }
 
 .response-modal-button-commit:hover {
-  background-color: #3c763d;
-  color: white;
+    background: var(--button-commit-background-hover);
+    color: var(--button-commit-color-hover);
 }
 
 .response-modal-button-commit-disabled {
-    background-color: #888888;
+    background: var(--button-commit-disabled-background);
     border: none;
-    color: white;
+    color: var(--button-commit-disabled-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -273,32 +322,34 @@ html, body {
 }
 
 .response-modal-button-commit-disabled:hover {
-  background-color: #888888;
-  color: white;
+    background: var(--button-commit-disabled-background-hover);
+    color: var(--button-commit-disabled-color-hover);
 }
 
 /* Collapsible contentDetails (Raw JSON)*/
 .response-modal-json-collapsible-button {
-  background-color: #777;
-  color: white;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
+    background: var(--button-collapsible-content-details-background);
+    color: var(--button-collapsible-content-details-color);
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
 }
 
 .active, .response-modal-json-collapsible-button:hover {
-  background-color: #555;
+    background: var(--button-collapsible-content-details-background-hover);
+    color: var(--button-collapsible-content-details-color-hover)
 }
 
 .response-modal-json-collapsible-content {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  background-color: #f1f1f1;
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+    background: var(--modal-collapsible-content-details-background);
+    color: var(--modal-collapsible-content-details-color);
 }
 
 #confirmation-modal-body {
@@ -313,9 +364,9 @@ html, body {
 }
 
 .confirmation-modal-button-yes {
-    background-color: #5cb85c;
+    background: var(--button-yes-background);
     border: none;
-    color: white;
+    color: var(--button-yes-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -324,14 +375,14 @@ html, body {
 }
 
 .confirmation-modal-button-yes:hover {
-  background-color: #3c763d;
-  color: white;
+    background: var(--button-yes-background-hover);
+    color: var(--button-yes-color-hover);
 }
 
 .confirmation-modal-button-no {
-    background-color: #da423f;
+    background: var(--button-no-background);
     border: none;
-    color: white;
+    color: var(--button-no-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -340,8 +391,8 @@ html, body {
 }
 
 .confirmation-modal-button-no:hover {
-  background-color: #761c19;
-  color: white;
+    background-color: var(--button-no-background-hover);
+    color: var(--button-no-color-hover);
 }
 
 /* Textbox with line numbering styling */
