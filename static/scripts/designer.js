@@ -119,6 +119,38 @@ function getCSSVar(varName) {
     return getComputedStyle(document.documentElement).getPropertyValue('--' + varName);
 }
 
+// function setModalMaxHeight(element) {
+//     this.$element     = $(element);
+//     this.$content     = this.$element.find('.modal-body');
+//     var borderWidth   = this.$content.outerHeight() - this.$content.innerHeight();
+//     var dialogMargin  = $(window).width() < 768 ? 20 : 60;
+//     var contentHeight = $(window).height() - (dialogMargin + borderWidth);
+//     var headerHeight  = this.$element.find('.modal-header').outerHeight() || 0;
+//     var footerHeight  = this.$element.find('.modal-footer').outerHeight() || 0;
+//     var maxHeight     = contentHeight - (headerHeight + footerHeight);
+//
+//     this.$content.css({
+//         'overflow': 'hidden'
+//     });
+//
+//     this.$element
+//         .find('.modal-body').css({
+//           'max-height': maxHeight,
+//           'overflow-y': 'auto'
+//     });
+// }
+//
+// $('.modal').on('show.bs.modal', function() {
+//     $(this).show();
+//     setModalMaxHeight(this);
+// });
+//
+// $(window).resize(function() {
+//   if ($('.modal.in').length != 0) {
+//     setModalMaxHeight($('.modal.in'));
+//   }
+// });
+
 /**
  * Shows a pop-up modal with customisable header, footer and body,
  * as well as background color based on level.
@@ -681,6 +713,26 @@ function comparer(idx, asc) {
     }(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
 }}
 
+function mockRules(num) {
+    let mockRules = [];
+    for (let i = 0; i < num; i++) {
+        mockRules.push({
+            "added_on": "2020-03-05T13:50:07.793123",
+            "case_id": String(i),
+            "data": {
+                "title": `Mock Rule #${i}`,
+                "severity": i,
+                "observables": [],
+                "id": String(i)
+            },
+            "last_modified": "2020-04-29T10:28:28.504976",
+            "pending": true,
+            "yara_file": null
+        })
+    }
+    return mockRules;
+}
+
 /**
  * Print fetched rules table.
  *
@@ -690,6 +742,12 @@ function comparer(idx, asc) {
  * @param defaultCheckedRadio
  */
 function printRulesTable(rules, defaultCheckedRadio="Title", hideRadios=["Pending"]) {
+    console.log("rules", rules);
+    console.log("mock rules", mockRules(5));
+    for ( let mockRule of mockRules(50) ) {
+        rules.push(mockRule);
+    }
+
     let header = `<h3>Fetched rules <span id='response-modal-header-filter-count'</span></h3>`;
     let body = "";
     let footer = "Tip: Click any row to load its corresponding rule.";
@@ -816,7 +874,7 @@ function setObservableTypes(types) {
 
     for (let i = 0; i < types.length; i++) {
         html +=
-            `<span id='artifact_type${i}' class='draggable_artifact_type' onclick='addToEditor(event)'>${types[i]}</span>'`;
+            `<span id='artifact_type${i}' class='draggable_artifact_type' onclick='addToEditor(event)'>${types[i]}</span>`;
     }
 
     document.getElementById('yara_rule_designer_artifact_types').innerHTML = html;
@@ -827,7 +885,7 @@ function setObservableData(data) {
 
     for (let i = 0; i < data.length; i++) {
         html +=
-            `<span id='artifact${i}' class='draggable_artifact' onclick='addToEditor(event)'>${data[i]}</span>'`;
+            `<span id='artifact${i}' class='draggable_artifact' onclick='addToEditor(event)'>${data[i]}</span>`;
     }
 
     document.getElementById('yara_rule_designer_artifacts').innerHTML = html;
