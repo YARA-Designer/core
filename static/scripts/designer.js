@@ -594,47 +594,34 @@ function makeRuleTableRows(rules) {
 }
 
 function filterFetchedRules(inputId, tableId, filterRadioId) {
-    console.log(`filterFetchedRules(inputId="${inputId}", tableId="${tableId}", filterRadioId="${filterRadioId}")`);
-
-    // Declare variables
     let input = document.getElementById(inputId);
     let filter = input.value.toUpperCase();
     let table = document.getElementById(tableId);
     let filterRadios = document.getElementById(filterRadioId).getElementsByTagName('input');
-    console.log("filterCheckboxes", filterRadios);
 
     // Get all table row elements.
     let tr = table.getElementsByTagName("tr");
-    console.log("tr", tr);
 
-    // Get a HTMLCollection of mapping between header and a row index (both by numbered index and key name).
-    let rowMap = tr["fetched-rules-headers"].children;
-    console.log("rowMap", rowMap);
-
-    // Get a list of which checkboxes are check (what to filter by).
-    let enabledTds = [];
+    // Get the currently checked radio button.
+    let enabledTd = 0;
     for (let idx = 0; idx < filterRadios.length; idx++) {
         console.log(`filterCheckboxes[${idx}]`, filterRadios[idx]);
         if (filterRadios[idx].checked) {
-            // enabledTds.push(filterCheckboxes[idx]);
-            enabledTds.push(idx);
+            enabledTd = idx;
         }
     }
-    console.log("enabledTds", enabledTds);
 
     // Loop through all table rows, and hide those who don't match the search query
     for (let i = 0; i < tr.length; i++) {
-        // td = tr[i].getElementsByTagName("td")[1];
-        for (let enabledTd of enabledTds) {
-            let td = tr[i].getElementsByTagName("td")[enabledTd];
-            if (td) {
-                let txtValue = td.textContent || td.innerText;
+        let td = tr[i].getElementsByTagName("td")[enabledTd];
 
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
+        if (td) {
+            let txtValue = td.textContent || td.innerText;
+
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
             }
         }
     }
@@ -687,13 +674,13 @@ function printRulesTable(rules, defaultCheckedRadio="Title") {
     let headerContentMaps = makeRuleTableRows(rules);
 
     // Filter/Search input text box:
-    let filterRadioClassName = "fetched-rules-input-filter-radios";
-    let filterRadioId = "fetched-rules-input-filter-radios";
-    let filterInputId = "fetched-rules-input-filter";
+    let filterRadioClassName = `${tableId}-input-filter-radios`;
+    let filterRadioId = `${tableId}-input-filter-radios`;
+    let filterInputId = `${tableId}-input-filter`;
     body += `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', '${tableId}', '${filterRadioId}')" placeholder="Filter table..">`;
 
     // Checkboxes:
-    let radios = "";
+    let radioHTML = "";
     let columns = Object.keys(headerContentMaps[0]);
     for (let i = 0; i < columns.length; i++) {
         let column = columns[i];
@@ -710,13 +697,13 @@ function printRulesTable(rules, defaultCheckedRadio="Title") {
                 checked = column === defaultCheckedRadio ? " checked": "";
             }
 
-            radios += `<input type="radio" name="${filterRadioClassName}" class="form-check-input" id="${filterRadioId}-${i}" title="${column}"${checked}>\n`;
-            radios += `<label class="form-check-label" for="${filterRadioId}-${i}">${column}</label>\n`;
+            radioHTML += `<input type="radio" name="${filterRadioClassName}" class="form-check-input" id="${filterRadioId}-${i}" title="${column}"${checked}>\n`;
+            radioHTML += `<label class="form-check-label" for="${filterRadioId}-${i}">${column}</label>\n`;
         }
     }
 
     // Assemble checkboxes HTML.
-    body += `<div class="${filterRadioClassName} form-check form-check-inline" id="${filterRadioId}">\n${radios}\n</div>`;
+    body += `<div class="${filterRadioClassName} form-check form-check-inline" id="${filterRadioId}">\n${radioHTML}\n</div>`;
     body += "<br>";
 
     // Table:
