@@ -1,5 +1,11 @@
 /* Define variables for colors etc so that themes can easily override them */
 :root {
+    /* Theme selector */
+    /*--theme-button-light-background: #f8f9fa;*/
+    /*--theme-button-light-color: #343a40;*/
+    /*--theme-button-dark-background: #343a40;*/
+    /*--theme-button-dark-color: #f8f9fa;*/
+
     /* Main editor elements. */
     --yara_rule_designer_text_color: white;
     --yara_rule_designer_color: white;
@@ -131,6 +137,47 @@ tr:hover td {
     /*box-shadow: 5px 5px 5px var(--yara_rule_designer_span_box_shadow);*/
     color: var(--yara_rule_designer_color);
 }
+
+/*.container-fluid {*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  height: 100%;*/
+/*}*/
+/*.row:last-child {*/
+/*  flex: 1;*/
+/*}*/
+
+#yara-rule-designer-theme-selector {
+    background: var(--yara_rule_designer_header_background);
+    width: 30%;
+}
+
+#load-theme-light-button {
+    /*background: var(--theme-button-light-background);*/
+    /*color: var(--theme-button-light-color);*/
+    /*border: 0;*/
+}
+
+#load-theme-dark-button {
+    /*background: var(--theme-button-dark-background);*/
+    /*color: var(--theme-button-dark-color);*/
+    /*border: 0;*/
+}
+
+#load-themes-dropdown {
+    background: var(--button-submit-background);
+    border: none;
+    color: var(--button-submit-color);
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+/*#load-theme-light-button:hover {*/
+/*    background: var(--button-submit-background-hover);*/
+/*    color: var(--button-submit-color-hover);*/
+/*}*/
 
 #yara_rule_designer_header {
     overflow: hidden;

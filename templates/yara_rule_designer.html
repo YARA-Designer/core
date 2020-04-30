@@ -1,164 +1,166 @@
-<title id="yara-designer-title">YARA Rule Designer: No rule loaded</title>
-{# <!--suppress HtmlUnknownTarget --> #}
-<link rel="stylesheet" href="{{ url_for('static', filename='styles/yara_rule_designer.css') }}">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title id="yara-designer-title">YARA Rule Designer: No rule loaded</title>
+        <!--suppress HtmlUnknownTarget -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/yara_rule_designer.css') }}">
 
-<!-- Set Jinja2 variables for use in JavaScript -->
-<!--    Theme handler: -->
-<meta id="theme" data-path="{{ url_for('static', filename='themes') + '/' }}">
-<!--    JavaScript custom POST handlers -->
-<meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
-<meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
-<!--    JavaScript GET handlers -->
-<meta id="getRules" data-url="{{ url_for('get_rules_request') }}">
-<meta id="getRule" data-url="{{ url_for('post_get_rule_request') }}">
+        <!-- Add icon libraries -->
+        <!--suppress HtmlUnknownTarget -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='fonts/fontawesome-free-5.13.0-web/css/all.css') }}">
 
-<div class="container mh-100 h-100 mw-100 w-100 yara_rule_designer" id="yara_rule_designer_container">
-    <div class="row align-items-start">
-
-        <div id="yara-rule-designer-theme-selector" class="row m-row justify-content-between yara_rule_designer" style="background: transparent; position: relative; z-index: 9; float: left;">
-            <button id="load-theme-light-button" class="col-sm my-col" onclick="loadTheme('light')">Light</button>
-            <button id="load-theme-dark-button" class="col-sm my-col" onclick="loadTheme('dark')">Dark</button>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More themes
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="w-100"></div>
-
-        <div id="yara_rule_designer_header" class="col yara_rule_designer"><p>No rule loaded.</p></div>
-
-        <div class="w-100"></div>
-
-        <div id="yara_rule_designer_leftpane_container" class="col-2 yara_rule_designer">
-            <div class="row">
-                <div class="row m-row justify-content-between yara_rule_designer" id="yara-rule-designer-buttons">
-                    <button id="load-rule-button" class="col-sm my-col" onclick="loadRuleDialog()">Open</button>
-                    <button id="show-help-button" class="col-sm my-col" onclick="popupHelpModal()">Help</button>
-                    <button id="clear-rule-button" class="col-sm my-col" onclick="clearRule()">Clear</button>
-                    <button id="submit-rule-button" class="col-sm my-col" onclick="postRule()">Submit</button>
+        <!-- Set Jinja2 variables for use in JavaScript -->
+        <!--    Theme handler: -->
+        <meta id="theme" data-path="{{ url_for('static', filename='themes') + '/' }}">
+        <!--    JavaScript custom POST handlers -->
+        <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
+        <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
+        <!--    JavaScript GET handlers -->
+        <meta id="getRules" data-url="{{ url_for('get_rules_request') }}">
+        <meta id="getRule" data-url="{{ url_for('post_get_rule_request') }}">
+    </head>
+    <body>
+        <div class="container mh-100 h-100 mw-100 w-100 yara_rule_designer" id="yara_rule_designer_container">
+            <div class="row align-items-start">
+                <div class="w-100"></div>
+                <div id="yara_rule_designer_header" class="col yara_rule_designer">
+                    <div id="yara-rule-designer-theme-selector" class="row yara_rule_designer">
+                        <button id="load-theme-light-button" class="col-1 fas fa-sun btn btn-light" onclick="loadTheme('light')"></button>
+                        <button id="load-theme-dark-button" class="col-1 fas fa-moon btn btn-dark" onclick="loadTheme('dark')"></button>
+                    </div>
+                    <div id="yara-rule-designer-header-content">
+                        <p>No rule loaded.</p>
+                    </div>
                 </div>
 
                 <div class="w-100"></div>
 
-                <div id="yara-rule-designer-tags" class="yara_rule_designer"></div>
+                <div id="yara_rule_designer_leftpane_container" class="col-2 yara_rule_designer">
+                    <div class="row">
+                        <div class="row m-row yara_rule_designer" id="yara-rule-designer-buttons">
+                            <button id="load-rule-button" class="col-sm my-col" onclick="loadRuleDialog()">Open</button>
+                            <button id="show-help-button" class="col-sm my-col" onclick="popupHelpModal()">Help</button>
+                            <button id="clear-rule-button" class="col-sm my-col" onclick="clearRule()">Clear</button>
+                            <button id="submit-rule-button" class="col-sm my-col" onclick="postRule()">Submit</button>
+                        </div>
 
-                <div class="w-100"></div>
+                        <div class="w-100"></div>
 
-                <div class="yara_rule_designer" id="yara_rule_designer_operators">
-                    <!--    Add conditional keywords-->
-                    <!--    Boolean-->
-                    <span id="condition_keyword_and" class="condition_keyword" onclick="addToEditor(event)">AND</span>
-                    <span id="condition_keyword_or" class="condition_keyword" onclick="addToEditor(event)">OR</span>
-                    <span id="condition_keyword_not" class="condition_keyword" onclick="addToEditor(event)">NOT</span>
-                    <!--    Arithmetic-->
-                    <span id="condition_keyword_equal" class="condition_keyword" onclick="addToEditor(event)">==</span>
-                    <span id="condition_keyword_lt" class="condition_keyword" onclick="addToEditor(event)"><</span>
-                    <span id="condition_keyword_gt" class="condition_keyword" onclick="addToEditor(event)">></span>
-                    <span id="condition_keyword_leq" class="condition_keyword" onclick="addToEditor(event)"><=</span>
-                    <span id="condition_keyword_geq" class="condition_keyword" onclick="addToEditor(event)">>=</span>
-                    <span id="condition_keyword_neq" class="condition_keyword" onclick="addToEditor(event)">!=</span>
-                    <!--    Relational-->
-                    <span id="condition_keyword_add" class="condition_keyword" onclick="addToEditor(event)">+</span>
-                    <span id="condition_keyword_sub" class="condition_keyword" onclick="addToEditor(event)">-</span>
-                    <span id="condition_keyword_mul" class="condition_keyword" onclick="addToEditor(event)">*</span>
-                    <span id="condition_keyword_div" class="condition_keyword" onclick="addToEditor(event)">/</span>
-                    <span id="condition_keyword_pct" class="condition_keyword" onclick="addToEditor(event)">%</span>
-                    <span id="condition_keyword_setminus" class="condition_keyword" onclick="addToEditor(event)">\</span>
-                    <!--    Bitwise-->
-                    <span id="condition_keyword_bitwise_and" class="condition_keyword" onclick="addToEditor(event)">&</span>
-                    <span id="condition_keyword_bitwise_or" class="condition_keyword" onclick="addToEditor(event)">|</span>
-                    <span id="condition_keyword_bitwise_not" class="condition_keyword" onclick="addToEditor(event)">~</span>
-                    <span id="condition_keyword_bitwise_xor" class="condition_keyword" onclick="addToEditor(event)">^</span>
-                    <span id="condition_keyword_bitwise_lshift" class="condition_keyword" onclick="addToEditor(event)"><<</span>
-                    <span id="condition_keyword_bitwise_rshift" class="condition_keyword" onclick="addToEditor(event)">>></span>
-                    <!-- Parenthesis and wrappers       -->
-                    <span id="condition_keyword_lparen" class="condition_keyword" onclick="addToEditor(event)">(</span>
-                    <span id="condition_keyword_rparen" class="condition_keyword" onclick="addToEditor(event)">)</span>
-                    <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)">()</span>
+                        <div id="yara-rule-designer-tags" class="yara_rule_designer"></div>
+
+                        <div class="w-100"></div>
+
+                        <div class="yara_rule_designer" id="yara_rule_designer_operators">
+                            <!--    Add conditional keywords-->
+                            <!--    Boolean-->
+                            <span id="condition_keyword_and" class="condition_keyword" onclick="addToEditor(event)">AND</span>
+                            <span id="condition_keyword_or" class="condition_keyword" onclick="addToEditor(event)">OR</span>
+                            <span id="condition_keyword_not" class="condition_keyword" onclick="addToEditor(event)">NOT</span>
+                            <!--    Arithmetic-->
+                            <span id="condition_keyword_equal" class="condition_keyword" onclick="addToEditor(event)">==</span>
+                            <span id="condition_keyword_lt" class="condition_keyword" onclick="addToEditor(event)"><</span>
+                            <span id="condition_keyword_gt" class="condition_keyword" onclick="addToEditor(event)">></span>
+                            <span id="condition_keyword_leq" class="condition_keyword" onclick="addToEditor(event)"><=</span>
+                            <span id="condition_keyword_geq" class="condition_keyword" onclick="addToEditor(event)">>=</span>
+                            <span id="condition_keyword_neq" class="condition_keyword" onclick="addToEditor(event)">!=</span>
+                            <!--    Relational-->
+                            <span id="condition_keyword_add" class="condition_keyword" onclick="addToEditor(event)">+</span>
+                            <span id="condition_keyword_sub" class="condition_keyword" onclick="addToEditor(event)">-</span>
+                            <span id="condition_keyword_mul" class="condition_keyword" onclick="addToEditor(event)">*</span>
+                            <span id="condition_keyword_div" class="condition_keyword" onclick="addToEditor(event)">/</span>
+                            <span id="condition_keyword_pct" class="condition_keyword" onclick="addToEditor(event)">%</span>
+                            <span id="condition_keyword_setminus" class="condition_keyword" onclick="addToEditor(event)">\</span>
+                            <!--    Bitwise-->
+                            <span id="condition_keyword_bitwise_and" class="condition_keyword" onclick="addToEditor(event)">&</span>
+                            <span id="condition_keyword_bitwise_or" class="condition_keyword" onclick="addToEditor(event)">|</span>
+                            <span id="condition_keyword_bitwise_not" class="condition_keyword" onclick="addToEditor(event)">~</span>
+                            <span id="condition_keyword_bitwise_xor" class="condition_keyword" onclick="addToEditor(event)">^</span>
+                            <span id="condition_keyword_bitwise_lshift" class="condition_keyword" onclick="addToEditor(event)"><<</span>
+                            <span id="condition_keyword_bitwise_rshift" class="condition_keyword" onclick="addToEditor(event)">>></span>
+                            <!-- Parenthesis and wrappers       -->
+                            <span id="condition_keyword_lparen" class="condition_keyword" onclick="addToEditor(event)">(</span>
+                            <span id="condition_keyword_rparen" class="condition_keyword" onclick="addToEditor(event)">)</span>
+                            <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)">()</span>
+                        </div>
+
+                        <div class="w-100"></div>
+
+                        <div class="yara_rule_designer" id="yara_rule_designer_artifact_types"></div>
+
+                        <div class="w-100"></div>
+
+                        <div class="yara_rule_designer" id="yara_rule_designer_artifacts"></div>
+                    </div>
                 </div>
 
-                <div class="w-100"></div>
+                <div id="yara_rule_designer_editor_container" class="col-10 yara_rule_designer">
+                    <div class="row">
+                        <div class="container col yara_rule_designer" id="yara_rule_designer_editor"></div>
+                    </div>
+                </div>
 
-                <div class="yara_rule_designer" id="yara_rule_designer_artifact_types"></div>
+            </div> <!-- Row -->
+        </div> <!-- Container -->
 
-                <div class="w-100"></div>
-
-                <div class="yara_rule_designer" id="yara_rule_designer_artifacts"></div>
+        <!-- Pre-define default modals (to be populated by JavaScript later). -->
+        <div id="response-modal" class="custom-modal">
+            <!-- Modal content -->
+            <div class="custom-modal-content">
+              <div class="custom-modal-header" id="response-modal-header">
+                <span class="close-custom-modal" id="response-modal-close">&times;</span>
+                <h2>Modal Header</h2>
+              </div>
+              <div class="custom-modal-body" id="response-modal-body">
+                <p>Some text in the Modal Body</p>
+                <p>Some other text...</p>
+              </div>
+              <div class="custom-modal-footer" id="response-modal-footer">
+                <h3>Modal Footer</h3>
+              </div>
             </div>
         </div>
 
-        <div id="yara_rule_designer_editor_container" class="col-10 yara_rule_designer">
-            <div class="row">
-                <div class="container col yara_rule_designer" id="yara_rule_designer_editor"></div>
+        <div id="confirmation-modal" class="custom-modal">
+            <!-- Modal content -->
+            <div class="custom-modal-content">
+                <div class="custom-modal-header" id="confirmation-modal-header">
+                    <span class="close-custom-modal" id="confirmation-modal-close">&times;</span>
+                    <h2>Modal Header</h2>
+                </div>
+                <div class="custom-modal-body" id="confirmation-modal-body">
+                    <p>Some text in the Modal Body</p>
+                    <p>Some other text...</p>
+                </div>
+                <div class="custom-modal-footer" id="confirmation-modal-footer">
+                    <h3>Modal Footer</h3>
+                </div>
             </div>
         </div>
 
-    </div> <!-- Row -->
-</div> <!-- Container -->
+        {% block javascript %}
+        <!-- JQuery ( required for Bootstrap and $() ). -->
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
 
-<!-- Pre-define default modals (to be populated by JavaScript later). -->
-<div id="response-modal" class="custom-modal">
-    <!-- Modal content -->
-    <div class="custom-modal-content">
-      <div class="custom-modal-header" id="response-modal-header">
-        <span class="close-custom-modal" id="response-modal-close">&times;</span>
-        <h2>Modal Header</h2>
-      </div>
-      <div class="custom-modal-body" id="response-modal-body">
-        <p>Some text in the Modal Body</p>
-        <p>Some other text...</p>
-      </div>
-      <div class="custom-modal-footer" id="response-modal-footer">
-        <h3>Modal Footer</h3>
-      </div>
-    </div>
-</div>
+        <!-- Popper ( required for Bootstrap ). -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 
-<div id="confirmation-modal" class="custom-modal">
-    <!-- Modal content -->
-    <div class="custom-modal-content">
-        <div class="custom-modal-header" id="confirmation-modal-header">
-            <span class="close-custom-modal" id="confirmation-modal-close">&times;</span>
-            <h2>Modal Header</h2>
-        </div>
-        <div class="custom-modal-body" id="confirmation-modal-body">
-            <p>Some text in the Modal Body</p>
-            <p>Some other text...</p>
-        </div>
-        <div class="custom-modal-footer" id="confirmation-modal-footer">
-            <h3>Modal Footer</h3>
-        </div>
-    </div>
-</div>
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-{% block javascript %}
-    <!-- JQuery ( required for Bootstrap and $() ). -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+        <!-- Dragula - Drag 'n Drop   -->
+        <!--suppress HtmlUnknownTarget -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/dragula.css') }}">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
 
-    <!-- Popper ( required for Bootstrap ). -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+        <!-- Theme handler -->
+        <!--suppress HtmlUnknownTarget -->
+        <script src="{{ url_for('static', filename='scripts/themes.js') }}"></script>
 
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-
-    <!-- Dragula - Drag 'n Drop   -->
-    <!--suppress HtmlUnknownTarget -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/dragula.css') }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
-
-    <!-- Theme handler -->
-    {# <!--suppress HtmlUnknownTarget --> #}
-    <script src="{{ url_for('static', filename='scripts/themes.js') }}"></script>
-
-    <!-- Core Designer script block -->
-    {# <!--suppress HtmlUnknownTarget --> #}
-    <script src="{{ url_for('static', filename='scripts/designer.js') }}"></script>
-{% endblock %}
+        <!-- Core Designer script block -->
+        <!--suppress HtmlUnknownTarget -->
+        <script src="{{ url_for('static', filename='scripts/designer.js') }}"></script>
+        {% endblock %}
+    </body>
+</html>

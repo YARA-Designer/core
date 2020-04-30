@@ -853,7 +853,7 @@ function loadRuleDialog() {
 
 function setTitle(title, id, description=null) {
     document.getElementById('yara-designer-title').innerText = title;
-    document.getElementById('yara_rule_designer_header').innerHTML =
+    document.getElementById('yara-rule-designer-header-content').innerHTML =
         `<p> Case: ${title} [ID: ${id}] </p>`;
     document.getElementById('yara_rule_designer_header').innerHTML +=
         `<h6>${description}</h6>`;
