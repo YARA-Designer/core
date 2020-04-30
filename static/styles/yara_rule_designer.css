@@ -34,8 +34,8 @@
     --button-clear-background: #c7254e;
     --button-clear-color-hover: white;
     --button-clear-background-hover: #721c24;
-    --button-help-color: white;
-    --button-help-background: #5d6d7e;
+    --button-default-color: white;
+    --button-default-background: #5d6d7e;
     --button-help-color-hover: white;
     --button-help-background-hover: #2e4053;
 
@@ -203,6 +203,22 @@ tr:hover td {
     border-right:1px solid transparent;
     border-bottom:1px solid var(--yara_rule_designer_border_color);
     padding: 0;
+    /*width: 100%;*/
+}
+
+#load-rule-button {
+    background: var(--button-default-background);
+    border: none;
+    color: var(--button-default-color);
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+#load-rule-button:hover {
+  background: var(--button-help-background-hover);
+  color: var(--button-help-color-hover);
 }
 
 #submit-rule-button {
@@ -236,9 +252,9 @@ tr:hover td {
 }
 
 #show-help-button {
-    background: var(--button-help-background);
+    background: var(--button-default-background);
     border: none;
-    color: var(--button-help-color);
+    color: var(--button-default-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;

@@ -39,10 +39,19 @@
                 <div id="yara_rule_designer_leftpane_container" class="col-2 yara_rule_designer">
                     <div class="row">
                         <div class="row m-row yara_rule_designer" id="yara-rule-designer-buttons">
-                            <button id="load-rule-button" class="col-sm my-col" onclick="loadRuleDialog()">Open</button>
-                            <button id="show-help-button" class="col-sm my-col" onclick="popupHelpModal()">Help</button>
-                            <button id="clear-rule-button" class="col-sm my-col" onclick="clearRule()">Clear</button>
-                            <button id="submit-rule-button" class="col-sm my-col" onclick="postRule()">Submit</button>
+                            <button id="load-rule-button" class="col" onclick="loadRuleDialog()" title="Open YARA rule...">
+                                <i class="fas fa-folder-open fa-lg"></i>
+                            </button>
+                            <button id="show-help-button" class="col" onclick="popupHelpModal()" title="Info">
+                                <i class="fas fa-info-circle fa-lg"></i>
+                            </button>
+                            <button id="clear-rule-button" class="col" onclick="clearRule()" title="Clear editor">
+                                <i class="fas fa-broom fa-lg"></i>
+                            </button>
+                            <div class="w-100"></div>
+                            <button id="submit-rule-button" class="col" onclick="postRule()" title="Submit">
+                                <h4>Submit&nbsp;<i class="fas fa-arrow-right"></i></h4>
+                            </button>
                         </div>
 
                         <div class="w-100"></div>
