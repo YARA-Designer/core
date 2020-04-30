@@ -19,6 +19,8 @@
     "--modal-background": "#191c1f",
     "--modal-color": "white",
     "--modal-a-color": "#6db0ec",
+    "--modal_background_info": "#4680a7",
+    "--modal_background_warning": "#c2a632",
     "--modal-collapsible-content-details-color": "white",
     "--modal-collapsible-content-details-background": "#191c1f",
     "--numbered-lines-background": "#191c1f",
@@ -27,9 +29,9 @@
     "--mark-red-text-color": "#bf3535",
 
     "--table-header-color": "white",
-    "--table-header-background": "#191c1f",
-    "--table-row-background": "#191c1f",
+    "--table-header-background": "#2b2b2b",
+    "--table-row-background": "#2b2b2b",
     "--table-row-color": "white",
-    "--table-row-background-hover": "#373d43",
+    "--table-row-background-hover": "#323232",
     "--table-row-color-hover": "white"
 }
