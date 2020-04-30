@@ -15,6 +15,23 @@
 <div class="container mh-100 h-100 mw-100 w-100 yara_rule_designer" id="yara_rule_designer_container">
     <div class="row align-items-start">
 
+        <div id="yara-rule-designer-theme-selector" class="row m-row justify-content-between yara_rule_designer" style="background: transparent; position: relative; z-index: 9; float: left;">
+            <button id="load-theme-light-button" class="col-sm my-col" onclick="loadTheme('light')">Light</button>
+            <button id="load-theme-dark-button" class="col-sm my-col" onclick="loadTheme('dark')">Dark</button>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More themes
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="#">Action</a>
+                    <a class="dropdown-item" href="#">Another action</a>
+                    <a class="dropdown-item" href="#">Something else here</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-100"></div>
+
         <div id="yara_rule_designer_header" class="col yara_rule_designer"><p>No rule loaded.</p></div>
 
         <div class="w-100"></div>
