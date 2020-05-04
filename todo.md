@@ -16,7 +16,6 @@
 * Split (what's possible) of script blocks into separate .js files.
 * Style modals more sensibly and make them fit width of their content, not span page width (more or less).
 * Strip deprecated yara_rule_raw for parts and delete it.
-* Style the open button.
 * Replace all antiquated XHR requests with fetch.
 * Figure out some sort of scroll overflow for modals when they vertically size beyond reason (or beyond viewport).
 
