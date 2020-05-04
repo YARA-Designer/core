@@ -1,15 +1,20 @@
-##Requests
+## Requests
 *  Compare YARA rules' similarity (particularly conditions)
     * Change generator to use descriptive names.
 
-##General
+## General
 *  Rename post_rule_json and post_commit_json far more sensibly / unambiguously.
 *  Rename all instances of "artifacts" to "observables" for less confusion..
 
-##Backend
-* Rename retv dict to be attribute compatible (no fancy characters).
+## Responder
+* Replace hardcoded strings with some sort of server-side config file.
+  * Look into whether it can be configured within Cortex itself? 
 
-##Frontend
+## Backend
+* Rename retv dict to be attribute compatible (no fancy characters).
+* Look into merging (responder's) listener webserver code into handlers.webserver.
+
+## Frontend
 * Make encapsulator work with click (surround elements currently in editor div)
 * Add some sort of hashed "state" string to URL to reproduce the current editor elements from URL.
 * Properly implement showing of column error occurred on (currently just appended to SyntaxError str).
