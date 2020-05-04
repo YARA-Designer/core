@@ -149,19 +149,24 @@
 
         {% block javascript %}
         <!-- JQuery ( required for Bootstrap and $() ). -->
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+        <!--suppress HtmlUnknownTarget -->
+        <script src="{{ url_for('static', filename='scripts/third-party/jquery-3.5.0.min.js') }}" integrity="sha384-LVoNJ6yst/aLxKvxwp6s2GAabqPczfWh6xzm38S/YtjUyZ+3aTKOnD/OJVGYLZDl" crossorigin="anonymous"></script>
 
         <!-- Popper ( required for Bootstrap ). -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+        <!--suppress HtmlUnknownTarget -->
+        <script src="{{ url_for('static', filename='scripts/third-party/popper-1.14.6.min.js') }}" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 
         <!-- Bootstrap -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <!--suppress HtmlUnknownTarget -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/third-party/bootstrap-4.4.1.min.css') }}" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <!--suppress HtmlUnknownTarget -->
+        <script src="{{ url_for('static', filename='scripts/third-party/bootstrap-4.4.1.bundle.min.js') }}" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
 
         <!-- Dragula - Drag 'n Drop   -->
         <!--suppress HtmlUnknownTarget -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/dragula.css') }}">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/third-party/dragula-3.7.2.css') }}">
+        <!--suppress HtmlUnknownTarget -->
+        <script src="{{ url_for('static', filename='scripts/third-party/dragula-3.7.2.min.js') }}" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
 
         <!-- Theme handler -->
         <!--suppress HtmlUnknownTarget -->
