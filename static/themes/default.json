@@ -49,6 +49,7 @@
     "--modal-background": "white",
     "--modal-color": "black",
     "--modal-a-color": "rgb(0, 123, 255)",
+    "--modal_background_info": "#5dade2",
     "--modal_color_info": "white",
     "--modal_background_success": "#5cb85c",
     "--modal_color_success": "white",

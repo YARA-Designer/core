@@ -1,5 +1,16 @@
 import json
 
+
+def strip_trailing_comment(s):
+    """
+    Strips out a trailing comment
+
+    :param s:
+    :return:
+    """
+    return s[:s.find('/*')]
+
+
 if __name__ == "__main__":
     styleLines = []
     rootVars = []
@@ -16,16 +27,22 @@ if __name__ == "__main__":
                 if '}' in line:
                     root_var_segment = False
                 else:
+                    # Strip any trailing comments.
+                    # (coding support for leading and depth is too
+                    # time consuming for this simple utility script.)
+                    line = strip_trailing_comment(line)
                     if '/*' not in line and '*/' not in line:
                         # Trim leading indent.
                         rootVars.append(line[4:].strip('\n'))
+                    else:
+                        print("Ignore commented line: {}".format(repr(line)))
 
     themeJson = {}
     for var in rootVars:
         if var != '':
             key, value = var.split(':')
             # Strip trailing semicolon and leading whitespace.
-            value = value[1:-1]
+            value = value.strip(' ').strip(';')
             themeJson[key] = value
 
     print(json.dumps(themeJson, indent=4))
