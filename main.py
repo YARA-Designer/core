@@ -67,20 +67,16 @@ def log_added_route(name: str, include_obj=True):
         log.debug2(rule.__dict__)
 
 
-def add_app_route(flask_app: Flask, route: str, description: str, hide=False, **kwargs):
+def add_app_route(flask_app: Flask, route: str, **kwargs):
     """
     Expand route adding to also update webserver routes dict and log action.
 
-    :param hide:        If True, entry won't be added to webserver routes dict.
     :param flask_app:   A Flask app handle.
     :param route:       Route pathname.
-    :param description: Custom description in webserver routes dict.
     :param kwargs:      Additional Flask app kwargs.
     :return:
     """
     flask_app.add_url_rule(route, **kwargs)
-    if hide is False:
-        webserver.routes[route] = description
     log_added_route(route)
 
 
@@ -114,29 +110,16 @@ if __name__ == "__main__":
     app.add_url_rule(config["hive_listener_endpoint"], methods=['POST'], view_func=api.create_yara_whitelist_rule)
     log_added_route(config["hive_listener_endpoint"])
 
-    # Add other useful routes.
-    # -- Listing of all pending rules.
-    add_app_route(app, '/list', "List all rules pending creation.", view_func=webserver.list_rules)
-
-    # -- Page to create raw yara rules on.
-    add_app_route(app, '/yara_rule_raw', "Create Yara rule using only raw CLI.",
-                  view_func=webserver.new_rule_raw, methods=['GET', 'POST'])
-
-    # -- Page to design yara rules on.
-    add_app_route(app, '/yara_rule_designer', "Create Yara rule using only the designer.",
-                  view_func=webserver.new_rule_designer, methods=['GET', 'POST'])
+    # -- Page to design yara rules on (root endpoint for frontend Web GUI).
+    add_app_route(app, '/', view_func=webserver.new_rule_designer, methods=['GET', 'POST'])
 
     # -- Pages to receive POST request from new_yara_rule so it can be processed by the codebase.
-    add_app_route(app, '/post_yara_rule_imd', "", hide=True, view_func=webserver.post_rule_raw_imd, methods=['POST'])
-    add_app_route(app, '/post_yara_rule_json', "", hide=True, view_func=webserver.post_rule_json, methods=['POST'])
-    add_app_route(app, '/post_yara_commit_json', "", hide=True, view_func=webserver.post_commit_json, methods=['POST'])
-    add_app_route(app, '/post_get_rule_request', "", hide=True, view_func=webserver.post_get_rule_request, methods=['POST'])
+    add_app_route(app, '/post_yara_rule_json', view_func=webserver.post_rule_json, methods=['POST'])
+    add_app_route(app, '/post_yara_commit_json', view_func=webserver.post_commit_json, methods=['POST'])
+    add_app_route(app, '/post_get_rule_request', view_func=webserver.post_get_rule_request, methods=['POST'])
 
     # -- Pages to receive GET requests on.
-    add_app_route(app, '/get_rules_request', "", hide=True, view_func=webserver.get_rules_request, methods=['GET'])
-
-    # Add root endpoint for frontend Web GUI (NB: Add this last to account for populating of webserver routes dict)
-    add_app_route(app, '/', "Home.", hide=True, view_func=webserver.home)
+    add_app_route(app, '/get_rules_request', view_func=webserver.get_rules_request, methods=['GET'])
 
     # Run the Flask Webserver.
     log.info("Starting Flask App Webserver, listening on: {host}:{port}".format(

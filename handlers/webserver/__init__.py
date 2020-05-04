@@ -14,7 +14,6 @@ from handlers.log_handler import create_logger
 
 tab_character = "&nbsp;"
 tab = tab_character*4
-routes = {}
 the_oracle_repo: git.Repo
 
 log = create_logger(__name__)
@@ -97,28 +96,6 @@ def dict_to_json(d: dict):
     return json.loads(rule_json_str)
 
 
-def list_rules():
-    # Get pending rules from database.
-    rule_dicts = get_rules()
-
-    rules_json = []
-    for rule_dict in rule_dicts:
-        if rule_dict["yara_file"]:
-            # Strip path down to only filename itself.
-            rule_dict["yara_file"] = rule_dict["yara_file"].split(os.path.sep)[-1]
-        rules_json.append(dict_to_json(rule_dict))
-
-    return render_template('list_rules.html', rules=rules_json)
-
-
-def new_rule_raw():
-    if 'id' not in request.args:
-        return "Please specify a case ID!"
-
-    return render_template('yara_rule_raw.html',
-                           case=dict_to_json(get_rule(request.args.get('id'))))
-
-
 def new_rule_designer():
     log.info("Rendering YARA Rule Designer template...")
     return render_template('yara_rule_designer.html')
@@ -186,46 +163,6 @@ def generate_yara_rule(j: json):
             log.error("Exception occurred git checkout: {}".format(retv), exc_info=exc2)
 
     return retv
-
-
-def post_rule_raw_imd():  # FIXME: Should probably be deprecated along with raw CLI (HTML page).
-    """
-    Receives an ImmutableMultiDict of the operators which needs to be matched against the original list of artifacts.
-    :return: JSON on the form of:
-    {
-        "artifacts:
-        [
-            {
-            "artifactN":
-            {
-                "artifact",
-                "id",
-                "type"
-            }
-            }
-        ]",
-        condition: ""
-    }
-    """
-    log.debug("keys: " + str([key for key in request.form.keys()]))
-    log.debug("request.form: {}".format(request.form))
-
-    artifacts = {}
-    for artifact, varname, artifact_type, artifact_id in zip(request.form.getlist('artifact'),
-                                                             request.form.getlist('artifact_var'),
-                                                             request.form.getlist('artifact_type'),
-                                                             request.form.getlist('artifact_id')):
-        artifacts[varname] = {"artifact": artifact, "type": artifact_type, "id": artifact_id}
-
-    yara_condition_string = request.form['rawUrlSubmit']
-    yara_dict = {"rule": (request.form['rule'] if 'rule' in request.form else 'UNNAMED_RULE'),
-                 "meta": ({k: request.form['meta_' + k] for k in request.form['meta_keys'].split(',')}
-                          if 'meta_keys' in request.form else {}),
-                 "tags": (request.form["tags"] if "tags" in request.form else []),
-                 "artifacts": artifacts,
-                 "condition": yara_condition_string}
-
-    return generate_yara_rule(yara_dict)
 
 
 def post_rule_json():
@@ -367,7 +304,4 @@ def post_commit_json():
     log.debug("Return dict: {}".format(result))
     return make_response(jsonify(result), 200)
 
-
-def home():
-    return render_template('index.html', routes=dict_to_json(routes))
 
