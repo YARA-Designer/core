@@ -27,4 +27,3 @@
 ## Bugs
 * Drag and drop won't work until you've added at least one item to the editor, 
   likely issue with no existing items to sort with.
-* When switching from dark to light theme some CSS variables doesn't get explicitly set, e.g. `--modal_background_info`.
