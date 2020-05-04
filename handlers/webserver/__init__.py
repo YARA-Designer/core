@@ -4,55 +4,15 @@ import os
 
 import handlers.git_handler as git
 from flask import render_template, request, jsonify, make_response
-from sqlalchemy.exc import SQLAlchemyError
 
-from database.models import Rule
-from database.operations import db_session, update_rule
+from database.operations import update_rule, get_rule, get_rules
 import handlers.yara
 from handlers.config_handler import load_config
 from handlers.log_handler import create_logger
 
-tab_character = "&nbsp;"
-tab = tab_character*4
 the_oracle_repo: git.Repo
 
 log = create_logger(__name__)
-
-
-def get_rule(case_id: str) -> dict:
-    session = db_session()
-
-    try:
-        # Get the first item in the list of queries
-        rule_dict: dict = session.query(Rule).filter(Rule.case_id == case_id)[0].as_dict()
-
-        # Commit transaction (NB: makes detached instances expire)
-        session.commit()
-    except SQLAlchemyError:
-        raise
-    finally:
-        session.close()
-
-    return rule_dict
-
-
-def get_rules() -> list:
-    rules = []
-    session = db_session()
-
-    try:
-        for rule in session.query(Rule).all():
-            rules.append(rule.as_dict())
-            log.debug("get_rules rule: {}".format(json.dumps(dict_to_json(rule.as_dict()), indent=4)))
-
-        # Commit transaction (NB: makes detached instances expire)
-        session.commit()
-    except SQLAlchemyError:
-        raise
-    finally:
-        session.close()
-
-    return rules
 
 
 def add_yara_filename(rules: list) -> list:
@@ -83,17 +43,6 @@ def get_rules_request():
     log.info("GET rules return JSON: {}".format(json.dumps(retv.json, indent=4)))
 
     return retv
-
-
-def dict_to_json(d: dict):
-    # Get rule dict
-    rule_dict = d
-
-    # Serialize all items as str
-    rule_json_str = json.dumps(rule_dict, default=str)
-
-    # Convert it into a JSON object (avoids TypeErrors with things like datetime)
-    return json.loads(rule_json_str)
 
 
 def new_rule_designer():
