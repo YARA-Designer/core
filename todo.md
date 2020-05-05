@@ -1,6 +1,7 @@
 ## Requests
 *  Compare YARA rules' similarity (particularly conditions)
     * Change generator to use descriptive names.
+        * Name = hashed string value.
 
 ## General
 *  Rename post_rule_json and post_commit_json far more sensibly / unambiguously.
@@ -23,6 +24,7 @@
 * Strip deprecated yara_rule_raw for parts and delete it.
 * Replace all antiquated XHR requests with fetch.
 * Figure out some sort of scroll overflow for modals when they vertically size beyond reason (or beyond viewport).
+* Fix "Update" YARA rule git diff string to be the proper sanitized/real version.
 
 ## Bugs
 * Drag and drop won't work until you've added at least one item to the editor, 
