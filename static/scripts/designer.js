@@ -1,3 +1,12 @@
+/**
+ * Add a MD5 sum property to String prototype which returns the MD5 sum of its value.
+ * */
+Object.defineProperty(String.prototype, 'md5sum', {
+    value: function() {
+        return md5(this);
+  }
+});
+
 // Exceptions
 function NoContentsException(message) {
     this.message = message;
@@ -107,10 +116,10 @@ const DESIGNER_HEADER_CONTENT = `${DESIGNER_HEADER}-content`;
 const DESIGNER_TAGS = `${ROOT_CLASS}-tags`;
 const DESIGNER_TAGS_CHECKBOX_CLASS = "yara-tag-checkbox";
 const OPERATOR_CONTAINER = `${ROOT_CLASS}-operators`;
-const ARTIFACT = `${ROOT_CLASS}-artifact`;
+const ARTIFACT = `artifact`;
 const ARTIFACT_CLASS = `condition-artifact`;
 const ARTIFACT_CONTAINER = `${ROOT_CLASS}-artifacts`;
-const ARTIFACT_TYPE = `${ROOT_CLASS}-artifact-type`;
+const ARTIFACT_TYPE = `artifact-type`;
 const ARTIFACT_TYPE_CLASS = `condition-artifact-type`;
 const ARTIFACT_TYPE_CONTAINER = `${ROOT_CLASS}-artifact-types`;
 const LEFTPANE_DRAGGABLES = [OPERATOR_CONTAINER, ARTIFACT_TYPE_CONTAINER, ARTIFACT_CONTAINER];
@@ -929,7 +938,7 @@ function setObservableTypes(types) {
 
     for (let i = 0; i < types.length; i++) {
         html +=
-            `<span id='${ARTIFACT_TYPE}${i}' class='${ARTIFACT_TYPE_CLASS}' onclick='addToEditor(event)'>${types[i]}</span>`;
+            `<span id='${ARTIFACT_TYPE}-${types[i].md5sum()}' class='${ARTIFACT_TYPE_CLASS}' onclick='addToEditor(event)'>${types[i]}</span>`;
     }
 
     document.getElementById(ARTIFACT_TYPE_CONTAINER).innerHTML = html;
@@ -940,7 +949,7 @@ function setObservableData(data) {
 
     for (let i = 0; i < data.length; i++) {
         html +=
-            `<span id='${ARTIFACT}${i}' class='${ARTIFACT_CLASS}' onclick='addToEditor(event)'>${data[i]}</span>`;
+            `<span id='${ARTIFACT}-${data[i].md5sum()}' class='${ARTIFACT_CLASS}' onclick='addToEditor(event)'>${data[i]}</span>`;
     }
 
     document.getElementById(ARTIFACT_CONTAINER).innerHTML = html;
