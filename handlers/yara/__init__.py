@@ -80,7 +80,7 @@ def get_referenced_strings(cond_stmt: str, yara_strings: dict) -> dict:
     :return: Returns dict of strings that are referenced in the conditional statement.
     """
     # Find all occurrences of words starting with $ (i.e. variable names)
-    r = re.compile(r'\$[\w]*\b')
+    r = re.compile(r'\$[\w]*\b\S+')
     possible_matches = r.findall(cond_stmt)
 
     # Get rid of mismatches by making a list of items that only matches the actual strings/vars list.
@@ -125,8 +125,17 @@ def generate_source_string(src: dict) -> str:
     identifier_line = "rule {}".format(src["rule"])
     meta = ""
     strings = ""
+
+    # Sanitize every identifier in the condition string before using it.
+    if len(src["condition"]) > 0:
+        sanitized_condition = \
+            " ".join([part[0] + sanitize_identifier(part[1:])
+                      if part[0] == '$' else part for part in src["condition"].split(' ')])
+    else:
+        sanitized_condition = src["condition"]
+
     condition = "    condition:" \
-                "\n        {}".format(src["condition"])
+                "\n        {}".format(sanitized_condition)
 
     # Append tags to rule line, if provided.
     if "tags" in src:
@@ -145,7 +154,8 @@ def generate_source_string(src: dict) -> str:
         if bool(src["strings"]):
             strings = "    strings:"
             for k, v in get_referenced_strings(src["condition"], src["strings"]).items():
-                strings = strings + "\n        {} = \"{}\"".format(k, v)
+                sanitized_identifier = k[0] + sanitize_identifier(k[1:])
+                strings = strings + "\n        {} = \"{}\"".format(sanitized_identifier, v)
 
     # Compile the entire rule block string.
     rule_string =           \
