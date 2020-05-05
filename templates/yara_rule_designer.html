@@ -2,7 +2,7 @@
   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title id="yara-designer-title">YARA Rule Designer: No rule loaded</title>
+        <title id="yara-rule-designer-title">YARA Rule Designer: No rule loaded</title>
         <!--suppress HtmlUnknownTarget -->
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/yara_rule_designer.css') }}">
 
@@ -21,11 +21,11 @@
         <meta id="getRule" data-url="{{ url_for('post_get_rule_request') }}">
     </head>
     <body>
-        <div class="container mh-100 h-100 mw-100 w-100 yara_rule_designer" id="yara_rule_designer_container">
+        <div class="container mh-100 h-100 mw-100 w-100 yara-rule-designer" id="yara-rule-designer-container">
             <div class="row align-items-start">
                 <div class="w-100"></div>
-                <div id="yara_rule_designer_header" class="col yara_rule_designer">
-                    <div id="yara-rule-designer-theme-selector" class="row yara_rule_designer">
+                <div id="yara-rule-designer-header" class="col yara-rule-designer">
+                    <div id="yara-rule-designer-theme-selector" class="row yara-rule-designer">
                         <button id="load-theme-light-button" class="col-1 fas fa-sun btn btn-light" onclick="loadTheme('light')"></button>
                         <button id="load-theme-dark-button" class="col-1 fas fa-moon btn btn-dark" onclick="loadTheme('dark')"></button>
                     </div>
@@ -36,9 +36,9 @@
 
                 <div class="w-100"></div>
 
-                <div id="yara_rule_designer_leftpane_container" class="col-2 yara_rule_designer">
+                <div id="yara-rule-designer-leftpane-container" class="col-2 yara-rule-designer">
                     <div class="row">
-                        <div class="row m-row yara_rule_designer" id="yara-rule-designer-buttons">
+                        <div class="row m-row yara-rule-designer" id="yara-rule-designer-buttons">
                             <button id="load-rule-button" class="col" onclick="loadRuleDialog()" title="Open YARA rule...">
                                 <i class="fas fa-folder-open fa-lg"></i>
                             </button>
@@ -56,56 +56,56 @@
 
                         <div class="w-100"></div>
 
-                        <div id="yara-rule-designer-tags" class="yara_rule_designer"></div>
+                        <div id="yara-rule-designer-tags" class="yara-rule-designer"></div>
 
                         <div class="w-100"></div>
 
-                        <div class="yara_rule_designer" id="yara_rule_designer_operators">
+                        <div class="yara-rule-designer" id="yara-rule-designer-operators">
                             <!--    Add conditional keywords-->
                             <!--    Boolean-->
-                            <span id="condition_keyword_and" class="condition_keyword" onclick="addToEditor(event)">AND</span>
-                            <span id="condition_keyword_or" class="condition_keyword" onclick="addToEditor(event)">OR</span>
-                            <span id="condition_keyword_not" class="condition_keyword" onclick="addToEditor(event)">NOT</span>
+                            <span id="condition-keyword-and" class="condition-keyword" onclick="addToEditor(event)">AND</span>
+                            <span id="condition-keyword-or" class="condition-keyword" onclick="addToEditor(event)">OR</span>
+                            <span id="condition-keyword-not" class="condition-keyword" onclick="addToEditor(event)">NOT</span>
                             <!--    Arithmetic-->
-                            <span id="condition_keyword_equal" class="condition_keyword" onclick="addToEditor(event)">==</span>
-                            <span id="condition_keyword_lt" class="condition_keyword" onclick="addToEditor(event)"><</span>
-                            <span id="condition_keyword_gt" class="condition_keyword" onclick="addToEditor(event)">></span>
-                            <span id="condition_keyword_leq" class="condition_keyword" onclick="addToEditor(event)"><=</span>
-                            <span id="condition_keyword_geq" class="condition_keyword" onclick="addToEditor(event)">>=</span>
-                            <span id="condition_keyword_neq" class="condition_keyword" onclick="addToEditor(event)">!=</span>
+                            <span id="condition-keyword-equal" class="condition-keyword" onclick="addToEditor(event)">==</span>
+                            <span id="condition-keyword-lt" class="condition-keyword" onclick="addToEditor(event)"><</span>
+                            <span id="condition-keyword-gt" class="condition-keyword" onclick="addToEditor(event)">></span>
+                            <span id="condition-keyword-leq" class="condition-keyword" onclick="addToEditor(event)"><=</span>
+                            <span id="condition-keyword-geq" class="condition-keyword" onclick="addToEditor(event)">>=</span>
+                            <span id="condition-keyword-neq" class="condition-keyword" onclick="addToEditor(event)">!=</span>
                             <!--    Relational-->
-                            <span id="condition_keyword_add" class="condition_keyword" onclick="addToEditor(event)">+</span>
-                            <span id="condition_keyword_sub" class="condition_keyword" onclick="addToEditor(event)">-</span>
-                            <span id="condition_keyword_mul" class="condition_keyword" onclick="addToEditor(event)">*</span>
-                            <span id="condition_keyword_div" class="condition_keyword" onclick="addToEditor(event)">/</span>
-                            <span id="condition_keyword_pct" class="condition_keyword" onclick="addToEditor(event)">%</span>
-                            <span id="condition_keyword_setminus" class="condition_keyword" onclick="addToEditor(event)">\</span>
+                            <span id="condition-keyword-add" class="condition-keyword" onclick="addToEditor(event)">+</span>
+                            <span id="condition-keyword-sub" class="condition-keyword" onclick="addToEditor(event)">-</span>
+                            <span id="condition-keyword-mul" class="condition-keyword" onclick="addToEditor(event)">*</span>
+                            <span id="condition-keyword-div" class="condition-keyword" onclick="addToEditor(event)">/</span>
+                            <span id="condition-keyword-pct" class="condition-keyword" onclick="addToEditor(event)">%</span>
+                            <span id="condition-keyword-setminus" class="condition-keyword" onclick="addToEditor(event)">\</span>
                             <!--    Bitwise-->
-                            <span id="condition_keyword_bitwise_and" class="condition_keyword" onclick="addToEditor(event)">&</span>
-                            <span id="condition_keyword_bitwise_or" class="condition_keyword" onclick="addToEditor(event)">|</span>
-                            <span id="condition_keyword_bitwise_not" class="condition_keyword" onclick="addToEditor(event)">~</span>
-                            <span id="condition_keyword_bitwise_xor" class="condition_keyword" onclick="addToEditor(event)">^</span>
-                            <span id="condition_keyword_bitwise_lshift" class="condition_keyword" onclick="addToEditor(event)"><<</span>
-                            <span id="condition_keyword_bitwise_rshift" class="condition_keyword" onclick="addToEditor(event)">>></span>
+                            <span id="condition-keyword-bitwise-and" class="condition-keyword" onclick="addToEditor(event)">&</span>
+                            <span id="condition-keyword-bitwise-or" class="condition-keyword" onclick="addToEditor(event)">|</span>
+                            <span id="condition-keyword-bitwise-not" class="condition-keyword" onclick="addToEditor(event)">~</span>
+                            <span id="condition-keyword-bitwise-xor" class="condition-keyword" onclick="addToEditor(event)">^</span>
+                            <span id="condition-keyword-bitwise-lshift" class="condition-keyword" onclick="addToEditor(event)"><<</span>
+                            <span id="condition-keyword-bitwise-rshift" class="condition-keyword" onclick="addToEditor(event)">>></span>
                             <!-- Parenthesis and wrappers       -->
-                            <span id="condition_keyword_lparen" class="condition_keyword" onclick="addToEditor(event)">(</span>
-                            <span id="condition_keyword_rparen" class="condition_keyword" onclick="addToEditor(event)">)</span>
-                            <span id="condition_keyword_encapsulate_paren" class="condition_encapsulator" onclick="addToEditor(event)">()</span>
+                            <span id="condition-keyword-lparen" class="condition-keyword" onclick="addToEditor(event)">(</span>
+                            <span id="condition-keyword-rparen" class="condition-keyword" onclick="addToEditor(event)">)</span>
+                            <span id="condition-keyword-encapsulate-paren" class="condition-encapsulator" onclick="addToEditor(event)">()</span>
                         </div>
 
                         <div class="w-100"></div>
 
-                        <div class="yara_rule_designer" id="yara_rule_designer_artifact_types"></div>
+                        <div class="yara-rule-designer" id="yara-rule-designer-artifact-types"></div>
 
                         <div class="w-100"></div>
 
-                        <div class="yara_rule_designer" id="yara_rule_designer_artifacts"></div>
+                        <div class="yara-rule-designer" id="yara-rule-designer-artifacts"></div>
                     </div>
                 </div>
 
-                <div id="yara_rule_designer_editor_container" class="col-10 yara_rule_designer">
+                <div id="yara-rule-designer-editor-container" class="col-10 yara-rule-designer">
                     <div class="row">
-                        <div class="container col yara_rule_designer" id="yara_rule_designer_editor"></div>
+                        <div class="container col yara-rule-designer" id="yara-rule-designer-editor"></div>
                     </div>
                 </div>
 

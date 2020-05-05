@@ -1,7 +1,7 @@
 // Exceptions
 function NoContentsException(message) {
     this.message = message;
-    this.name = "NoContentsException"
+    this.name = NO_CONTENTS_EXCEPTION;
 }
 
 // https://stackoverflow.com/a/26272668
@@ -29,49 +29,127 @@ function getStyleRuleValue(selector, style) {
   }
  }
 
-const ROOT_CLASS = 'yara_rule_designer';
-const DIVS_WITH_CLONING = ['yara_rule_designer_artifacts', 'yara_rule_designer_operators'];
-const ELEMENT_OPERATORS = 'yara_rule_designer_operators';
-const ELEMENT_ARTIFACT_TYPES = 'yara_rule_designer_artifact_types';
-const ELEMENT_ARTIFACTS = 'yara_rule_designer_artifacts';
-const LEFTPANE_DRAGGABLES = [ELEMENT_OPERATORS, ELEMENT_ARTIFACT_TYPES, ELEMENT_ARTIFACTS];
-const ELEMENT_EDITOR = 'yara_rule_designer_editor';
-const SUCCESS_ICON = "<span style='color: green'>&#10003;</color>";
-const FAILED_ICON = "<span style='color: red'>&#10005;</span>";
-const YARA_VARIABLE_DENOMINATOR = "$";
 
-let originalParentIdLookupByClass = {
-    "draggable_artifact": "yara_rule_designer_artifacts",
-    "condition_keyword": "yara_rule_designer_operators",
-    "condition_encapsulator": "yara_rule_designer_operators"
-};
 
-// Convenience/readability constants.
-const LEFT_CLICK = 0;
-const MIDDLE_CLICK = 1;
-const RIGHT_CLICK = 2;
-const ARTIFACT_CLASSES = ["draggable_artifact", "draggable_artifact_type"];
-const KEYWORD_CLASSES = ["condition_keyword"];
+// IDs and ClassNames (Helps tremendously when renaming identifier strings at a later date):
+// Common values:
+const NONE = "none";
+const BLOCK = "block";
+const CLICK = "click";
+const AUX_CLICK = "auxclick";
+const ACTIVE = "active";
+const ID = "id";
+
+// MIME Types:
+const MIMETYPE_JSON = 'application/json';
+const MIMETYPE_URL_ENCODED = 'application/x-www-form-urlencoded';
+
+// Exceptions:
+NO_CONTENTS_EXCEPTION = "NoContentsException";
+
+// CSS Vars:
+const CSS_VAR_PREFIX = "--";
+
+// Root:
+const ROOT_CLASS = 'yara-rule-designer';
+
+// Modals:
+const MODAL_CLASS = "custom-modal";
+const MODAL_HEADER = "header";
+const MODAL_BODY = "body";
+const MODAL_FOOTER = "footer";
+const MODAL_CLOSE = "close";
+const MODAL_BG = "modal-background";
+const MODAL_TEXT_COLOR = "modal-color";
 const MODAL_DEFAULT_HEADER = "";
 const MODAL_DEFAULT_BODY = "";
 const MODAL_DEFAULT_FOOTER = "<p>Tip: Click anywhere outside of this modal to close.</p>";
 const MODAL_DEFAULT_CONFIRMATION_HEADER = "<h2>Are you sure?</h2>";
 const MODAL_DEFAULT_CONFIRMATION_BODY = "";
 const MODAL_DEFAULT_CONFIRMATION_FOOTER = MODAL_DEFAULT_FOOTER;
-const LEVEL_ERROR = "error";
-const LEVEL_WARNING = "warning";
-const LEVEL_SUCCESS = "success";
 
+const RESPONSE_MODAL = "response-modal";
+const RESPONSE_MODAL_HEADER = `${RESPONSE_MODAL}-${MODAL_HEADER}`;
+const RESPONSE_MODAL_BODY = `${RESPONSE_MODAL}-${MODAL_BODY}`;
+const RESPONSE_MODAL_FOOTER = `${RESPONSE_MODAL}-${MODAL_FOOTER}`;
+const RESPONSE_MODAL_BUTTON = `${RESPONSE_MODAL}-button`;
+const RESPONSE_MODAL_BUTTON_COMMIT = `${RESPONSE_MODAL_BUTTON}-commit-onclick`;
+const RESPONSE_MODAL_BUTTON_COMMIT_CLASS = `${RESPONSE_MODAL_BUTTON}-commit`;
+const RESPONSE_MODAL_BUTTON_COMMIT_DISABLED_CLASS = `${RESPONSE_MODAL_BUTTON_COMMIT_CLASS}-disabled`;
+const RESPONSE_MODAL_BUTTON_JSON_COLLAPSIBLE_CLASS = `${RESPONSE_MODAL_BUTTON}-json-collapsible`;
+const RESPONSE_MODAL_JSON_COLLAPSIBLE_CONTENT_CLASS = `${RESPONSE_MODAL}-json-collapsible-content`;
+
+const CONFIRMATION_MODAL = "confirmation-modal";
+const CONFIRMATION_MODAL_HEADER = `${CONFIRMATION_MODAL}-${MODAL_HEADER}`;
+const CONFIRMATION_MODAL_BODY = `${CONFIRMATION_MODAL}-${MODAL_BODY}`;
+const CONFIRMATION_MODAL_FOOTER = `${CONFIRMATION_MODAL}-${MODAL_FOOTER}`;
+const CONFIRMATION_MODAL_BUTTON = `${CONFIRMATION_MODAL}-button`;
+const CONFIRMATION_MODAL_BUTTON_YES = `${CONFIRMATION_MODAL_BUTTON}-yes-onclick`;
+const CONFIRMATION_MODAL_BUTTON_YES_CLASS = `${CONFIRMATION_MODAL_BUTTON}-yes`;
+const CONFIRMATION_MODAL_BUTTON_NO = `${CONFIRMATION_MODAL_BUTTON}-no-onclick`;
+const CONFIRMATION_MODAL_BUTTON_NO_CLASS = `${CONFIRMATION_MODAL_BUTTON}-no`;
+
+// Tables:
+const TABLE_FILTER_INPUT_SUFFIX = "input-filter";
+const TABLE_FILTER_RADIO_CLASS_SUFFIX = `${TABLE_FILTER_INPUT_SUFFIX}-radios`;
+const TABLE_FILTER_COUNT = "filter-count";
+const TABLE_FILTER_CHECKED_RADIO = "Title";
+const TABLE_FILTER_HIDDEN_RADIOS = ["Pending"];
+
+// Table: -- Fetched Rules
+const RULES_TABLE = "fetched-rules";
+
+// Designer:
+const DESIGNER_TITLE_ID = `${ROOT_CLASS}-title`;
+const DESIGNER_HEADER = `${ROOT_CLASS}-header`;
+const DESIGNER_HEADER_CONTENT = `${DESIGNER_HEADER}-content`;
+
+const DESIGNER_TAGS = `${ROOT_CLASS}-tags`;
+const DESIGNER_TAGS_CHECKBOX_CLASS = "yara-tag-checkbox";
+const OPERATOR_CONTAINER = `${ROOT_CLASS}-operators`;
+const ARTIFACT = `${ROOT_CLASS}-artifact`;
+const ARTIFACT_CLASS = `condition-artifact`;
+const ARTIFACT_CONTAINER = `${ROOT_CLASS}-artifacts`;
+const ARTIFACT_TYPE = `${ROOT_CLASS}-artifact-type`;
+const ARTIFACT_TYPE_CLASS = `condition-artifact-type`;
+const ARTIFACT_TYPE_CONTAINER = `${ROOT_CLASS}-artifact-types`;
+const LEFTPANE_DRAGGABLES = [OPERATOR_CONTAINER, ARTIFACT_TYPE_CONTAINER, ARTIFACT_CONTAINER];
+
+const DESIGNER_EDITOR = `${ROOT_CLASS}-editor`;
+
+// Text and styling:
+const NUMBERED_TEXTBOX_CLASS = "numbered-lines";
+const SUCCESS_ICON = "<span style='color: green'>&#10003;</color>";
+const FAILED_ICON = "<span style='color: red'>&#10005;</span>";
+const BGCOLOR_RED_CLASS = "red-bg";
+const TEXT_COLOR_GREEN_CLASS = "green-text";
+const TEXT_COLOR_RED_CLASS = "red-text";
+const YARA_VARIABLE_DENOMINATOR = "$";
+
+// Convenience/readability constants:
+const MOUSECLICK_LEFT = 0;
+const MOUSECLICK_MIDDLE = 1;
+const MOUSECLICK_RIGHT = 2;
+const ARTIFACT_CLASSES = ["condition-artifact", "condition-artifact-type"];
+const KEYWORD_CLASSES = ["condition-keyword"];
+const INFO_LEVEL = "info";
+const ERROR_LEVEL = "error";
+const WARNING_LEVEL = "warning";
+const SUCCESS_LEVEL = "success";
+const SYNTAX_ERROR = "syntax";
+const CUSTOM_TABLE_CLASS = "custom-table";
+
+// NB: *NOT* Unused and needs to be var (instead of let/const) due to being a GLOBAL.
 var currentlyLoadedRule = null;
 
 /////////////////////////////////// Dragula - drag 'n Drop //////////////////////////////////////////
 
 dragula([
     // Enable drag and drop for these DIVs:
-    document.getElementById(ELEMENT_OPERATORS),
-    document.getElementById(ELEMENT_ARTIFACT_TYPES),
-    document.getElementById(ELEMENT_ARTIFACTS),
-    document.getElementById(ELEMENT_EDITOR)
+    document.getElementById(OPERATOR_CONTAINER),
+    document.getElementById(ARTIFACT_TYPE_CONTAINER),
+    document.getElementById(ARTIFACT_CONTAINER),
+    document.getElementById(DESIGNER_EDITOR)
 ], { // Apply logic.
     copy: function (el, source) {
         // If the source is one of the draggable elements, allow copy.
@@ -88,25 +166,24 @@ dragula([
 
 // Get the modals
 let modals = [];
-let modal_ids = ["response-modal", "confirmation-modal"];
-for (let i = 0; i < modal_ids.length; i++ ) {
+let modalIds = [RESPONSE_MODAL, CONFIRMATION_MODAL];
+for (let i = 0; i < modalIds.length; i++ ) {
     // Add modals by-id.
-    modals.push(document.getElementById(modal_ids[i]));
-    console.log("pushed: " + modal_ids[i]);
+    modals.push(document.getElementById(modalIds[i]));
 
    // Add close logic.
-   let closeCustomModal = document.getElementById(modal_ids[i] + "-close");//[i];
+   let closeCustomModal = document.getElementById(`${modalIds[i]}-${MODAL_CLOSE}`); //[i];
 
    // When the user clicks on <span> (x), close (hide) the modal
-   document.getElementById(modal_ids[i] + "-close").onclick = function() {
-     document.getElementById(modal_ids[i]).style.display = "none";
+   document.getElementById(`${modalIds[i]}-${MODAL_CLOSE}`).onclick = function() {
+     document.getElementById(modalIds[i]).style.display = NONE;
    };
 
    // When the user clicks anywhere outside of the modal, close it
     window.onclick = function (event) {
-        for (let i = 0; i < modal_ids.length; i++) {
-            if (event.target === document.getElementById(modal_ids[i])) {
-                document.getElementById(modal_ids[i]).style.display = "none";
+        for (let i = 0; i < modalIds.length; i++) {
+            if (event.target === document.getElementById(modalIds[i])) {
+                document.getElementById(modalIds[i]).style.display = NONE;
             }
         }
     };
@@ -116,61 +193,28 @@ for (let i = 0; i < modal_ids.length; i++ ) {
  * Convenience: Shortens the line width when getting a CSS variable.
  */
 function getCSSVar(varName) {
-    return getComputedStyle(document.documentElement).getPropertyValue('--' + varName);
+    return getComputedStyle(document.documentElement).getPropertyValue(`${CSS_VAR_PREFIX}${varName}`);
 }
-
-// function setModalMaxHeight(element) {
-//     this.$element     = $(element);
-//     this.$content     = this.$element.find('.modal-body');
-//     var borderWidth   = this.$content.outerHeight() - this.$content.innerHeight();
-//     var dialogMargin  = $(window).width() < 768 ? 20 : 60;
-//     var contentHeight = $(window).height() - (dialogMargin + borderWidth);
-//     var headerHeight  = this.$element.find('.modal-header').outerHeight() || 0;
-//     var footerHeight  = this.$element.find('.modal-footer').outerHeight() || 0;
-//     var maxHeight     = contentHeight - (headerHeight + footerHeight);
-//
-//     this.$content.css({
-//         'overflow': 'hidden'
-//     });
-//
-//     this.$element
-//         .find('.modal-body').css({
-//           'max-height': maxHeight,
-//           'overflow-y': 'auto'
-//     });
-// }
-//
-// $('.modal').on('show.bs.modal', function() {
-//     $(this).show();
-//     setModalMaxHeight(this);
-// });
-//
-// $(window).resize(function() {
-//   if ($('.modal.in').length != 0) {
-//     setModalMaxHeight($('.modal.in'));
-//   }
-// });
 
 /**
  * Shows a pop-up modal with customisable header, footer and body,
  * as well as background color based on level.
  *
  * level: String that is appended to CSS variables:
- *  - '-modal_background_*'
- *  - '-modal_color_*'
+ *  - '-modal-background-*'
+ *  - '-modal-color-*'
  */
-function popupModal(modal_id=null, header=null, body=null, footer=null, level=null) {
+function popupModal(modalId=null, header=null, body=null, footer=null, level=null) {
     // Modal element itself.
-    let modal = document.getElementById(modal_id);
+    let modal = document.getElementById(modalId);
 
     // Modal sub-elements.
-    let modalHeader = document.getElementById(modal_id + "-header");
-    let modalBody = document.getElementById(modal_id + "-body");
-    let modalFooter = document.getElementById(modal_id + "-footer");
+    let modalHeader = document.getElementById(`${modalId}-${MODAL_HEADER}`);
+    let modalBody = document.getElementById(`${modalId}-${MODAL_BODY}`);
+    let modalFooter = document.getElementById(`${modalId}-${MODAL_FOOTER}`);
 
     // Set level (if null, set to info/default).
-    level = (level != null) ? level : "info";
-    console.log("level:" + level);
+    level = (level != null) ? level : INFO_LEVEL;
 
     // Set sub-element values, if given.
     modalHeader.innerHTML = (header != null) ? header: MODAL_DEFAULT_HEADER;
@@ -179,14 +223,14 @@ function popupModal(modal_id=null, header=null, body=null, footer=null, level=nu
 
     // Set custom style.
     //      Header.
-    modalHeader.style.background = getCSSVar("modal_background_" + level);
-    modalHeader.style.color = getCSSVar("modal_color_" + level);
+    modalHeader.style.background = getCSSVar(`${MODAL_BG}-${level}`);
+    modalHeader.style.color = getCSSVar(`${MODAL_TEXT_COLOR}-${level}`);
     //      Footer.
-    modalFooter.style.background = getCSSVar("modal_background_" + level);
-    modalFooter.style.color = getCSSVar("modal_color_" + level);
+    modalFooter.style.background = getCSSVar(`${MODAL_BG}-${level}`);
+    modalFooter.style.color = getCSSVar(`${MODAL_TEXT_COLOR}-${level}`);
 
     // Show modal.
-    modal.style.display = "block";
+    modal.style.display = BLOCK;
 
     // Return the modal to be easily used by caller.
     return modal;
@@ -195,13 +239,15 @@ function popupModal(modal_id=null, header=null, body=null, footer=null, level=nu
 function popupWarningModal(header, body, footer=null) {
     let hdr = `<h2>Warning: ${header}</h2>`;
     let bdy = `<h3>${body}</h3>`;
-    popupModal("response-modal", hdr, bdy, footer, "warning");
+
+    popupModal(RESPONSE_MODAL, hdr, bdy, footer, WARNING_LEVEL);
 }
 
 function popupErrorModal(header, body, footer=null) {
     let hdr = `<h2>Warning: ${header}</h2>`;
     let bdy = `<h3>${body}</h3>`;
-    popupModal("response-modal", hdr, bdy, footer, "error");
+
+    popupModal(RESPONSE_MODAL, hdr, bdy, footer, ERROR_LEVEL);
 }
 
 function performAction(actionObj) {
@@ -231,28 +277,28 @@ function popupConfirmationModal(yesAction, noAction=undefined,
                                 body=MODAL_DEFAULT_CONFIRMATION_BODY,
                                 header=MODAL_DEFAULT_CONFIRMATION_HEADER,
                                 footer=MODAL_DEFAULT_CONFIRMATION_FOOTER,
-                                level=LEVEL_WARNING) {
+                                level=WARNING_LEVEL) {
 
     // Append bindable buttons to custom body.
-    body += `<button id="confirmation-modal-button-yes-onclick" class="confirmation-modal-button-yes">Yes</button>`;
-    body += `<button id="confirmation-modal-button-no-onclick" class="confirmation-modal-button-no">No</button>`;
+    body += `<button id="${CONFIRMATION_MODAL_BUTTON_YES}" class="${CONFIRMATION_MODAL_BUTTON_YES_CLASS}">Yes</button>`;
+    body += `<button id="${CONFIRMATION_MODAL_BUTTON_NO}" class="${CONFIRMATION_MODAL_BUTTON_NO_CLASS}">No</button>`;
 
     // Spawn modal.
-    popupModal("confirmation-modal", header, body, footer, level);
+    popupModal(CONFIRMATION_MODAL, header, body, footer, level);
 
     // Add bindings to buttons.
-    document.getElementById("confirmation-modal-button-yes-onclick").onclick = function() {
+    document.getElementById(CONFIRMATION_MODAL_BUTTON_YES).onclick = function() {
         yesAction && performAction(yesAction);
 
         // Close modal.
-        document.getElementById("confirmation-modal").style.display = "none";
+        document.getElementById(CONFIRMATION_MODAL).style.display = NONE;
     };
-    document.getElementById("confirmation-modal-button-no-onclick").onclick = function() {
+    document.getElementById(CONFIRMATION_MODAL_BUTTON_NO).onclick = function() {
         // Perform bound action (if defined).
         noAction && noAction();
 
         // Close modal after handling button action.
-        document.getElementById("confirmation-modal").style.display = "none";
+        document.getElementById(CONFIRMATION_MODAL).style.display = NONE;
     };
 }
 
@@ -270,7 +316,7 @@ function popupHelpModal() {
             "<h4>Tags</h4>" +
             "<p>Check the checkboxes for which tags you want to include (if any).</p>";
 
-    popupModal("response-modal", header, body, null, "info");
+    popupModal(RESPONSE_MODAL, header, body, null, INFO_LEVEL);
 
 }
 
@@ -280,7 +326,7 @@ function popupHelpModal() {
  * Override default behaviour for mouse clicks in the editor div,
  * in order to support middle and right clicks.
  */
-document.getElementById('yara_rule_designer_editor').addEventListener('auxclick', function(ev) {
+document.getElementById(DESIGNER_EDITOR).addEventListener(AUX_CLICK, function(ev) {
   console.log(ev.button);
   // Prevent default action in order to implement our own.
   ev.preventDefault();
@@ -290,10 +336,10 @@ document.getElementById('yara_rule_designer_editor').addEventListener('auxclick'
 });
 
 function addToEditor(clickEvent) {
-    let editorDiv = document.getElementById("yara_rule_designer_editor");
+    let editorDiv = document.getElementById(DESIGNER_EDITOR);
 
     // If target is already in the editor, ignore the click event.
-    if (clickEvent.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
+    if (clickEvent.target.parentNode.getAttribute(ID) === DESIGNER_EDITOR) {
         console.log("Ignored click event (target is child of editor div):");
         console.log(clickEvent);
         return
@@ -304,10 +350,10 @@ function addToEditor(clickEvent) {
 }
 
 function removeFromEditor(clickEvent) {
-    let editorDiv = document.getElementById("yara_rule_designer_editor");
+    let editorDiv = document.getElementById(DESIGNER_EDITOR);
 
     // Only perform remove action if target is a child of editor div.
-    if (clickEvent.target.parentNode.getAttribute("id") === "yara_rule_designer_editor") {
+    if (clickEvent.target.parentNode.getAttribute(ID) === DESIGNER_EDITOR) {
         console.log("removeFromEditor: " + $(clickEvent.target).text());
         editorDiv.removeChild(clickEvent.target);
     }
@@ -319,16 +365,16 @@ function onAuxClick(auxClickEvent) {
 
     // Check which mouse button was pressed and act accordingly.
     switch (auxClickEvent.button) {
-        case MIDDLE_CLICK:
+        case MOUSECLICK_MIDDLE:
             removeFromEditor(auxClickEvent);
             break;
-        case RIGHT_CLICK:
+        case MOUSECLICK_RIGHT:
             break;
     }
 }
 
 function getEditorContents() {
-    return document.getElementById("yara_rule_designer_editor").children;
+    return document.getElementById(DESIGNER_EDITOR).children;
 }
 
 function getEditorArtifactsAndTypes(unique=true) {
@@ -384,8 +430,7 @@ function getEditorConditionString() {
             // Child is a logical operator
             conditionString += preSpacing + getEditorElementKeywordText(children[i]).toLowerCase();
         } else {
-            console.error("getEditorConditionString is not supposed to reach an else condition!");
-            console.error(children[i]);
+            console.error("getEditorConditionString is not supposed to reach an else condition!", children[i]);
         }
     }
 
@@ -394,7 +439,7 @@ function getEditorConditionString() {
 
 function getEnabledTags() {
     let enabledTags= [];
-    let tagCheckboxes = document.getElementsByClassName("yara-tag-checkbox");
+    let tagCheckboxes = document.getElementsByClassName(DESIGNER_TAGS_CHECKBOX_CLASS);
 
     for (let i = 0; i < tagCheckboxes.length; i++) {
         if (tagCheckboxes[i].checked) enabledTags.push(tagCheckboxes[i].value);
@@ -409,8 +454,8 @@ function getEnabledTags() {
 function getRuleJsonFromEditorElements() {
     let json = {};
     let yaraRule = window.currentlyLoadedRule;
-    let yaraRuleName = `Whitelist_${yaraRule.data.title}`;
-    let yaraMetaDescription = `Whitelist regler for alarmen: Whitelist_${yaraRule.data.title}`;
+    let yaraRuleName = `Whitelist_${yaraRule.data.title}`; // FIXME: Hardcoded string variable should be made configurable.
+    let yaraMetaDescription = `Whitelist regler for alarmen: Whitelist_${yaraRule.data.title}`; // FIXME: Hardcoded string variable should be made configurable.
 
     // Set meta FIXME: sub-dicts hardcoded!
     json["meta"] = {"description" : yaraMetaDescription};
@@ -442,13 +487,13 @@ function addCaseDetailsCollapsibleButtonLogic(className) {
     let i;
 
     for (i = 0; i < coll.length; i++) {
-      coll[i].addEventListener("click", function() {
-        this.classList.toggle("active");
+      coll[i].addEventListener(CLICK, function() {
+        this.classList.toggle(ACTIVE);
         let content = this.nextElementSibling;
-        if (content.style.display === "block") {
-          content.style.display = "none";
+        if (content.style.display === BLOCK) {
+          content.style.display = NONE;
         } else {
-          content.style.display = "block";
+          content.style.display = BLOCK;
         }
       });
     }
@@ -472,10 +517,10 @@ function fetchGetRequest(url, callback) {
     .then(status)
     .then(json)
     .then(function(data) {
-        console.log(`fetchRequest succeeded with JSON response`, data);
+        // console.log(`fetchRequest succeeded with JSON response`, data);
         callback(data);
       }).catch(function(error) {
-        console.log('Request failed', error);
+        console.log('fetchRequest failed!', error);
       });
 }
 
@@ -499,8 +544,8 @@ async function fetchPostRequest(url = '', data = {}, callback) {
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
         credentials: 'same-origin', // include, *same-origin, omit
         headers: {
-          'Content-Type': 'application/json'
-          // 'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': MIMETYPE_JSON
+          // 'Content-Type': MIMETYPE_URL_ENCODED',
         },
         redirect: 'follow', // manual, *follow, error
         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
@@ -538,7 +583,7 @@ function getRules(callback=printRulesTable) {
  *
  * @returns {string}            Generated HTML <TABLE>.
  */
-function makeTable(id, headerContentMaps, className="custom-table") {
+function makeTable(id, headerContentMaps, className = CUSTOM_TABLE_CLASS) {
     // Header row:
     let headerColumns = "";
     // For key in arbitrary JSON (they all share the same keys).
@@ -654,7 +699,7 @@ function filterFetchedRules(inputId, tableId, filterRadioId, filterCountCallback
             if (txtValue.toUpperCase().indexOf(filter) > -1) {
                 tr[i].style.display = "";
             } else {
-                tr[i].style.display = "none";
+                tr[i].style.display = NONE;
                 filterCount++;
             }
         }
@@ -696,8 +741,9 @@ function getHtmlCommentData(s) {
     return s.match(regex)[1].toString();
 }
 
-function filterCountCallback(filterCount) {
-    let filtercountElement = document.getElementById("response-modal-header-filter-count");
+function filterCountCallback(filterCount, modalId = RESPONSE_MODAL) {
+    let filtercountElement = document.getElementById(
+        `${modalId}-${MODAL_HEADER}-${TABLE_FILTER_COUNT}`);
 
     filtercountElement.innerText = filterCount > 0 ? `(filtered: ${filterCount})` : "";
 }
@@ -713,7 +759,7 @@ function comparer(idx, asc) {
     }(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
 }}
 
-function mockRules(num) {
+function mockRules(num) { // FIXME: Remove this debug/testing function.
     let mockRules = [];
     for (let i = 0; i < num; i++) {
         mockRules.push({
@@ -740,25 +786,30 @@ function mockRules(num) {
  *
  * @param rules
  * @param defaultCheckedRadio
+ * @param hideRadios
+ * @param modalId
  */
-function printRulesTable(rules, defaultCheckedRadio="Title", hideRadios=["Pending"]) {
+function printRulesTable(rules, defaultCheckedRadio = TABLE_FILTER_CHECKED_RADIO,
+                         hideRadios = TABLE_FILTER_HIDDEN_RADIOS, modalId = RESPONSE_MODAL) {
     console.log("rules", rules);
     console.log("mock rules", mockRules(5));
     for ( let mockRule of mockRules(50) ) {
         rules.push(mockRule);
     }
 
-    let header = `<h3>Fetched rules <span id='response-modal-header-filter-count'</span></h3>`;
+    let header = `<h3>Fetched rules <span id='${modalId}-header-${TABLE_FILTER_COUNT}'</span></h3>`;
     let body = "";
     let footer = "Tip: Click any row to load its corresponding rule.";
-    let tableId = "fetched-rules";
+    let tableId = RULES_TABLE;
     let headerContentMaps = makeRuleTableRows(rules);
 
     // Filter/Search input text box:
-    let filterRadioClassName = `${tableId}-input-filter-radios`;
-    let filterRadioId = `${tableId}-input-filter-radios`;
-    let filterInputId = `${tableId}-input-filter`;
-    body += `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', '${tableId}', '${filterRadioId}', filterCountCallback)" placeholder="Filter table..">`;
+    let filterRadioClassName = `${tableId}-${TABLE_FILTER_RADIO_CLASS_SUFFIX}`;
+    let filterRadioId = filterRadioClassName;
+    let filterInputId = `${tableId}-${TABLE_FILTER_INPUT_SUFFIX}`;
+    body +=
+        `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', ` +
+        `'${tableId}', '${filterRadioId}', filterCountCallback)" placeholder="Filter table..">`;
 
     // Checkboxes:
     let radioHTML = "";
@@ -794,20 +845,23 @@ function printRulesTable(rules, defaultCheckedRadio="Title", hideRadios=["Pendin
                 style = `style="${style}"`;
             }
 
-            radioHTML += `<input type="radio" name="${filterRadioClassName}" class="form-check-input" id="${filterRadioId}-${i}" title="${column}"${checked}${style}>\n`;
-            radioHTML += `<label class="form-check-label" for="${filterRadioId}-${i}"${style}>${column}</label>\n`;
+            radioHTML +=
+                `<input type="radio" name="${filterRadioClassName}" class="form-check-input" ` +
+                `id="${filterRadioId}-${i}" title="${column}"${checked}${style}>\n` +
+                `<label class="form-check-label" for="${filterRadioId}-${i}"${style}>${column}</label>\n`;
         }
     }
 
     // Assemble checkboxes HTML.
-    body += `<div class="${filterRadioClassName} form-check form-check-inline" id="${filterRadioId}">\n${radioHTML}\n</div>`;
+    body += `<div class="${filterRadioClassName} form-check form-check-inline" id="${filterRadioId}">\n` +
+        `${radioHTML}\n</div>`;
     body += "<br>";
 
     // Table:
     body += makeTable(tableId, headerContentMaps);
     // console.log(body);
 
-    popupModal("response-modal", header, body, footer, "info");
+    popupModal(RESPONSE_MODAL, header, body, footer, INFO_LEVEL);
 
     // Apply actions to modal and table that couldn't be applied before it was spawned:
     // document.getElementById("response-modal").style.width = "100%";
@@ -837,7 +891,7 @@ function printRulesTable(rules, defaultCheckedRadio="Title", hideRadios=["Pendin
                     "<h3>You currently have contents in the editor, loading a rule clears the editor.</h3>")
             } else {
                 loadRule(rules[i].data.id);
-                document.getElementById("response-modal-footer").innerText =
+                document.getElementById(RESPONSE_MODAL_FOOTER).innerText =
                     `Loaded rule: ${rules[i].data.title} [ID: ${rules[i].data.id}]`;
             }
         };
@@ -852,21 +906,22 @@ function loadRuleDialog() {
 }
 
 function setTitle(title, id, description=null) {
-    document.getElementById('yara-designer-title').innerText = title;
-    document.getElementById('yara-rule-designer-header-content').innerHTML =
+    document.getElementById(DESIGNER_TITLE_ID).innerText = title;
+    document.getElementById(DESIGNER_HEADER_CONTENT).innerHTML =
         `<p> Case: ${title} [ID: ${id}] </p>`;
-    document.getElementById('yara_rule_designer_header').innerHTML +=
+    document.getElementById(DESIGNER_HEADER).innerHTML +=
         `<h6>${description}</h6>`;
 }
 
 function setTags(tags) {
     let html ="";
     for (let i = 0; i < tags.length; i++) {
-        html += `<input type="checkbox" id="tagCheckbox${i}" class="yara-tag-checkbox" value="${tags[i]}">\n` +
-                `<label for="tagCheckbox${i}" title="${tags[i]}">${tags[i]}</label>\n`;
-                `<div class="w-100"></div>\n`;
+        html += `<input type="checkbox" id="tagCheckbox${i}" class="${DESIGNER_TAGS_CHECKBOX_CLASS}" ` +
+            `value="${tags[i]}">\n` +
+            `<label for="tagCheckbox${i}" title="${tags[i]}">${tags[i]}</label>\n`;
+            `<div class="w-100"></div>\n`;
     }
-    document.getElementById('yara-rule-designer-tags').innerHTML = html;
+    document.getElementById(DESIGNER_TAGS).innerHTML = html;
 }
 
 function setObservableTypes(types) {
@@ -874,10 +929,10 @@ function setObservableTypes(types) {
 
     for (let i = 0; i < types.length; i++) {
         html +=
-            `<span id='artifact_type${i}' class='draggable_artifact_type' onclick='addToEditor(event)'>${types[i]}</span>`;
+            `<span id='${ARTIFACT_TYPE}${i}' class='${ARTIFACT_TYPE_CLASS}' onclick='addToEditor(event)'>${types[i]}</span>`;
     }
 
-    document.getElementById('yara_rule_designer_artifact_types').innerHTML = html;
+    document.getElementById(ARTIFACT_TYPE_CONTAINER).innerHTML = html;
 }
 
 function setObservableData(data) {
@@ -885,10 +940,10 @@ function setObservableData(data) {
 
     for (let i = 0; i < data.length; i++) {
         html +=
-            `<span id='artifact${i}' class='draggable_artifact' onclick='addToEditor(event)'>${data[i]}</span>`;
+            `<span id='${ARTIFACT}${i}' class='${ARTIFACT_CLASS}' onclick='addToEditor(event)'>${data[i]}</span>`;
     }
 
-    document.getElementById('yara_rule_designer_artifacts').innerHTML = html;
+    document.getElementById(ARTIFACT_CONTAINER).innerHTML = html;
 }
 
 function setAllObservables(observables) {
@@ -913,8 +968,6 @@ function setAllObservables(observables) {
 }
 
 function loadRuleCallback(rule) {
-    console.log("Got rule", rule);
-
     // Clear editor.
     clearEditorDivContents();
 
@@ -950,9 +1003,9 @@ function handlePostRuleResponse(json) {
     let compilable = outJson["compilable"];
     let success = outJson["success"];
 
-    let sourcePreprocessed = outJson["source (preprocessed)"];
+    let sourcePreprocessed = outJson["source (preprocessed)"]; // FIXME: Fix JSON key naming convention.
 
-    let yaraRuleSourceFile = outJson["generated_yara_source_file"];
+    let yaraRuleSourceFile = outJson["generated_yara_source_file"]; // FIXME: Fix JSON key naming convention.
 
     if (!compilable) {
         level = "warning";
@@ -995,21 +1048,21 @@ function handlePostRuleResponse(json) {
 
     // Loop through lines to add line numbering support via CSS counter.
     let lines = String(sourcePreprocessed).split('\n');
-    body += "<pre class='numbered_lines'>";
+    body += `<pre class='${NUMBERED_TEXTBOX_CLASS}'>`;
     for (let i = 0; i < lines.length; i++) {
         if (!success) {
-            if (errorType === "syntax" && i === errorLineNumber-1) {
+            if (errorType === SYNTAX_ERROR && i === errorLineNumber-1) {
                 // Color bad column or line.
                 let stringUpToMark = lines[i].substring(0, errorColumnNumber -1);
                 let stringToMark = lines[i].substring(errorColumnNumber -1, errorColumnRange - 1);
                 let stringPastMark = lines[i].substring(errorColumnRange -1, lines[i].length);
 
-                // FIXME: Debug (not sure it is quite over yet).
+                // FIXME: Debug syntax error marking (not sure it is quite over yet).
                 // console.log("stringUpToMark: " + stringUpToMark);
                 // console.log(`stringToMark: '${stringToMark}'`);
                 // console.log("stringPastMark: " + stringPastMark);
 
-                lines[i] = `${stringUpToMark}<mark class='red-bg'>${stringToMark}</mark>${stringPastMark}`;
+                lines[i] = `${stringUpToMark}<mark class='${BGCOLOR_RED_CLASS}'>${stringToMark}</mark>${stringPastMark}`;
             }
         }
 
@@ -1020,27 +1073,27 @@ function handlePostRuleResponse(json) {
 
     // Add commit button if valid result.
     if (success) {
-        body += `<button id="response-modal-button-commit-onclick" class="response-modal-button-commit">Commit & Push</button>`;
+        body += `<button id="${RESPONSE_MODAL_BUTTON_COMMIT}" class="${RESPONSE_MODAL_BUTTON_COMMIT_CLASS}">Commit & Push</button>`;
     } else {
-        body += `<button id="response-modal-button-commit-onclick" class="response-modal-button-commit-disabled" disabled>Commit & Push</button>`;
+        body += `<button id="${RESPONSE_MODAL_BUTTON_COMMIT}" class="${RESPONSE_MODAL_BUTTON_COMMIT_DISABLED_CLASS}" disabled>Commit & Push</button>`;
     }
 
     // Collapsible raw JSON details.
     body +=
-        "<button type='button' class='response-modal-json-collapsible-button'>Show JSON</button>" +
-        "<div class='response-modal-json-collapsible-content'>" +
-            "<pre>" +
-                JSON.stringify(json, undefined, 4) +
-            "</pre>" +
-        "</div>";
+        `<button type='button' class='${RESPONSE_MODAL_BUTTON_JSON_COLLAPSIBLE_CLASS}'>Show JSON</button>\n` +
+        `<div class='${RESPONSE_MODAL_JSON_COLLAPSIBLE_CONTENT_CLASS}'>\n` +
+        `    <pre>\n` +
+        `        ${JSON.stringify(json, undefined, 4)}\n` +
+        `    </pre>\n` +
+        `</div>`;
 
     // Spawn modal.
-    popupModal("response-modal", header, body, MODAL_DEFAULT_FOOTER, level);
+    popupModal(RESPONSE_MODAL, header, body, MODAL_DEFAULT_FOOTER, level);
 
     // Perform changes that requires a spawned modal:
 
     // Add bindings to buttons.
-    document.getElementById("response-modal-button-commit-onclick").onclick = function() {
+    document.getElementById(RESPONSE_MODAL_BUTTON_COMMIT).onclick = function() {
         // Perform bound action.
         let jsonToCommit = {};
         let yaraRule = window.currentlyLoadedRule;
@@ -1051,11 +1104,11 @@ function handlePostRuleResponse(json) {
         postCommit(jsonToCommit);
 
         // Close modal after handling button action.
-        document.getElementById("confirmation-modal").style.display = "none";
+        document.getElementById(CONFIRMATION_MODAL).style.display = NONE;
     };
 
     // Make the JSON detailsCollapsible element actually collapsible.
-    addCaseDetailsCollapsibleButtonLogic("response-modal-json-collapsible-button");
+    addCaseDetailsCollapsibleButtonLogic(RESPONSE_MODAL_BUTTON_JSON_COLLAPSIBLE_CLASS);
 }
 
 /**
@@ -1065,13 +1118,13 @@ function postRule() {
     try {
         let json = getRuleJsonFromEditorElements();
 
-        let xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest();  // FIXME: Replace antiquated XHR with fetch.
         let postDesignedRuleUrl = $('#postDesignedRuleUrl').data().url;
 
         console.log("POST URL: " + postDesignedRuleUrl);
 
         xhr.open("POST", postDesignedRuleUrl, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Content-Type', MIMETYPE_JSON);
 
         // Add custom handling of the response returned by XHR POST URL.
         xhr.onreadystatechange = function () {
@@ -1083,7 +1136,7 @@ function postRule() {
         // Convert a JavaScript value to a JavaScript Object Notation (JSON) string (Required for POST).
         xhr.send(JSON.stringify(json));
     } catch (e) {
-        if (e.name === "NoContentsException") {
+        if (e.name === NO_CONTENTS_EXCEPTION) {
             console.warn(e.message, e.name);
             popupWarningModal(e.message, "Please add contents to the editor before submitting.");
         } else {
@@ -1108,14 +1161,14 @@ function printGitDiff(diffString, color=true) {
         return "<p>There were no differences between this and the previous commit.</p>"
     }
 
-    let retv = "<pre class='numbered_lines'>";
+    let retv = `<pre class='${NUMBERED_TEXTBOX_CLASS}'>`;
 
     if (color) {
         for (let line of diffString.split('\n')) {
             if (line.startsWith("+")) {
-                retv += `<span><mark class='green-text'>${line}</mark>\n</span>`
+                retv += `<span><mark class='${TEXT_COLOR_GREEN_CLASS}'>${line}</mark>\n</span>`
             } else if (line.startsWith("-")) {
-                retv += `<span><mark class='red-text'>${line}</mark>\n</span>`
+                retv += `<span><mark class='${TEXT_COLOR_RED_CLASS}'>${line}</mark>\n</span>`
             }
             else {
                 retv += `<span>${line}\n</span>`;
@@ -1134,7 +1187,7 @@ function printGitDiff(diffString, color=true) {
 function handlePostCommitResponse(json) {
     let errorType = "";
     let errorMessage = "";
-    let level = "success";
+    let level = SUCCESS_LEVEL;
 
     // Parse JSON:
     let outJson = json["out"];
@@ -1145,7 +1198,7 @@ function handlePostCommitResponse(json) {
     if (!success) {
         errorMessage = outJson["error"]["message"];
         errorType = outJson["error"]["type"];
-        level = outJson["error"].hasOwnProperty("level") ? outJson["error"]["level"] : "error";
+        level = outJson["error"].hasOwnProperty("level") ? outJson["error"]["level"] : ERROR_LEVEL;
 
         console.log("errorMessage: " + errorMessage);
         console.log("errorType: " + errorType);
@@ -1174,41 +1227,41 @@ function handlePostCommitResponse(json) {
 
     // Collapsible raw JSON details.
     body +=
-        "<button type='button' class='response-modal-json-collapsible-button'>Show JSON</button>" +
-        "<div class='response-modal-json-collapsible-content'>" +
-            "<pre>" +
-                JSON.stringify(json, undefined, 4) +
-            "</pre>" +
-        "</div>";
+        `<button type='button' class='${RESPONSE_MODAL_BUTTON_JSON_COLLAPSIBLE_CLASS}'>Show JSON</button>` +
+        `<div class='${RESPONSE_MODAL_JSON_COLLAPSIBLE_CONTENT_CLASS}'>` +
+        `    <pre>` +
+        `        ${JSON.stringify(json, undefined, 4)}` +
+        `    </pre>` +
+        `</div>`;
 
     // Spawn modal.
-    popupModal("response-modal", header, body, MODAL_DEFAULT_FOOTER, level);
+    popupModal(RESPONSE_MODAL, header, body, MODAL_DEFAULT_FOOTER, level);
 
     // Perform changes that requires a spawned modal:
     // Make the JSON detailsCollapsible element actually collapsible.
-    addCaseDetailsCollapsibleButtonLogic("response-modal-json-collapsible-button");
+    addCaseDetailsCollapsibleButtonLogic(RESPONSE_MODAL_BUTTON_JSON_COLLAPSIBLE_CLASS);
 }
 
 /**
  * Make a custom POST request for non-form elements like DIV and SPAN.
  */
 function postCommit(json) {
-    let xhr = new XMLHttpRequest();
+    let xhr = new XMLHttpRequest();  // FIXME: Replace antiquated XHR with fetch.
     let postCommitUrl = $('#postCommitUrl').data().url;
 
     console.log("POST URL: " + postCommitUrl);
 
     xhr.open("POST", postCommitUrl, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Content-Type', MIMETYPE_JSON);
 
     // Add custom handling of the response returned by XHR POST URL.
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             // Make sure to close any open modals.
-            for ( let modalElement of document.getElementsByClassName("custom-modal") ) {
-                if (modalElement.style.display !== "none") {
+            for ( let modalElement of document.getElementsByClassName(MODAL_CLASS) ) {
+                if (modalElement.style.display !== NONE) {
                     console.log("[postCommit] xhr.onreadystatechange: Closed open modal: " + modalElement.id);
-                    modalElement.style.display = "none";
+                    modalElement.style.display = NONE;
                 }
             }
 
@@ -1222,7 +1275,7 @@ function postCommit(json) {
 }
 
 function clearEditorDivContents() {
-    let editorDiv = document.getElementById("yara_rule_designer_editor");
+    let editorDiv = document.getElementById(DESIGNER_EDITOR);
     editorDiv.textContent = '';
 }
 
@@ -1258,9 +1311,12 @@ function getParameterByName(name, url) {
 }
 
 // Global code
-let idParm = getParameterByName('id');
+let idParm = getParameterByName(ID);
 
 if (idParm !== null && idParm !== "") {
     console.log("Load rule: " + idParm);
     loadRule(idParm);
 }
+
+// Indicate that script ran through to the end during the initial load.
+console.log("Ready.");

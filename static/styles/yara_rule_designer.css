@@ -7,23 +7,23 @@
     /*--theme-button-dark-color: #f8f9fa;*/
 
     /* Main editor elements. */
-    --yara_rule_designer_text_color: white;
-    --yara_rule_designer_color: white;
-    --yara_rule_designer_span_box_shadow: grey;
-    --yara_rule_designer_header_color: white;
-    --yara_rule_designer_header_background: rgb(41, 128, 185);
-    --yara_rule_designer_leftpane_background: white;
-    --yara_rule_designer_tags_color: black;
-    --yara_rule_designer_border_color: rgb(41, 128, 185);
-    --yara_rule_designer_background: white;
+    --yara-rule-designer-text-color: white;
+    --yara-rule-designer-color: white;
+    --yara-rule-designer-span-box-shadow: grey;
+    --yara-rule-designer-header-color: white;
+    --yara-rule-designer-header-background: rgb(41, 128, 185);
+    --yara-rule-designer-leftpane-background: white;
+    --yara-rule-designer-tags-color: black;
+    --yara-rule-designer-border-color: rgb(41, 128, 185);
+    --yara-rule-designer-background: white;
 
     /* Draggables. */
-    --condition_keyword_color: white;
-    --condition_keyword_background: #8a3ab9;
-    --draggable_artifact_color: white;
-    --draggable_artifact_background: #2879af;
-    --draggable_artifact_type_color: white;
-    --draggable_artifact_type_background: #28af9f;
+    --condition-keyword-color: white;
+    --condition-keyword-background: #8a3ab9;
+    --draggable-artifact-color: white;
+    --draggable-artifact-background: #2879af;
+    --draggable-artifact-type-color: white;
+    --draggable-artifact-type-background: #28af9f;
 
     /* Buttons. */
     --button-submit-color: white;
@@ -64,14 +64,14 @@
     --modal-background: white;
     --modal-color: black;
     --modal-a-color: rgb(0, 123, 255);
-    --modal_background_info: #5dade2; /*grey ver: #87898a;*/
-    --modal_color_info: white;
-    --modal_background_success: #5cb85c;
-    --modal_color_success: white;
-    --modal_background_warning: #f4d03f;
-    --modal_color_warning: black;
-    --modal_background_error: #da423f;
-    --modal_color_error: white;
+    --modal-background-info: #5dade2; /*grey ver: #87898a;*/
+    --modal-color-info: white;
+    --modal-background-success: #5cb85c;
+    --modal-color-success: white;
+    --modal-background-warning: #f4d03f;
+    --modal-color-warning: black;
+    --modal-background-error: #da423f;
+    --modal-color-error: white;
     --modal-collapsible-content-details-color: black;
     --modal-collapsible-content-details-background: #f1f1f1;
 
@@ -100,7 +100,7 @@
 /*}*/
 
 html, body {
-    background: var(--yara_rule_designer_background);
+    background: var(--yara-rule-designer-background);
     margin:0;
     padding:0;
     border:0;
@@ -123,19 +123,19 @@ tr:hover td {
     color: var(--table-row-color-hover);
 }
 
-.yara_rule_designer {
+.yara-rule-designer {
     overflow: auto;
-    background: var(--yara_rule_designer_background);
+    background: var(--yara-rule-designer-background);
 }
 
-.yara_rule_designer > span {
+.yara-rule-designer > span {
     margin: 5px;    /* Spacing between span elements */
     padding: 10px;  /* Spacing within span elements */
     font-size: 12px;
     border: 0px solid;
     /*border-radius: 25px;*/
-    /*box-shadow: 5px 5px 5px var(--yara_rule_designer_span_box_shadow);*/
-    color: var(--yara_rule_designer_color);
+    /*box-shadow: 5px 5px 5px var(--yara-rule-designer-span-box-shadow);*/
+    color: var(--yara-rule-designer-color);
 }
 
 /*.container-fluid {*/
@@ -148,7 +148,7 @@ tr:hover td {
 /*}*/
 
 #yara-rule-designer-theme-selector {
-    background: var(--yara_rule_designer_header_background);
+    background: var(--yara-rule-designer-header-background);
     width: 30%;
 }
 
@@ -179,29 +179,29 @@ tr:hover td {
 /*    color: var(--button-submit-color-hover);*/
 /*}*/
 
-#yara_rule_designer_header {
+#yara-rule-designer-header {
     overflow: hidden;
     text-align: center;
     font-size: 22pt;
     font-weight: bold;
-    border-bottom:1px solid var(--yara_rule_designer_border_color);
-    background: var(--yara_rule_designer_header_background);
-    color: var(--yara_rule_designer_header_color);
+    border-bottom:1px solid var(--yara-rule-designer-border-color);
+    background: var(--yara-rule-designer-header-background);
+    color: var(--yara-rule-designer-header-color);
 }
 
-#yara_rule_designer_leftpane_container {
+#yara-rule-designer-leftpane-container {
     /* Bootstrap: A border in name only, each individual child element
        needs their own (transparent) border to stay in-bounds. */
-    border-right:1px solid var(--yara_rule_designer_border_color);
-    border-bottom: 1px solid var(--yara_rule_designer_border_color);
-    background: var(--yara_rule_designer_leftpane_background);
+    border-right:1px solid var(--yara-rule-designer-border-color);
+    border-bottom: 1px solid var(--yara-rule-designer-border-color);
+    background: var(--yara-rule-designer-leftpane-background);
     overflow-x: hidden;
 }
 
 #yara-rule-designer-buttons {
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
     border-right:1px solid transparent;
-    border-bottom:1px solid var(--yara_rule_designer_border_color);
+    border-bottom:1px solid var(--yara-rule-designer-border-color);
     padding: 0;
     /*width: 100%;*/
 }
@@ -267,70 +267,70 @@ tr:hover td {
 }
 
 #yara-rule-designer-tags {
-    color: var(--yara_rule_designer_tags_color);
+    color: var(--yara-rule-designer-tags-color);
     margin-left: 10px;
     margin-top: 10px;
     background: transparent;
 }
 
-#yara_rule_designer_operators {
+#yara-rule-designer-operators {
     overflow: auto;
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
-    border-top: 1px solid var(--yara_rule_designer_border_color);
+    border-top: 1px solid var(--yara-rule-designer-border-color);
     border-right:1px solid transparent;
-    border-bottom:1px solid var(--yara_rule_designer_border_color);
+    border-bottom:1px solid var(--yara-rule-designer-border-color);
     background: transparent;
 }
 
-#yara_rule_designer_artifact_types {
+#yara-rule-designer-artifact-types {
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
     border-right:1px solid transparent;
     background: transparent;
 }
 
-#yara_rule_designer_artifacts {
+#yara-rule-designer-artifacts {
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
     border-right:1px solid transparent;
-    border-top: 1px solid var(--yara_rule_designer_border_color);
+    border-top: 1px solid var(--yara-rule-designer-border-color);
     border-bottom:1px solid transparent;
     background: transparent;
 }
 
 /* Override designer span properties for items that are put in the editor element */
-#yara_rule_designer_editor > span {
+#yara-rule-designer-editor > span {
     margin: 5px 0 5px 0;    /* Spacing between inline span elements (top, right, bottom, left)*/
     padding: 10px;
     border-radius: 0;
 }
 
-.condition_keyword {
+.condition-keyword {
     display: inline-table;
-    color: var(--condition_keyword_color);
+    color: var(--condition-keyword-color);
     font-weight: bold;
-    background: var(--condition_keyword_background);
+    background: var(--condition-keyword-background);
     cursor: pointer;
 }
 
-.condition_encapsulator {
+.condition-encapsulator {
     display: inline-table;
-    color: var(--condition_keyword_color);
+    color: var(--condition-keyword-color);
     font-weight: bold;
-    background: var(--condition_keyword_background);
+    background: var(--condition-keyword-background);
     cursor: pointer;
 }
 
 
-.draggable_artifact {
+.condition-artifact {
     display: inline-table;
-    color: var(--draggable_artifact_color);
-    background-color: var(--draggable_artifact_background);
+    color: var(--draggable-artifact-color);
+    background-color: var(--draggable-artifact-background);
     cursor: pointer;
 }
 
-.draggable_artifact_type {
+.condition-artifact-type {
     display: inline-table;
-    color: var(--draggable_artifact_type_color);
-    background-color: var(--draggable_artifact_type_background);
+    color: var(--draggable-artifact-type-color);
+    background-color: var(--draggable-artifact-type-background);
     cursor: pointer;
 }
 
@@ -353,8 +353,8 @@ tr:hover td {
  /* Modal Header */
 .custom-modal-header {
   padding: 2px 16px;
-  background: var(--modal_background_info);
-  color: var(--modal_color_info);
+  background: var(--modal-background-info);
+  color: var(--modal-color-info);
 }
 
 /* Modal Body */
@@ -371,8 +371,8 @@ tr:hover td {
 /* Modal Footer */
 .custom-modal-footer {
   padding: 2px 16px;
-  background: var(--modal_background_info);
-  color: var(--modal_color_info);
+  background: var(--modal-background-info);
+  color: var(--modal-color-info);
 }
 
 /* Modal Content */
@@ -428,7 +428,7 @@ tr:hover td {
 }
 
 /* Collapsible contentDetails (Raw JSON)*/
-.response-modal-json-collapsible-button {
+.response-modal-button-json-collapsible {
     background: var(--button-collapsible-content-details-background);
     color: var(--button-collapsible-content-details-color);
     cursor: pointer;
@@ -439,8 +439,8 @@ tr:hover td {
     outline: none;
     font-size: 15px;
 }
-
-.active, .response-modal-json-collapsible-button:hover {
+yara-rule-designer-artifact-types
+.active, .response-modal-button-json-collapsible:hover {
     background: var(--button-collapsible-content-details-background-hover);
     color: var(--button-collapsible-content-details-color-hover)
 }
@@ -502,7 +502,7 @@ tr:hover td {
 
 /* Textbox with line numbering styling */
 
-.numbered_lines {
+.numbered-lines {
     background: var(--numbered-lines-background);
     color: var(--numbered-lines-color);
     padding: 10px 16px;
@@ -512,12 +512,12 @@ tr:hover td {
     /*box-shadow: inset 0 0 10px #000;*/
     counter-reset: line;
 }
-.numbered_lines span {
+.numbered-lines span {
     display: block;
     line-height: 1.5rem;
     counter-increment: line;
 }
-.numbered_lines span:before {
+.numbered-lines span:before {
     content: counter(line, decimal-leading-zero);
     display: inline-block;
     border-right: 1px solid #ddd;
@@ -533,7 +533,7 @@ mark.red-text {
 }
 
 mark.red-bg {
-    background-color: var(--modal_background_error);
+    background-color: var(--modal-background-error);
 }
 
 mark.green-text {
@@ -544,7 +544,7 @@ mark.green-text {
 
 
 mark.green-bg {
-    background-color: var(--modal_background_success);
+    background-color: var(--modal-background-success);
 }
 
 #fetched-rules-input-filter {
