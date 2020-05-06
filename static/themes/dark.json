@@ -16,7 +16,7 @@
     "--draggable-artifact-type-color": "#67c1f5",
     "--draggable-artifact-type-background": "#2e86c1",
 
-    "--modal-background": "#191c1f",
+    "--modal-background": "#2a2a2e",
     "--modal-color": "white",
     "--modal-a-color": "#6db0ec",
     "--modal-background-info": "#4680a7",
@@ -28,10 +28,14 @@
     "--mark-green-text-color": "#78c46a",
     "--mark-red-text-color": "#bf3535",
 
-    "--table-header-color": "white",
-    "--table-header-background": "#2b2b2b",
-    "--table-row-background": "#2b2b2b",
-    "--table-row-color": "white",
-    "--table-row-background-hover": "#323232",
-    "--table-row-color-hover": "white"
+    "--table-header-color": "#9a9a9b",
+    "--table-header-background": "#1b1b1d",
+    "--table-row-background": "#2a2a2e",
+    "--table-row-background-alt": "#353539",
+    "--table-row-color": "#9a9a9b",
+    "--table-row-color-alt": "#9a9a9b",
+    "--table-row-background-hover": "#353b48",
+    "--table-row-background-alt-hover": "#353b48",
+    "--table-row-color-hover": "white",
+    "--table-row-color-alt-hover": "white"
 }

@@ -87,17 +87,14 @@
     --table-header-color: black;
     --table-header-background: white;
     --table-row-background: white;
+    --table-row-background-alt: #ededed;
     --table-row-color: black;
+    --table-row-color-alt: black;
     --table-row-background-hover: #e2e2e2;
+    --table-row-background-alt-hover: #e2e2e2;
     --table-row-color-hover: black;
+    --table-row-color-alt-hover: black;
 }
-
-/* DEBUG Helper: Make ghost items visible */
-/** {*/
-/*  background: #000 !important;*/
-/*  color: #0f0 !important;*/
-/*  outline: solid #f00 1px !important;*/
-/*}*/
 
 html, body {
     background: var(--yara-rule-designer-background);
@@ -106,21 +103,47 @@ html, body {
     border:0;
 }
 
+table {
+    border-collapse: collapse; /* Collapse borders */
+    width: 100%; /* Full-width */
+    /*border: 1px solid #ddd; !* Surrounds table with a grey border *!*/
+    font-size:14px;
+    overflow-x:auto;
+}
+
 th {
     background: var(--table-header-background);
     color: var(--table-header-color);
+    text-align: left;
+}
+
+td {
+    text-align: left; /* Left-align text */
+    padding: 5px; /* Add padding */
+    min-width:1px /* Used to size pending bar */
 }
 
 tr {
-    background: #721c24;
     background: var(--table-row-background);
     color: var(--table-row-color);
+    padding: 5px; /* Add padding */
+    min-width:1px; /* Used to size pending bar */
+}
+
+tr:nth-child(even) {
+    background-color: var(--table-row-background-alt);
+    color: var(--table-row-color-alt);
 }
 
 /* <tr>s themselves are very hard to access with CSS; thus the 'td' bit.. */
 tr:hover td {
     background: var(--table-row-background-hover);
     color: var(--table-row-color-hover);
+}
+
+tr:nth-child(even):hover td {
+    background: var(--table-row-background-alt-hover);
+    color: var(--table-row-color-alt-hover);
 }
 
 .yara-rule-designer {
@@ -132,36 +155,15 @@ tr:hover td {
     margin: 5px;    /* Spacing between span elements */
     padding: 10px;  /* Spacing within span elements */
     font-size: 12px;
-    border: 0px solid;
+    border: 0 solid;
     /*border-radius: 25px;*/
     /*box-shadow: 5px 5px 5px var(--yara-rule-designer-span-box-shadow);*/
     color: var(--yara-rule-designer-color);
 }
 
-/*.container-fluid {*/
-/*  display: flex;*/
-/*  flex-direction: column;*/
-/*  height: 100%;*/
-/*}*/
-/*.row:last-child {*/
-/*  flex: 1;*/
-/*}*/
-
 #yara-rule-designer-theme-selector {
     background: var(--yara-rule-designer-header-background);
     width: 30%;
-}
-
-#load-theme-light-button {
-    /*background: var(--theme-button-light-background);*/
-    /*color: var(--theme-button-light-color);*/
-    /*border: 0;*/
-}
-
-#load-theme-dark-button {
-    /*background: var(--theme-button-dark-background);*/
-    /*color: var(--theme-button-dark-color);*/
-    /*border: 0;*/
 }
 
 #load-themes-dropdown {
@@ -173,11 +175,6 @@ tr:hover td {
     text-decoration: none;
     font-size: 16px;
 }
-
-/*#load-theme-light-button:hover {*/
-/*    background: var(--button-submit-background-hover);*/
-/*    color: var(--button-submit-color-hover);*/
-/*}*/
 
 #yara-rule-designer-header {
     overflow: hidden;
@@ -319,7 +316,6 @@ tr:hover td {
     cursor: pointer;
 }
 
-
 .condition-artifact {
     display: inline-table;
     color: var(--draggable-artifact-color);
@@ -439,7 +435,7 @@ tr:hover td {
     outline: none;
     font-size: 15px;
 }
-yara-rule-designer-artifact-types
+
 .active, .response-modal-button-json-collapsible:hover {
     background: var(--button-collapsible-content-details-background-hover);
     color: var(--button-collapsible-content-details-color-hover)
@@ -558,31 +554,6 @@ mark.green-bg {
     padding: 12px 20px 12px 40px; /* Add some padding */
     border: 1px solid #ddd; /* Add a grey border */
     margin-bottom: 12px; /* Add some space below the input */
-}
-
-.custom-table {
-    border-collapse: collapse; /* Collapse borders */
-    width: 100%; /* Full-width */
-    border: 1px solid #ddd; /* Add a grey border */
-    font-size:14px;
-    overflow-x:auto;
-}
-
-.custom-table th, .custom-table td {
-    text-align: left; /* Left-align text */
-    /*padding: 12px; !* Add padding *!*/
-    padding: 5px; /* Add padding */
-    min-width:1px /* Used to size pending bar */
-}
-
-.custom-table tr {
-  /* Add a bottom border to all table rows */
-  border-bottom: 1px solid #ddd;
-}
-
-.custom-table tr.header, .custom-table tr:hover {
-  /* Add a grey background color to the table header and on hover */
-  background-color: #f1f1f1;
 }
 
 .bar-pending{

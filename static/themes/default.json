@@ -66,7 +66,11 @@
     "--table-header-color": "black",
     "--table-header-background": "white",
     "--table-row-background": "white",
+    "--table-row-background-alt": "#ededed",
     "--table-row-color": "black",
+    "--table-row-color-alt": "black",
     "--table-row-background-hover": "#e2e2e2",
-    "--table-row-color-hover": "black"
+    "--table-row-background-alt-hover": "#e2e2e2",
+    "--table-row-color-hover": "black",
+    "--table-row-color-alt-hover": "black"
 }
