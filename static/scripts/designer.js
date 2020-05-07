@@ -66,15 +66,24 @@ const ROOT_CLASS = 'yara-rule-designer';
 const MODAL_CLASS = "custom-modal";
 const MODAL_HEADER = "header";
 const MODAL_BODY = "body";
+const MODAL_BODY_TOP = `${MODAL_BODY}-top`;
+const MODAL_BODY_MIDDLE = `${MODAL_BODY}-middle`;
+const MODAL_BODY_BOTTOM = `${MODAL_BODY}-bottom`;
 const MODAL_FOOTER = "footer";
 const MODAL_CLOSE = "close";
 const MODAL_BG = "modal-background";
 const MODAL_TEXT_COLOR = "modal-color";
 const MODAL_DEFAULT_HEADER = "";
 const MODAL_DEFAULT_BODY = "";
+const MODAL_DEFAULT_BODY_TOP = "";
+const MODAL_DEFAULT_BODY_MIDDLE = "";
+const MODAL_DEFAULT_BODY_BOTTOM = "";
 const MODAL_DEFAULT_FOOTER = "<p>Tip: Click anywhere outside of this modal to close.</p>";
 const MODAL_DEFAULT_CONFIRMATION_HEADER = "<h2>Are you sure?</h2>";
 const MODAL_DEFAULT_CONFIRMATION_BODY = "";
+const MODAL_DEFAULT_CONFIRMATION_BODY_TOP = "";
+const MODAL_DEFAULT_CONFIRMATION_BODY_MIDDLE = "";
+const MODAL_DEFAULT_CONFIRMATION_BODY_BOTTOM = "";
 const MODAL_DEFAULT_CONFIRMATION_FOOTER = MODAL_DEFAULT_FOOTER;
 
 const RESPONSE_MODAL = "response-modal";
@@ -99,6 +108,8 @@ const CONFIRMATION_MODAL_BUTTON_NO = `${CONFIRMATION_MODAL_BUTTON}-no-onclick`;
 const CONFIRMATION_MODAL_BUTTON_NO_CLASS = `${CONFIRMATION_MODAL_BUTTON}-no`;
 
 // Tables:
+const CUSTOM_TABLE_CLASS = "custom-table";
+const CUSTOM_TABLE_CONTAINER = `${CUSTOM_TABLE_CLASS}-container`;
 const TABLE_FILTER_INPUT_SUFFIX = "input-filter";
 const TABLE_FILTER_RADIO_CLASS_SUFFIX = `${TABLE_FILTER_INPUT_SUFFIX}-radios`;
 const TABLE_FILTER_COUNT = "filter-count";
@@ -146,7 +157,6 @@ const ERROR_LEVEL = "error";
 const WARNING_LEVEL = "warning";
 const SUCCESS_LEVEL = "success";
 const SYNTAX_ERROR = "syntax";
-const CUSTOM_TABLE_CLASS = "custom-table";
 
 // NB: *NOT* Unused and needs to be var (instead of let/const) due to being a GLOBAL.
 var currentlyLoadedRule = null;
@@ -213,13 +223,17 @@ function getCSSVar(varName) {
  *  - '-modal-background-*'
  *  - '-modal-color-*'
  */
-function popupModal(modalId=null, header=null, body=null, footer=null, level=null) {
+function popupModal(modalId=null, header=null, bodyTop=null, bodyMiddle=null, bodyBottom=null, footer=null, level=null) {
     // Modal element itself.
     let modal = document.getElementById(modalId);
 
     // Modal sub-elements.
     let modalHeader = document.getElementById(`${modalId}-${MODAL_HEADER}`);
-    let modalBody = document.getElementById(`${modalId}-${MODAL_BODY}`);
+    // let modalBody = document.getElementById(`${modalId}-${MODAL_BODY}`);
+    console.log("modalBodyTop", `${modalId}-${MODAL_BODY_TOP}`);
+    let modalBodyTop = document.getElementById(`${modalId}-${MODAL_BODY_TOP}`);
+    let modalBodyMiddle = document.getElementById(`${modalId}-${MODAL_BODY_MIDDLE}`);
+    let modalBodyBottom = document.getElementById(`${modalId}-${MODAL_BODY_BOTTOM}`);
     let modalFooter = document.getElementById(`${modalId}-${MODAL_FOOTER}`);
 
     // Set level (if null, set to info/default).
@@ -227,7 +241,10 @@ function popupModal(modalId=null, header=null, body=null, footer=null, level=nul
 
     // Set sub-element values, if given.
     modalHeader.innerHTML = (header != null) ? header: MODAL_DEFAULT_HEADER;
-    modalBody.innerHTML  = (body != null) ? body : MODAL_DEFAULT_BODY;
+    // modalBody.innerHTML  = (body != null) ? body : MODAL_DEFAULT_BODY;
+    modalBodyTop.innerHTML  = (bodyTop != null) ? bodyTop : MODAL_DEFAULT_BODY_TOP;
+    modalBodyMiddle.innerHTML  = (bodyMiddle != null) ? bodyMiddle : MODAL_DEFAULT_BODY_MIDDLE;
+    modalBodyBottom.innerHTML  = (bodyBottom != null) ? bodyBottom : MODAL_DEFAULT_BODY_BOTTOM;
     modalFooter.innerHTML = (footer != null) ? footer :  MODAL_DEFAULT_FOOTER;
 
     // Set custom style.
@@ -249,14 +266,14 @@ function popupWarningModal(header, body, footer=null) {
     let hdr = `<h2>Warning: ${header}</h2>`;
     let bdy = `<h3>${body}</h3>`;
 
-    popupModal(RESPONSE_MODAL, hdr, bdy, footer, WARNING_LEVEL);
+    popupModal(RESPONSE_MODAL, hdr, null, bdy, null, footer, WARNING_LEVEL);
 }
 
 function popupErrorModal(header, body, footer=null) {
     let hdr = `<h2>Warning: ${header}</h2>`;
     let bdy = `<h3>${body}</h3>`;
 
-    popupModal(RESPONSE_MODAL, hdr, bdy, footer, ERROR_LEVEL);
+    popupModal(RESPONSE_MODAL, hdr, null, bdy, null, footer, ERROR_LEVEL);
 }
 
 function performAction(actionObj) {
@@ -289,11 +306,12 @@ function popupConfirmationModal(yesAction, noAction=undefined,
                                 level=WARNING_LEVEL) {
 
     // Append bindable buttons to custom body.
-    body += `<button id="${CONFIRMATION_MODAL_BUTTON_YES}" class="${CONFIRMATION_MODAL_BUTTON_YES_CLASS}">Yes</button>`;
-    body += `<button id="${CONFIRMATION_MODAL_BUTTON_NO}" class="${CONFIRMATION_MODAL_BUTTON_NO_CLASS}">No</button>`;
+    let bodyMiddle = body;
+    bodyMiddle += `<button id="${CONFIRMATION_MODAL_BUTTON_YES}" class="${CONFIRMATION_MODAL_BUTTON_YES_CLASS}">Yes</button>`;
+    bodyMiddle += `<button id="${CONFIRMATION_MODAL_BUTTON_NO}" class="${CONFIRMATION_MODAL_BUTTON_NO_CLASS}">No</button>`;
 
     // Spawn modal.
-    popupModal(CONFIRMATION_MODAL, header, body, footer, level);
+    popupModal(CONFIRMATION_MODAL, header, null, bodyMiddle, null, footer, level);
 
     // Add bindings to buttons.
     document.getElementById(CONFIRMATION_MODAL_BUTTON_YES).onclick = function() {
@@ -313,7 +331,7 @@ function popupConfirmationModal(yesAction, noAction=undefined,
 
 function popupHelpModal() {
     let header = "<h2>How To Use</h2>";
-    let body =
+    let bodyMiddle =
             "<h4>Adding items</h4>" +
             "<p>Either click on or drag items from the left-pane to add them to the editor." + "<br/>" +
             "<i>NB: Drag and drop won't work until you've added at least one item to the editor.</i></p>" +
@@ -325,7 +343,7 @@ function popupHelpModal() {
             "<h4>Tags</h4>" +
             "<p>Check the checkboxes for which tags you want to include (if any).</p>";
 
-    popupModal(RESPONSE_MODAL, header, body, null, INFO_LEVEL);
+    popupModal(RESPONSE_MODAL, header, null, bodyMiddle, null, null, INFO_LEVEL);
 
 }
 
@@ -807,7 +825,8 @@ function printRulesTable(rules, defaultCheckedRadio = TABLE_FILTER_CHECKED_RADIO
     }
 
     let header = `<h3>Fetched rules <span id='${modalId}-header-${TABLE_FILTER_COUNT}'</span></h3>`;
-    let body = "";
+    let bodyTop = "";
+    let bodyMiddle = "";
     let footer = "Tip: Click any row to load its corresponding rule.";
     let tableId = RULES_TABLE;
     let headerContentMaps = makeRuleTableRows(rules);
@@ -816,7 +835,7 @@ function printRulesTable(rules, defaultCheckedRadio = TABLE_FILTER_CHECKED_RADIO
     let filterRadioClassName = `${tableId}-${TABLE_FILTER_RADIO_CLASS_SUFFIX}`;
     let filterRadioId = filterRadioClassName;
     let filterInputId = `${tableId}-${TABLE_FILTER_INPUT_SUFFIX}`;
-    body +=
+    bodyTop +=
         `<input type="text" id="${filterInputId}" onkeyup="filterFetchedRules('${filterInputId}', ` +
         `'${tableId}', '${filterRadioId}', filterCountCallback)" placeholder="Filter table..">`;
 
@@ -862,15 +881,20 @@ function printRulesTable(rules, defaultCheckedRadio = TABLE_FILTER_CHECKED_RADIO
     }
 
     // Assemble checkboxes HTML.
-    body += `<div class="${filterRadioClassName} form-check form-check-inline" id="${filterRadioId}">\n` +
+    bodyTop += `<div class="${filterRadioClassName} form-check form-check-inline" id="${filterRadioId}">\n` +
         `${radioHTML}\n</div>`;
-    body += "<br>";
+    bodyTop += "<br>";
 
     // Table:
-    body += makeTable(tableId, headerContentMaps);
+    let table = makeTable(tableId, headerContentMaps);
+    let tableContainer =
+        `<div id=${CUSTOM_TABLE_CONTAINER}>\n` +
+        `    ${table}\n` +
+        `</div>\n`;
+    bodyMiddle += tableContainer;
     // console.log(body);
 
-    popupModal(RESPONSE_MODAL, header, body, footer, INFO_LEVEL);
+    popupModal(RESPONSE_MODAL, header, bodyTop, bodyMiddle, null, footer, INFO_LEVEL);
 
     // Apply actions to modal and table that couldn't be applied before it was spawned:
     // document.getElementById("response-modal").style.width = "100%";
@@ -1097,7 +1121,7 @@ function handlePostRuleResponse(json) {
         `</div>`;
 
     // Spawn modal.
-    popupModal(RESPONSE_MODAL, header, body, MODAL_DEFAULT_FOOTER, level);
+    popupModal(RESPONSE_MODAL, header, null, body, null, MODAL_DEFAULT_FOOTER, level);
 
     // Perform changes that requires a spawned modal:
 
@@ -1244,7 +1268,7 @@ function handlePostCommitResponse(json) {
         `</div>`;
 
     // Spawn modal.
-    popupModal(RESPONSE_MODAL, header, body, MODAL_DEFAULT_FOOTER, level);
+    popupModal(RESPONSE_MODAL, header, null, body, null, MODAL_DEFAULT_FOOTER, level);
 
     // Perform changes that requires a spawned modal:
     // Make the JSON detailsCollapsible element actually collapsible.
