@@ -1,5 +1,5 @@
 ## Requests
-*  Compare YARA rules' similarity (particularly conditions)
+*  Compare YARA rules' similarity (particularly conditions).
 *  Customisable metadata fields (user input).
     * Probably also add:
         * Custom tags

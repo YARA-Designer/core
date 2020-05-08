@@ -349,11 +349,16 @@ tr:nth-child(even):hover td {
     background: transparent;
 }
 
+#yara-rule-designer-editor {
+    padding-left: 10px;
+}
+
 /* Override designer span properties for items that are put in the editor element */
 #yara-rule-designer-editor > span {
-    margin: 5px 0 5px 0;    /* Spacing between inline span elements (top, right, bottom, left)*/
+    /* Spacing between inline span elements */
+    margin: 10px 0 0;
+    /* Spacing within inline span elements (changes size of elements as well). */
     padding: 10px;
-    border-radius: 0;
 }
 
 .condition-keyword {
