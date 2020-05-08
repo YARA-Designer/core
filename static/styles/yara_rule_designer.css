@@ -402,6 +402,12 @@ tr:nth-child(even):hover td {
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
+.close-custom-modal {
+    float: right;
+    font-size: 22pt;
+    cursor: pointer;
+}
+
  /* Modal Header */
 .custom-modal-header {
   padding: 2px 16px;
