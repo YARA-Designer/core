@@ -70,6 +70,7 @@ const SIZE_FULLWIDTH_CLASS = "size-fullwidth";
 const MODAL_CLASS = "custom-modal";
 const MODAL_CONTENT_CLASS = `${MODAL_CLASS}-content`;
 const MODAL_HEADER = "header";
+const MODAL_HEADER_CONTENT = `${MODAL_HEADER}-content`;
 const MODAL_BODY = "body";
 const MODAL_BODY_TOP = `${MODAL_BODY}-top`;
 const MODAL_BODY_MIDDLE = `${MODAL_BODY}-middle`;
@@ -240,6 +241,7 @@ function popupModal(modalId=null, header=null, bodyTop=null, bodyMiddle=null, bo
 
     // Modal sub-elements.
     let modalHeader = document.getElementById(`${modalId}-${MODAL_HEADER}`);
+    let modalHeaderContent = document.getElementById(`${modalId}-${MODAL_HEADER_CONTENT}`);
     // let modalBody = document.getElementById(`${modalId}-${MODAL_BODY}`);
     console.log("modalBodyTop", `${modalId}-${MODAL_BODY_TOP}`);
     let modalBodyTop = document.getElementById(`${modalId}-${MODAL_BODY_TOP}`);
@@ -251,7 +253,7 @@ function popupModal(modalId=null, header=null, bodyTop=null, bodyMiddle=null, bo
     level = (level != null) ? level : INFO_LEVEL;
 
     // Set sub-element values, if given.
-    modalHeader.innerHTML = (header != null) ? header: MODAL_DEFAULT_HEADER;
+    modalHeaderContent.innerHTML = (header != null) ? header: MODAL_DEFAULT_HEADER;
     // modalBody.innerHTML  = (body != null) ? body : MODAL_DEFAULT_BODY;
     modalBodyTop.innerHTML  = (bodyTop != null) ? bodyTop : MODAL_DEFAULT_BODY_TOP;
     modalBodyMiddle.innerHTML  = (bodyMiddle != null) ? bodyMiddle : MODAL_DEFAULT_BODY_MIDDLE;
