@@ -9,12 +9,12 @@
     "--yara-rule-designer-border-color": "#67c1f5",
     "--yara-rule-designer-background": "#191c1f",
 
-    "--condition-keyword-color": "67c1f5",
+    "--condition-keyword-color": "white",
     "--condition-keyword-background": "#77209b",
-    "--draggable-artifact-color": "#67c1f5",
+    "--draggable-artifact-color": "white",
     "--draggable-artifact-background": "#1d365d",
-    "--draggable-artifact-type-color": "#67c1f5",
-    "--draggable-artifact-type-background": "#2e86c1",
+    "--draggable-artifact-type-color": "white",
+    "--draggable-artifact-type-background": "#63ab26",
 
     "--modal-background": "#2a2a2e",
     "--modal-color": "white",
