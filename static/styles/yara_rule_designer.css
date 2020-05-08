@@ -451,14 +451,20 @@ tr:nth-child(even):hover td {
     max-height: 100%;
     overflow: auto; /* Enable scroll if needed */
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-    animation-name: animatetop;
+    animation-name: animate-in-place;
     animation-duration: 0.4s;
 }
 
 /* Add Animation */
 @keyframes animatetop {
-  from {top: -300px; opacity: 0}
-  to {top: 0; opacity: 1}
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+/* Add Animation */
+@keyframes animate-in-place {
+    from {top: 0; opacity: 0.5}
+    to {top: 0; opacity: 1}
 }
 
 /* Commit etc buttons */
