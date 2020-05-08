@@ -62,8 +62,13 @@ const CSS_VAR_PREFIX = "--";
 // Root:
 const ROOT_CLASS = 'yara-rule-designer';
 
+// Modifying classes
+const SIZE_WIDE_CLASS = "size-wide";
+const SIZE_FULLWIDTH_CLASS = "size-fullwidth";
+
 // Modals:
 const MODAL_CLASS = "custom-modal";
+const MODAL_CONTENT_CLASS = `${MODAL_CLASS}-content`;
 const MODAL_HEADER = "header";
 const MODAL_BODY = "body";
 const MODAL_BODY_TOP = `${MODAL_BODY}-top`;
@@ -229,6 +234,9 @@ function getCSSVar(varName) {
 function popupModal(modalId=null, header=null, bodyTop=null, bodyMiddle=null, bodyBottom=null, footer=null, level=null) {
     // Modal element itself.
     let modal = document.getElementById(modalId);
+
+    // Reset any custom resizing or other modal-content classList modifications.
+    modal.getElementsByClassName(MODAL_CONTENT_CLASS)[0].className = MODAL_CONTENT_CLASS;
 
     // Modal sub-elements.
     let modalHeader = document.getElementById(`${modalId}-${MODAL_HEADER}`);
@@ -897,10 +905,12 @@ function printRulesTable(rules, defaultCheckedRadio = TABLE_FILTER_CHECKED_RADIO
     bodyMiddle += tableContainer;
     // console.log(body);
 
-    popupModal(RESPONSE_MODAL, header, bodyTop, bodyMiddle, null, footer, INFO_LEVEL);
+    let modal = popupModal(RESPONSE_MODAL, header, bodyTop, bodyMiddle, null, footer, INFO_LEVEL);
 
     // Apply actions to modal and table that couldn't be applied before it was spawned:
-    // document.getElementById("response-modal").style.width = "100%";
+
+    // Set size to fullwidth due to the amount of columns of this particular table.
+    modal.getElementsByClassName(MODAL_CONTENT_CLASS)[0].classList.add(SIZE_FULLWIDTH_CLASS);
 
     // Add onclick action for sorting headers.
     for ( let headerElem of document.getElementById(`${tableId}-headers`).children ) {
