@@ -1,8 +1,8 @@
 // Global code
 let themeParm = getParameterByName('theme');
-let defaultThemePath = $('#theme').data().path;
+const DEFAULT_THEME_PATH = "/static/themes/";
 
-function loadTheme(themeName, themePath=defaultThemePath) {
+function loadTheme(themeName, themePath=DEFAULT_THEME_PATH) {
     const rootEl = document.querySelector(':root');
 
     let themeFile = themeName + ".json";
@@ -35,5 +35,5 @@ function getParameterByName(name, url) {
 
 // Global code
 if (themeParm !== null && themeParm !== "") {
-    loadTheme(themeParm, $('#theme').data().path)
+    loadTheme(themeParm)
 }

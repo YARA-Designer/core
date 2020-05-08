@@ -1,25 +1,35 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!DOCTYPE html>
+<!--suppress JSDeprecatedSymbols -->
+<!--^ Required due to false-positive of "deprecated" inline-event.... -->
+<html lang="en">
     <head>
+        <meta charset="utf-8" name="charset" content="UTF-8">
         <title id="yara-rule-designer-title">YARA Rule Designer: No rule loaded</title>
+        <meta name="author" content="Aleksander Berge Kjellsen">
+        <meta name="keywords" content="YARA, CERT, SP-CERT, TheHive, Editor, Designer">
+        <meta name="description" content="GUI for designing YARA rules from TheHive alerts and cases.">
 
-        <!-- Load 1st party stylesheets       -->
+        <!-- 3rd party stylesheets.       -->
+        <!-- Icon libraries -->
+        <link rel="stylesheet" href="/static/fonts/fontawesome-free-5.13.0-web/css/all.css">
+
+        <!-- Dragula - Drag 'n Drop   -->
+        <link rel="stylesheet" href="/static/styles/third-party/dragula-3.7.2.css">
+
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="/static/styles/third-party/bootstrap-4.4.1.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+        <!-- 1st party stylesheets (load last to ensure inherited properties from above exist.) -->
         <link rel="stylesheet" href="/static/styles/yara_rule_designer.css">
         <link rel="stylesheet" href="/static/styles/theme.css">
 
-        <!-- Add icon libraries -->
-        <link rel="stylesheet" href="/static/fonts/fontawesome-free-5.13.0-web/css/all.css">
-
         <!-- Set Jinja2 variables for use in JavaScript -->
-        <!--    Theme handler: -->
-        <meta id="theme" data-path="/static/themes') + '/' }}">
         <!--    JavaScript custom POST handlers -->
-        <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
-        <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
+        <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}" content="">
+        <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}" content="">
         <!--    JavaScript GET handlers -->
-        <meta id="getRules" data-url="{{ url_for('get_rules_request') }}">
-        <meta id="getRule" data-url="{{ url_for('post_get_rule_request') }}">
+        <meta id="getRules" data-url="{{ url_for('get_rules_request') }}" content="">
+        <meta id="getRule" data-url="{{ url_for('post_get_rule_request') }}" content="">
     </head>
     <body>
         <div class="container mh-100 h-100 mw-100 w-100 yara-rule-designer" id="yara-rule-designer-container">
@@ -160,11 +170,9 @@
         <script src="/static/scripts/third-party/popper-1.14.6.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 
         <!-- Bootstrap -->
-        <link rel="stylesheet" href="/static/styles/third-party/bootstrap-4.4.1.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <script src="/static/scripts/third-party/bootstrap-4.4.1.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
 
         <!-- Dragula - Drag 'n Drop   -->
-        <link rel="stylesheet" href="/static/styles/third-party/dragula-3.7.2.css">
         <script src="/static/scripts/third-party/dragula-3.7.2.min.js" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
 
         <!-- Theme handler -->
