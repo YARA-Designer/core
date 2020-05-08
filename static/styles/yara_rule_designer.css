@@ -162,6 +162,9 @@ tr:nth-child(even):hover td {
 }
 
 #yara-rule-designer-theme-selector {
+    /* Force theme buttons to be at the top left (0x0)
+       and not waste space by adding itself to an element. */
+    position: absolute;
     background: var(--yara-rule-designer-header-background);
     width: 30%;
 }
@@ -178,12 +181,64 @@ tr:nth-child(even):hover td {
 
 #yara-rule-designer-header {
     overflow: hidden;
-    text-align: center;
-    font-size: 22pt;
-    font-weight: bold;
+    padding-bottom: 0;
     border-bottom:1px solid var(--yara-rule-designer-border-color);
     background: var(--yara-rule-designer-header-background);
     color: var(--yara-rule-designer-header-color);
+}
+
+#yara-rule-designer-header-content {
+    overflow: hidden;
+    text-align: center;
+    font-weight: bold;
+    background: var(--yara-rule-designer-header-background);
+    color: var(--yara-rule-designer-header-color);
+}
+
+#yara-rule-designer-header-content-spacer-top {
+    padding-bottom: 5px;
+}
+
+#yara-rule-designer-header-content-title {
+    font-size: 22pt;
+    /* NB: Set line-height and height equal to font-size to strip uncontrolled padding
+           Use the spacer elements instead to add spacing between elements. */
+    line-height: 22pt;
+    height: 22pt;
+    background: var(--yara-rule-designer-header-background);
+    color: var(--yara-rule-designer-header-color);
+}
+
+#yara-rule-designer-header-content-title-spacer {
+    padding-bottom: 10px;
+}
+
+#yara-rule-designer-header-content-byline {
+    font-size: 12pt;
+    /* NB: Set line-height and height equal to font-size to strip uncontrolled padding
+       Use the spacer elements instead to add spacing between elements. */
+    line-height: 12pt;
+    height: 12pt;
+    background: var(--yara-rule-designer-header-background);
+    color: var(--yara-rule-designer-header-color);
+}
+
+#yara-rule-designer-header-content-byline-spacer {
+    padding-bottom: 5px;
+}
+
+#yara-rule-designer-header-content-description {
+    font-size: 12pt;
+    /* NB: Set line-height and height equal to font-size to strip uncontrolled padding.
+       Use the spacer elements instead to add spacing between elements. */
+    line-height: 12pt;
+    height: 12pt;
+    background: var(--yara-rule-designer-header-background);
+    color: var(--yara-rule-designer-header-color);
+}
+
+#yara-rule-designer-header-content-description-spacer {
+    padding-bottom: 5px;
 }
 
 #yara-rule-designer-leftpane-container {

@@ -120,9 +120,12 @@ const TABLE_FILTER_HIDDEN_RADIOS = ["Pending"];
 const RULES_TABLE = "fetched-rules";
 
 // Designer:
-const DESIGNER_TITLE_ID = `${ROOT_CLASS}-title`;
+const HTML_TITLE = `${ROOT_CLASS}-title`;
 const DESIGNER_HEADER = `${ROOT_CLASS}-header`;
 const DESIGNER_HEADER_CONTENT = `${DESIGNER_HEADER}-content`;
+const DESIGNER_HEADER_CONTENT_TITLE = `${DESIGNER_HEADER_CONTENT}-title`;
+const DESIGNER_HEADER_CONTENT_BYLINE = `${DESIGNER_HEADER_CONTENT}-byline`;
+const DESIGNER_HEADER_CONTENT_DESCRIPTION = `${DESIGNER_HEADER_CONTENT}-description`;
 
 const DESIGNER_TAGS = `${ROOT_CLASS}-tags`;
 const DESIGNER_TAGS_CHECKBOX_CLASS = "yara-tag-checkbox";
@@ -939,11 +942,13 @@ function loadRuleDialog() {
 }
 
 function setTitle(title, id, description=null) {
-    document.getElementById(DESIGNER_TITLE_ID).innerText = title;
-    document.getElementById(DESIGNER_HEADER_CONTENT).innerHTML =
-        `<p> Case: ${title} [ID: ${id}] </p>`;
-    document.getElementById(DESIGNER_HEADER_CONTENT).innerHTML +=
-        `<h6>${description}</h6>`;
+    document.getElementById(HTML_TITLE).innerText = title;
+    document.getElementById(DESIGNER_HEADER_CONTENT_TITLE).innerHTML =
+        `<p> Case: ${title}</p>`;
+    document.getElementById(DESIGNER_HEADER_CONTENT_BYLINE).innerHTML =
+        `<p>ID: ${id}</p>`;
+    document.getElementById(DESIGNER_HEADER_CONTENT_DESCRIPTION).innerHTML =
+        `<p>${description}</p>`;
 }
 
 function setTags(tags) {
