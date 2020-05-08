@@ -1,5 +1,10 @@
 ## Requests
 *  Compare YARA rules' similarity (particularly conditions)
+*  Customisable metadata fields (user input).
+    * Probably also add:
+        * Custom tags
+        * Custom artifacts
+        * Custom artifact types
 
 ## General
 *  Rename post_rule_json and post_commit_json far more sensibly / unambiguously.
@@ -18,6 +23,7 @@
 
 
 ## Frontend
+* Make leftnav containers collapsible.
 * Make encapsulator work with click (surround elements currently in editor div)
 * Add some sort of hashed "state" string to URL to reproduce the current editor elements from URL.
 * Properly implement showing of column error occurred on (currently just appended to SyntaxError str).
