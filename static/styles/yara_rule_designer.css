@@ -165,8 +165,8 @@ tr:nth-child(even):hover td {
     /* Force theme buttons to be at the top left (0x0)
        and not waste space by adding itself to an element. */
     position: absolute;
+    padding: 0;
     background: var(--yara-rule-designer-header-background);
-    width: 30%;
 }
 
 #load-themes-dropdown {
@@ -182,6 +182,7 @@ tr:nth-child(even):hover td {
 #yara-rule-designer-header {
     overflow: hidden;
     padding-bottom: 0;
+    padding-left: 0;
     border-bottom:1px solid var(--yara-rule-designer-border-color);
     background: var(--yara-rule-designer-header-background);
     color: var(--yara-rule-designer-header-color);
