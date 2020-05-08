@@ -3,17 +3,17 @@
 <html>
     <head>
         <title id="yara-rule-designer-title">YARA Rule Designer: No rule loaded</title>
-        <!--suppress HtmlUnknownTarget -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/yara_rule_designer.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/theme.css') }}">
+
+        <!-- Load 1st party stylesheets       -->
+        <link rel="stylesheet" href="/static/styles/yara_rule_designer.css">
+        <link rel="stylesheet" href="/static/styles/theme.css">
 
         <!-- Add icon libraries -->
-        <!--suppress HtmlUnknownTarget -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='fonts/fontawesome-free-5.13.0-web/css/all.css') }}">
+        <link rel="stylesheet" href="/static/fonts/fontawesome-free-5.13.0-web/css/all.css">
 
         <!-- Set Jinja2 variables for use in JavaScript -->
         <!--    Theme handler: -->
-        <meta id="theme" data-path="{{ url_for('static', filename='themes') + '/' }}">
+        <meta id="theme" data-path="/static/themes') + '/' }}">
         <!--    JavaScript custom POST handlers -->
         <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}">
         <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}">
@@ -154,34 +154,29 @@
 
         {% block javascript %}
         <!-- JQuery ( required for Bootstrap and $() ). -->
-        <!--suppress HtmlUnknownTarget -->
-        <script src="{{ url_for('static', filename='scripts/third-party/jquery-3.5.0.min.js') }}" integrity="sha384-LVoNJ6yst/aLxKvxwp6s2GAabqPczfWh6xzm38S/YtjUyZ+3aTKOnD/OJVGYLZDl" crossorigin="anonymous"></script>
+        <script src="/static/scripts/third-party/jquery-3.5.0.min.js" integrity="sha384-LVoNJ6yst/aLxKvxwp6s2GAabqPczfWh6xzm38S/YtjUyZ+3aTKOnD/OJVGYLZDl" crossorigin="anonymous"></script>
 
         <!-- Popper ( required for Bootstrap ). -->
-        <!--suppress HtmlUnknownTarget -->
-        <script src="{{ url_for('static', filename='scripts/third-party/popper-1.14.6.min.js') }}" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+        <script src="/static/scripts/third-party/popper-1.14.6.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 
         <!-- Bootstrap -->
-        <!--suppress HtmlUnknownTarget -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/third-party/bootstrap-4.4.1.min.css') }}" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <!--suppress HtmlUnknownTarget -->
-        <script src="{{ url_for('static', filename='scripts/third-party/bootstrap-4.4.1.bundle.min.js') }}" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="/static/styles/third-party/bootstrap-4.4.1.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="/static/scripts/third-party/bootstrap-4.4.1.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
 
         <!-- Dragula - Drag 'n Drop   -->
-        <!--suppress HtmlUnknownTarget -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/third-party/dragula-3.7.2.css') }}">
-        <!--suppress HtmlUnknownTarget -->
-        <script src="{{ url_for('static', filename='scripts/third-party/dragula-3.7.2.min.js') }}" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="/static/styles/third-party/dragula-3.7.2.css">
+        <script src="/static/scripts/third-party/dragula-3.7.2.min.js" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
 
         <!-- Theme handler -->
-        <!--suppress HtmlUnknownTarget -->
-        <script src="{{ url_for('static', filename='scripts/themes.js') }}"></script>
+        <script src="/static/scripts/themes.js"></script>
 
         <!-- Core Designer script block -->
-         <!--suppress HtmlUnknownTarget -->
-        <script src="{{ url_for('static', filename='scripts/third-party/md5.js') }}"></script>
-        <!--suppress HtmlUnknownTarget -->
-        <script src="{{ url_for('static', filename='scripts/designer.js') }}"></script>
+        <script src="/static/scripts/third-party/md5.js"></script>
+        <script src="/static/scripts/modules/exceptions.js"></script>
+        <script src="/static/scripts/modules/constants.js"></script>
+
+        <!--Finally load the main script which depends on all of the above modules -->
+        <script src="/static/scripts/designer.js"></script>
         {% endblock %}
     </body>
 </html>
