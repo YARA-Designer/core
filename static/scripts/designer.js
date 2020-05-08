@@ -942,7 +942,7 @@ function setTitle(title, id, description=null) {
     document.getElementById(DESIGNER_TITLE_ID).innerText = title;
     document.getElementById(DESIGNER_HEADER_CONTENT).innerHTML =
         `<p> Case: ${title} [ID: ${id}] </p>`;
-    document.getElementById(DESIGNER_HEADER).innerHTML +=
+    document.getElementById(DESIGNER_HEADER_CONTENT).innerHTML +=
         `<h6>${description}</h6>`;
 }
 
