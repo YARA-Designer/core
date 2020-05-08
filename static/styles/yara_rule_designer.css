@@ -1,103 +1,4 @@
-/* Define variables for colors etc so that themes can easily override them */
-:root {
-    /* Theme selector */
-    /*--theme-button-light-background: #f8f9fa;*/
-    /*--theme-button-light-color: #343a40;*/
-    /*--theme-button-dark-background: #343a40;*/
-    /*--theme-button-dark-color: #f8f9fa;*/
-
-    /* Main editor elements. */
-    --yara-rule-designer-text-color: white;
-    --yara-rule-designer-color: white;
-    --yara-rule-designer-span-box-shadow: grey;
-    --yara-rule-designer-header-color: white;
-    --yara-rule-designer-header-background: rgb(41, 128, 185);
-    --yara-rule-designer-leftpane-background: white;
-    --yara-rule-designer-tags-color: black;
-    --yara-rule-designer-border-color: rgb(41, 128, 185);
-    --yara-rule-designer-background: white;
-
-    /* Draggables. */
-    --condition-keyword-color: white;
-    --condition-keyword-background: #8a3ab9;
-    --draggable-artifact-color: white;
-    --draggable-artifact-background: #2879af;
-    --draggable-artifact-type-color: white;
-    --draggable-artifact-type-background: #509316;
-
-    /* Buttons. */
-    --button-submit-color: white;
-    --button-submit-background: #008CBA;
-    --button-submit-color-hover: white;
-    --button-submit-background-hover: #204d74;
-    --button-clear-color: white;
-    --button-clear-background: #c7254e;
-    --button-clear-color-hover: white;
-    --button-clear-background-hover: #721c24;
-    --button-default-color: white;
-    --button-default-background: #5d6d7e;
-    --button-help-color-hover: white;
-    --button-help-background-hover: #2e4053;
-
-    --button-yes-color: white;
-    --button-yes-background: #5cb85c;
-    --button-yes-color-hover: white;
-    --button-yes-background-hover: #3c763d;
-    --button-no-color: white;
-    --button-no-background: #da423f;
-    --button-no-color-hover: white;
-    --button-no-background-hover: #761c19;
-    --button-commit-color: white;
-    --button-commit-background: #5cb85c;
-    --button-commit-color-hover: white;
-    --button-commit-background-hover: #3c763d;
-    --button-commit-disabled-color: white;
-    --button-commit-disabled-background: #888888;
-    --button-commit-disabled-color-hover: white;
-    --button-commit-disabled-background-hover: #888888;
-    --button-collapsible-content-details-color: white;
-    --button-collapsible-content-details-background: #777;
-    --button-collapsible-content-details-color-hover: white;
-    --button-collapsible-content-details-background-hover: #555;
-
-    /* Modals. */
-    --modal-background: white;
-    --modal-color: black;
-    --modal-a-color: rgb(0, 123, 255);
-    --modal-background-info: #5dade2; /*grey ver: #87898a;*/
-    --modal-color-info: white;
-    --modal-background-success: #5cb85c;
-    --modal-color-success: white;
-    --modal-background-warning: #f4d03f;
-    --modal-color-warning: black;
-    --modal-background-error: #da423f;
-    --modal-color-error: white;
-    --modal-collapsible-content-details-color: black;
-    --modal-collapsible-content-details-background: #f1f1f1;
-
-    /* Numbered lines. */
-    --numbered-lines-color: black;
-    --numbered-lines-background: white;
-
-    /* Text marking. */
-    --mark-green-text-color: #218820;
-    --mark-red-text-color: #af2a1c;
-
-    /* Table */
-    --table-header-color: black;
-    --table-header-background: white;
-    --table-row-background: white;
-    --table-row-background-alt: #ededed;
-    --table-row-color: black;
-    --table-row-color-alt: black;
-    --table-row-background-hover: #e2e2e2;
-    --table-row-background-alt-hover: #e2e2e2;
-    --table-row-color-hover: black;
-    --table-row-color-alt-hover: black;
-}
-
 html, body {
-    background: var(--yara-rule-designer-background);
     margin:0;
     padding:0;
     border:0;
@@ -112,8 +13,6 @@ table {
 }
 
 th {
-    background: var(--table-header-background);
-    color: var(--table-header-color);
     text-align: left;
 }
 
@@ -124,31 +23,12 @@ td {
 }
 
 tr {
-    background: var(--table-row-background);
-    color: var(--table-row-color);
     padding: 5px; /* Add padding */
     min-width:1px; /* Used to size pending bar */
 }
 
-tr:nth-child(even) {
-    background-color: var(--table-row-background-alt);
-    color: var(--table-row-color-alt);
-}
-
-/* <tr>s themselves are very hard to access with CSS; thus the 'td' bit.. */
-tr:hover td {
-    background: var(--table-row-background-hover);
-    color: var(--table-row-color-hover);
-}
-
-tr:nth-child(even):hover td {
-    background: var(--table-row-background-alt-hover);
-    color: var(--table-row-color-alt-hover);
-}
-
 .yara-rule-designer {
     overflow: auto;
-    background: var(--yara-rule-designer-background);
 }
 
 .yara-rule-designer > span {
@@ -157,8 +37,7 @@ tr:nth-child(even):hover td {
     font-size: 12px;
     border: 0 solid;
     /*border-radius: 25px;*/
-    /*box-shadow: 5px 5px 5px var(--yara-rule-designer-span-box-shadow);*/
-    color: var(--yara-rule-designer-color);
+    /*box-shadow: 5px 5px 5px;*/
 }
 
 #yara-rule-designer-theme-selector {
@@ -166,13 +45,10 @@ tr:nth-child(even):hover td {
        and not waste space by adding itself to an element. */
     position: absolute;
     padding: 0;
-    background: var(--yara-rule-designer-header-background);
 }
 
 #load-themes-dropdown {
-    background: var(--button-submit-background);
     border: none;
-    color: var(--button-submit-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -183,17 +59,13 @@ tr:nth-child(even):hover td {
     overflow: hidden;
     padding-bottom: 0;
     padding-left: 0;
-    border-bottom:1px solid var(--yara-rule-designer-border-color);
-    background: var(--yara-rule-designer-header-background);
-    color: var(--yara-rule-designer-header-color);
+    border-bottom:1px solid;
 }
 
 #yara-rule-designer-header-content {
     overflow: hidden;
     text-align: center;
     font-weight: bold;
-    background: var(--yara-rule-designer-header-background);
-    color: var(--yara-rule-designer-header-color);
 }
 
 #yara-rule-designer-header-content-spacer-top {
@@ -206,8 +78,6 @@ tr:nth-child(even):hover td {
            Use the spacer elements instead to add spacing between elements. */
     line-height: 22pt;
     height: 22pt;
-    background: var(--yara-rule-designer-header-background);
-    color: var(--yara-rule-designer-header-color);
 }
 
 #yara-rule-designer-header-content-title-spacer {
@@ -220,8 +90,6 @@ tr:nth-child(even):hover td {
        Use the spacer elements instead to add spacing between elements. */
     line-height: 12pt;
     height: 12pt;
-    background: var(--yara-rule-designer-header-background);
-    color: var(--yara-rule-designer-header-color);
 }
 
 #yara-rule-designer-header-content-byline-spacer {
@@ -234,8 +102,6 @@ tr:nth-child(even):hover td {
        Use the spacer elements instead to add spacing between elements. */
     line-height: 12pt;
     height: 12pt;
-    background: var(--yara-rule-designer-header-background);
-    color: var(--yara-rule-designer-header-color);
 }
 
 #yara-rule-designer-header-content-description-spacer {
@@ -245,82 +111,51 @@ tr:nth-child(even):hover td {
 #yara-rule-designer-leftpane-container {
     /* Bootstrap: A border in name only, each individual child element
        needs their own (transparent) border to stay in-bounds. */
-    border-right:1px solid var(--yara-rule-designer-border-color);
-    border-bottom: 1px solid var(--yara-rule-designer-border-color);
-    background: var(--yara-rule-designer-leftpane-background);
+    border-right:1px solid;
+    border-bottom: 1px solid;
     overflow-x: hidden;
 }
 
 #yara-rule-designer-buttons {
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
     border-right:1px solid transparent;
-    border-bottom:1px solid var(--yara-rule-designer-border-color);
+    border-bottom:1px solid;
     padding: 0;
-    /*width: 100%;*/
 }
 
 #load-rule-button {
-    background: var(--button-default-background);
     border: none;
-    color: var(--button-default-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     font-size: 16px;
-}
-
-#load-rule-button:hover {
-  background: var(--button-help-background-hover);
-  color: var(--button-help-color-hover);
 }
 
 #submit-rule-button {
-    background: var(--button-submit-background);
     border: none;
-    color: var(--button-submit-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     font-size: 16px;
-}
-
-#submit-rule-button:hover {
-    background: var(--button-submit-background-hover);
-    color: var(--button-submit-color-hover);
 }
 
 #clear-rule-button {
-    background: var(--button-clear-background);
     border: none;
-    color: var(--button-clear-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     font-size: 16px;
-}
-
-#clear-rule-button:hover {
-    background: var(--button-clear-background-hover);
-    color: var(--button-clear-color-hover);
 }
 
 #show-help-button {
-    background: var(--button-default-background);
     border: none;
-    color: var(--button-default-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     font-size: 16px;
 }
 
-#show-help-button:hover {
-  background: var(--button-help-background-hover);
-  color: var(--button-help-color-hover);
-}
-
 #yara-rule-designer-tags {
-    color: var(--yara-rule-designer-tags-color);
     margin-left: 10px;
     margin-top: 10px;
     background: transparent;
@@ -329,9 +164,9 @@ tr:nth-child(even):hover td {
 #yara-rule-designer-operators {
     overflow: auto;
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
-    border-top: 1px solid var(--yara-rule-designer-border-color);
+    border-top: 1px solid;
     border-right:1px solid transparent;
-    border-bottom:1px solid var(--yara-rule-designer-border-color);
+    border-bottom:1px solid;
     background: transparent;
 }
 
@@ -344,7 +179,7 @@ tr:nth-child(even):hover td {
 #yara-rule-designer-artifacts {
     /* Bootstrap: If you actually remove this border, the contents flee out of bounds. */
     border-right:1px solid transparent;
-    border-top: 1px solid var(--yara-rule-designer-border-color);
+    border-top: 1px solid;
     border-bottom:1px solid transparent;
     background: transparent;
 }
@@ -363,31 +198,23 @@ tr:nth-child(even):hover td {
 
 .condition-keyword {
     display: inline-table;
-    color: var(--condition-keyword-color);
     font-weight: bold;
-    background: var(--condition-keyword-background);
     cursor: pointer;
 }
 
 .condition-encapsulator {
     display: inline-table;
-    color: var(--condition-keyword-color);
     font-weight: bold;
-    background: var(--condition-keyword-background);
     cursor: pointer;
 }
 
 .condition-artifact {
     display: inline-table;
-    color: var(--draggable-artifact-color);
-    background-color: var(--draggable-artifact-background);
     cursor: pointer;
 }
 
 .condition-artifact-type {
     display: inline-table;
-    color: var(--draggable-artifact-type-color);
-    background-color: var(--draggable-artifact-type-background);
     cursor: pointer;
 }
 
@@ -416,22 +243,16 @@ tr:nth-child(even):hover td {
  /* Modal Header */
 .custom-modal-header {
   padding: 2px 16px;
-  background: var(--modal-background-info);
-  color: var(--modal-color-info);
 }
 
 /* Modal Body */
 .custom-modal-body {
-    background: var(--modal-background);
-    color: var(--modal-color);
     padding: 2px 16px;
     overflow: hidden;
     max-height: 90vh; /* For 90% screen height (using viewport) */
 }
 
 .custom-modal-body-middle {
-    background: var(--modal-background);
-    color: var(--modal-color);
     padding: 2px 16px;
     overflow: auto;
     /* For 90% screen height (using viewport).
@@ -440,15 +261,9 @@ tr:nth-child(even):hover td {
     max-height: 80vh;
 }
 
-.custom-modal-body a {
-    color: var(--modal-a-color);
-}
-
 /* Modal Footer */
 .custom-modal-footer {
   padding: 2px 16px;
-  background: var(--modal-background-info);
-  color: var(--modal-color-info);
 }
 
 /* Modal Content */
@@ -488,41 +303,25 @@ tr:nth-child(even):hover td {
 
 /* Commit etc buttons */
 .response-modal-button-commit {
-    background: var(--button-commit-background);
     border: none;
-    color: var(--button-commit-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-}
-
-.response-modal-button-commit:hover {
-    background: var(--button-commit-background-hover);
-    color: var(--button-commit-color-hover);
 }
 
 .response-modal-button-commit-disabled {
-    background: var(--button-commit-disabled-background);
     border: none;
-    color: var(--button-commit-disabled-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-}
-
-.response-modal-button-commit-disabled:hover {
-    background: var(--button-commit-disabled-background-hover);
-    color: var(--button-commit-disabled-color-hover);
 }
 
 /* Collapsible contentDetails (Raw JSON)*/
 .response-modal-button-json-collapsible {
-    background: var(--button-collapsible-content-details-background);
-    color: var(--button-collapsible-content-details-color);
     cursor: pointer;
     padding: 18px;
     width: 100%;
@@ -532,21 +331,10 @@ tr:nth-child(even):hover td {
     font-size: 15px;
 }
 
-.active, .response-modal-button-json-collapsible:hover {
-    background: var(--button-collapsible-content-details-background-hover);
-    color: var(--button-collapsible-content-details-color-hover)
-}
-
 .response-modal-json-collapsible-content {
     padding: 0 18px;
     display: none;
     overflow: hidden;
-    background: var(--modal-collapsible-content-details-background);
-    color: var(--modal-collapsible-content-details-color);
-}
-
-.response-modal-json-collapsible-content pre {
-    color: var(--modal-collapsible-content-details-color);
 }
 
 #confirmation-modal-body-middle {
@@ -561,25 +349,16 @@ tr:nth-child(even):hover td {
 }
 
 .confirmation-modal-button-yes {
-    background: var(--button-yes-background);
     border: none;
-    color: var(--button-yes-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-}
-
-.confirmation-modal-button-yes:hover {
-    background: var(--button-yes-background-hover);
-    color: var(--button-yes-color-hover);
 }
 
 .confirmation-modal-button-no {
-    background: var(--button-no-background);
     border: none;
-    color: var(--button-no-color);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -587,16 +366,8 @@ tr:nth-child(even):hover td {
     font-size: 16px;
 }
 
-.confirmation-modal-button-no:hover {
-    background-color: var(--button-no-background-hover);
-    color: var(--button-no-color-hover);
-}
-
 /* Textbox with line numbering styling */
-
 .numbered-lines {
-    background: var(--numbered-lines-background);
-    color: var(--numbered-lines-color);
     padding: 10px 16px;
     border-radius: 2px;
     /*border-top: 4px solid #00aeef;*/
@@ -618,31 +389,8 @@ tr:nth-child(even):hover td {
     color: #888
 }
 
-mark.red-text {
-    color: var(--mark-red-text-color);
-    /* background is required to override Bootstrap's CSS. */
-    background-color: var(--modal-background);
-}
-
-mark.red-bg {
-    background-color: var(--modal-background-error);
-}
-
-mark.green-text {
-    color: var(--mark-green-text-color);
-    /* background is required to override Bootstrap's CSS. */
-    background-color: var(--modal-background);
-}
-
-
-mark.green-bg {
-    background-color: var(--modal-background-success);
-}
-
 #fetched-rules-input-filter {
     background-image: url('/static/images/searchicon.png'); /* Add a search icon to input */
-    background-color: var(--modal-background);
-    color: var(--modal-color);
     background-position: 10px 12px; /* Position the search icon */
     background-repeat: no-repeat; /* Do not repeat the icon image */
     width: 100%; /* Full-width */
