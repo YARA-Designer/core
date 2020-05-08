@@ -368,8 +368,9 @@ tr:nth-child(even):hover td {
     padding: 2px 16px;
     overflow: auto;
     /* For 90% screen height (using viewport).
-       NB: 1% less than parent to avoid scroll in parent */
-    max-height: 89vh;
+       NB: 1% less than parent to avoid scroll in parent .
+           10% less to avoid items vanishing behind footer. */
+    max-height: 80vh;
 }
 
 .custom-modal-body a {
