@@ -1,0 +1,8 @@
+{
+  "name": "YaraWhitelistRuleCreator",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "dotenv": "^8.2.0"
+  }
+}

@@ -111,7 +111,7 @@ if __name__ == "__main__":
     log_added_route(config["hive_listener_endpoint"])
 
     # -- Page to design yara rules on (root endpoint for frontend Web GUI).
-    add_app_route(app, '/', view_func=webserver.new_rule_designer, methods=['GET', 'POST'])
+    # add_app_route(app, '/', view_func=webserver.new_rule_designer, methods=['GET', 'POST'])
 
     # -- Pages to receive POST request from new_yara_rule so it can be processed by the codebase.
     add_app_route(app, '/post_yara_rule_json', view_func=webserver.post_rule_json, methods=['POST'])

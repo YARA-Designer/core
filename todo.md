@@ -20,6 +20,7 @@
 * Get a WSGI production server when deploying to production:
     * https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     * https://flask.palletsprojects.com/en/1.1.x/tutorial/deploy/
+* Fix handling of offline git server.
 
 
 ## Frontend
@@ -36,4 +37,6 @@
 
 ## Bugs
 * Drag and drop won't work until you've added at least one item to the editor, 
-  likely issue with no existing items to sort with.
+  likely issue with no existing items to sort with. 
+* Non-default theme loads late, leading to some uncomfortable contrast flashes when it finally gets applied.
+    * Set background CSS property early or create a loading screen to be shown until page is actually ready.

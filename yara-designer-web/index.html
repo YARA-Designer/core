@@ -22,14 +22,6 @@
         <!-- 1st party stylesheets (load last to ensure inherited properties from above exist.) -->
         <link rel="stylesheet" href="/static/styles/yara_rule_designer.css">
         <link rel="stylesheet" href="/static/styles/theme.css">
-
-        <!-- Set Jinja2 variables for use in JavaScript -->
-        <!--    JavaScript custom POST handlers -->
-        <meta id="postDesignedRuleUrl" data-url="{{ url_for('post_rule_json') }}" content="">
-        <meta id="postCommitUrl" data-url="{{ url_for('post_commit_json') }}" content="">
-        <!--    JavaScript GET handlers -->
-        <meta id="getRules" data-url="{{ url_for('get_rules_request') }}" content="">
-        <meta id="getRule" data-url="{{ url_for('post_get_rule_request') }}" content="">
     </head>
     <body>
         <div class="container mh-100 h-100 mw-100 w-100 yara-rule-designer" id="yara-rule-designer-container">
@@ -162,7 +154,7 @@
             </div>
         </div>
 
-        {% block javascript %}
+        <!-- 3rd party scripts.-->
         <!-- JQuery ( required for Bootstrap and $() ). -->
         <script src="/static/scripts/third-party/jquery-3.5.0.min.js" integrity="sha384-LVoNJ6yst/aLxKvxwp6s2GAabqPczfWh6xzm38S/YtjUyZ+3aTKOnD/OJVGYLZDl" crossorigin="anonymous"></script>
 
@@ -175,16 +167,21 @@
         <!-- Dragula - Drag 'n Drop   -->
         <script src="/static/scripts/third-party/dragula-3.7.2.min.js" integrity="sha384-BCXeg8w0rlmhmi8L/zjAIsj0b66prXjptd1vMdGJbEVJH5aBJYDjzfdTmWBzcCXG" crossorigin="anonymous"></script>
 
+        <!-- RequireJS.       -->
+        <script data-main="scripts/main" src="/static/scripts/third-party/require-2.3.6.min.js"></script>
+
+        <!-- MD5 hash functionality.       -->
+        <script src="/static/scripts/third-party/md5.js"></script>
+
+        <!--1st party scripts.        -->
         <!-- Theme handler -->
         <script src="/static/scripts/themes.js"></script>
 
         <!-- Core Designer script block -->
-        <script src="/static/scripts/third-party/md5.js"></script>
         <script src="/static/scripts/modules/exceptions.js"></script>
         <script src="/static/scripts/modules/constants.js"></script>
 
         <!--Finally load the main script which depends on all of the above modules -->
         <script src="/static/scripts/designer.js"></script>
-        {% endblock %}
     </body>
 </html>

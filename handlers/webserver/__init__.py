@@ -3,7 +3,7 @@ import json
 import os
 
 import handlers.git_handler as git
-from flask import render_template, request, jsonify, make_response
+from flask import request, jsonify, make_response
 
 from database.operations import update_rule, get_rule, get_rules
 import handlers.yara
@@ -43,11 +43,6 @@ def get_rules_request():
     log.info("GET rules return JSON: {}".format(json.dumps(retv.json, indent=4)))
 
     return retv
-
-
-def new_rule_designer():
-    log.info("Rendering YARA Rule Designer template...")
-    return render_template('yara_rule_designer.html')
 
 
 def reset_invalid_yara_rule(rule_name):

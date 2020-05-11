@@ -1,3 +1,15 @@
+require('dotenv').config();
+
+function parseConfig() {
+    return document.getElementById("my-configuration-file")
+}
+
+// Read configuration
+const CONFIG = parseConfig();
+
+console.log("config file", CONFIG);
+
+
 /**
  * Add a MD5 sum property to String prototype which returns the MD5 sum of its value.
  * */
