@@ -4,7 +4,6 @@
 
 ## Other
 *  Rename post_rule_json and post_commit_json far more sensibly / unambiguously.
-*  Rename all instances of "artifacts" to "observables" for less confusion..
 * Rename retv dict to be attribute compatible (no fancy characters).
 * Look into merging (responder's) listener webserver code into handlers.webserver.
 * Get a WSGI production server when deploying to production:

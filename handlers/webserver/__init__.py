@@ -111,15 +111,15 @@ def generate_yara_rule(j: json):
 
 def post_rule_json():
     """
-    Receives a JSON of the operators which needs to be matched against the original list of artifacts.
+    Receives a JSON of the operators which needs to be matched against the original list of observables.
     :return: JSON on the form of:
     {
-        "artifacts:
+        "observables:
         [
             {
-            "artifactN":
+            "observableN":
             {
-                "artifact",
+                "observable",
                 "id",
                 "type"
             }
@@ -135,15 +135,15 @@ def post_rule_json():
 
 def post_commit_json():
     """
-    Receives a JSON of the operators which needs to be matched against the original list of artifacts.
+    Receives a JSON of the operators which needs to be matched against the original list of observables.
     :return: JSON on the form of:
     {
-        "artifacts:
+        "observables:
         [
             {
-            "artifactN":
+            "observableN":
             {
-                "artifact",
+                "observable",
                 "id",
                 "type"
             }

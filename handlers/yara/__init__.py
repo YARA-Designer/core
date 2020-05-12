@@ -61,18 +61,18 @@ def determine_yara_source_filename(rule_name: str):
     return "{fname}{ext}".format(fname=sanitize_identifier(rule_name), ext=SOURCE_FILE_EXTENSION)
 
 
-def extract_yara_strings_dict(yara_artifacts: dict) -> dict:
+def extract_yara_strings_dict(yara_observables: dict) -> dict:
     """
-    Takes a yara artifacts dict (varname: {artifact, id, type} and returns a dict with only varname: {artifact}.
-    :param yara_artifacts:
+    Takes a YARA observables dict (varname: {observable, id, type} and returns a dict with only varname: {observable}.
+    :param yara_observables:
     :return: dict
     """
-    return {k: yara_artifacts[k]["artifact"] for k in yara_artifacts}
+    return {k: yara_observables[k]["observable"] for k in yara_observables}
 
 
 def get_referenced_strings(cond_stmt: str, yara_strings: dict) -> dict:
     """
-    In Yara it is a SyntaxError to have unreferenced strings/vars,
+    In YARA it is a SyntaxError to have unreferenced strings/vars,
     so these need to be rinsed out before rule compilation.
 
     :param cond_stmt: str
@@ -104,7 +104,7 @@ def newline_condition(condition: str):
 
 def generate_source_string(src: dict) -> str:
     """
-    Generates a yara rule on string form.
+    Generates a YARA rule on string form.
 
     example format:
         rule RuleIdentifier
@@ -113,10 +113,10 @@ def generate_source_string(src: dict) -> str:
                 description = ""
 
             strings:
-                $artifact1 = ""
+                $observable1 = ""
 
             condition:
-                $artifact1
+                $observable1
         }
 
     :param src: dict on the form of: {tags: [""], rule: "", meta: {}, strings: {}, condition: ""}
@@ -363,8 +363,8 @@ def determine_syntax_error_column(condition_as_lines_str: str, line_number: int,
 
 def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_compiled=False, **kwargs) -> dict:
     """
-    Generates a yara rule based on a given dict on the form of:
-     {rule: "", tags: [""], meta: {}, artifacts: [artifact: "", id: "", type: ""], condition: ""}.
+    Generates a YARA rule based on a given dict on the form of:
+     {rule: "", tags: [""], meta: {}, observables: [observable: "", id: "", type: ""], condition: ""}.
 
     :param keep_compiled: Whether or not to keep compiled binary files.
     :param error_on_warning: If true warnings are treated as errors, raising an exception.
@@ -394,7 +394,7 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
         "tags": sanitized_tags,
         "rule": sanitized_rule_name,
         "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
-        "strings": extract_yara_strings_dict(yara_sources_dict["artifacts"]),
+        "strings": extract_yara_strings_dict(yara_sources_dict["observables"]),
         "condition": yara_sources_dict["condition"]
         })
 
@@ -448,7 +448,7 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
                 "tags": sanitized_tags,
                 "rule": sanitized_rule_name,
                 "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
-                "strings": extract_yara_strings_dict(yara_sources_dict["artifacts"]),
+                "strings": extract_yara_strings_dict(yara_sources_dict["observables"]),
                 "condition": condition_as_lines_str
                 })
 
