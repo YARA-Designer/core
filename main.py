@@ -2,6 +2,7 @@ from datetime import date
 
 from flask import Flask
 from flask.json import JSONEncoder
+from flask_cors import CORS
 
 from handlers import config_handler, webserver
 from handlers.log_handler import create_logger
@@ -96,6 +97,7 @@ if __name__ == "__main__":
     # Set up Flask.
     app = MyFlask(__name__)
     log.info("Configured Flask app.")
+    CORS(app)
 
     # Add utility functions like print_in_console ('mdebug' in Jinja2 code)
     app.context_processor(utility_functions)

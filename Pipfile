@@ -7,9 +7,13 @@ verify_ssl = true
 
 [packages]
 thehive4py = "*"
-python-magic-bin = {version = "*", sys_platform = "== 'win32'"}
 cortexutils = "*"
 flask = "*"
 yara-python = "*"
 sqlalchemy = "*"
 gitpython = "*"
+flask-cors = "*"
+
+[packages.python-magic-bin]
+version = "*"
+sys_platform = "== 'win32'"
