@@ -1,6 +1,7 @@
 ## Requests
 *  Compare YARA rules' similarity (particularly conditions) - backend component.
 *  Customisable metadata fields (user input @ frontend).
+*  Implement support for an optional string type/modifier (case/wide/XOR/Base64) in the strings structure/object.
 
 ## Other
 *  Rename post_rule_json and post_commit_json far more sensibly / unambiguously.
