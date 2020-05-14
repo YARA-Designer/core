@@ -63,7 +63,8 @@ def determine_yara_source_filename(rule_name: str):
 
 def extract_yara_strings_dict(yara_observables: dict) -> dict:
     """
-    Takes a YARA observables dict (varname: {observable, id, type} and returns a dict with only varname: {observable}.
+    Takes a YARA observables dict (varname: {observable, md5sum, modifiers} and returns a dict with only varname: observable modifiers.
+
     :param yara_observables:
     :return: dict
     """
