@@ -71,6 +71,21 @@ class YaraStringModifier:
         return "YaraStringModifier(type={mod_type}, data={data})".format(mod_type=self.type, data=self.data)
 
 
+def validate_modifiers(modifiers):
+    restrictions = []
+    # build a list of restricted keywords to compare against every type.
+    for modifier in modifiers:
+        # Update restrictions list
+        restrictions.extend(MOD_RESTRICTIONS[modifier["type"]])
+
+    for modifier in modifiers:
+        if modifier["type"] in restrictions:
+            raise YaraModifierRestrictionError("Cannot use YARA String modifier {mod_type} with modifiers: "
+                                               "{items}".format(
+                                                mod_type=modifier["type"],
+                                                items=", ".join(MOD_RESTRICTIONS[modifier["type"]])), modifiers)
+
+
 class YaraString:
     # FIXME: Support more than basic strings
     # FIXME: Validate modifiers (syntax)
@@ -94,7 +109,7 @@ class YaraString:
             self.value = value
 
             # Throws exception if not valid.
-            self.validate_modifiers(modifiers)
+            validate_modifiers(modifiers)
 
             for modifier in modifiers:
                 self.modifiers.append(YaraStringModifier(modifier))
@@ -117,31 +132,14 @@ class YaraString:
     def determine_type(self):
         pass
 
-    def validate_modifiers(self, modifiers):
-        restrictions = []
-        # build a list of restricted keywords to compare against every type.
-        for modifier in modifiers:
-            # Update restrictions list
-            restrictions.extend(MOD_RESTRICTIONS[modifier["type"]])
-
-        for modifier in modifiers:
-            if modifier["type"] in restrictions:
-                raise YaraModifierRestrictionError("Cannot use YARA String modifier {mod_type} with modifiers: "
-                                                   "{items}".format(
-                                                    mod_type=modifier["type"],
-                                                    items=", ".join(MOD_RESTRICTIONS[modifier["type"]])), modifiers)
-
     def create_from_dict(self, from_dict):
         self.identifier = from_dict.keys()[0]
         self.value = from_dict["observable"]
 
         if "modifiers" in from_dict:
             # Throws exception if not valid.
-            self.validate_modifiers(from_dict["modifiers"])
+            validate_modifiers(from_dict["modifiers"])
 
             self.modifiers = from_dict["modifiers"]
 
 
-if __name__ == "__main__":
-    ys = YaraString("my_string", "potato", string_type="string", modifiers=[
-                    {"type": XOR}, {"type": WIDE}, {"type": NO_CASE}])
