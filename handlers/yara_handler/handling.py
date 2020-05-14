@@ -36,7 +36,7 @@ def extract_yara_strings_dict(yara_observables: dict) -> dict:
     return {k: yara_observables[k]["observable"] for k in yara_observables}
 
 
-def get_referenced_strings(cond_stmt: str, yara_strings: dict) -> dict:
+def get_referenced_strings(cond_stmt: str, yara_strings: List[YaraString]) -> List[YaraString]:
     """
     In YARA it is a SyntaxError to have unreferenced strings/vars,
     so these need to be rinsed out before rule compilation.
@@ -47,13 +47,13 @@ def get_referenced_strings(cond_stmt: str, yara_strings: dict) -> dict:
     """
     # Find all occurrences of words starting with $ (i.e. variable names)
     r = re.compile(r'\$[\w]*\b\S+')
-    possible_matches = r.findall(cond_stmt)
+    matched_condition_strings = r.findall(cond_stmt)
 
     # Get rid of mismatches by making a list of items that only matches the actual strings/vars list.
-    confirmed_items = {}
-    for assumed in possible_matches:
-        if assumed in yara_strings.keys():
-            confirmed_items[assumed] = yara_strings[assumed]
+    confirmed_items = []
+    for matched_condition_identifier, yara_string in zip(matched_condition_strings, yara_strings):
+        if sanitize_identifier(matched_condition_identifier[1:]) == yara_string.identifier:
+            confirmed_items.append(yara_string)
 
     return confirmed_items
 
@@ -121,9 +121,9 @@ def generate_source_string(src: dict) -> str:
             # Header
             strings = "    strings:"
             # Content
-            for k, v in get_referenced_strings(src["condition"], src["strings"]).items():
-                sanitized_identifier = k[0] + sanitize_identifier(k[1:])
-                strings = strings + "\n        {} = \"{}\"".format(sanitized_identifier, v)
+            for ys in get_referenced_strings(src["condition"], src["strings"]):
+                # sanitized_identifier = k[0] + sanitize_identifier(k[1:])
+                strings = strings + "\n        {}".format(str(ys))
 
     # Compile the entire rule block string.
     rule_string =           \
@@ -297,7 +297,7 @@ def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: st
 
     log.debug("compiled_rules_to_source_strings matches: {}".format(match["matches"]))  # FIXME: Debug
 
-    return generate_source_string(match)
+    # return generate_source_string(match)
 
 
 def determine_syntax_error_column(condition_as_lines_str: str, line_number: int, splitline_number: int) -> dict:
@@ -341,7 +341,6 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
     """
     retv = {
         "source": None,
-        "source (preprocessed)": None,
         "success": False,
         "compilable": False,
         "error": {
@@ -358,26 +357,25 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
     sanitized_tags: list = [sanitize_identifier(x) for x in yara_sources_dict["tags"]]
     log.info("sanitized_tags: {}".format(sanitized_tags))
 
-    retv["source (preprocessed)"]: str = generate_source_string({
+    retv["source"]: str = generate_source_string({
         "tags": sanitized_tags,
         "rule": sanitized_rule_name,
         "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
         # "strings": extract_yara_strings_dict(yara_sources_dict["observables"]),
-        "strings": [YaraString(obs) for obs in yara_sources_dict["observables"]],
+        "strings":
+            [YaraString(identifier, value["observable"]) for identifier, value in yara_sources_dict["observables"].items()],
         "condition": yara_sources_dict["condition"]
         })
 
-    source = retv["source (preprocessed)"]  # FIXME: Convenience for changing code.
-
-    log.debug("source: \n{}".format(source))    # FIXME: DEBUG
+    log.debug("source: \n{}".format(retv["source"]))    # FIXME: DEBUG
 
     # Save source rule to text file.
     try:
-        retv["generated_yara_source_file"] = str(save_source(rules=source,
+        retv["generated_yara_source_file"] = str(save_source(rules=retv["source"],
                                                              filename=sanitized_rule_name).resolve(strict=True))
     except Exception as exc:
         log.exception("Handing exception thrown by save_source(rules={rules}, filename={fname})".format(
-            rules=source, fname=sanitized_rule_name), exc_info=exc)
+            rules=retv["source"], fname=sanitized_rule_name), exc_info=exc)
         retv["generated_yara_source_file"] = None
         retv["success"] = False
         retv["compilable"] = False
@@ -386,7 +384,7 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
         return retv
 
     try:
-        compiled_yara_rules: yara.Rules = yara.compile(source=source,
+        compiled_yara_rules: yara.Rules = yara.compile(source=retv["source"],
                                                        error_on_warning=error_on_warning,
                                                        **kwargs)
         retv["compilable"] = True
@@ -394,7 +392,8 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
         # Save compiled rule to binary file.
         save_compiled(rules=compiled_yara_rules, filename=sanitized_rule_name)
 
-        retv["source"] = compiled_rules_to_source_string(sanitized_rule_name, condition=yara_sources_dict["condition"])
+        # retv["source"] = compiled_rules_to_source_string(sanitized_rule_name, condition=yara_sources_dict["condition"])
+        compiled_rules_to_source_string(sanitized_rule_name, condition=yara_sources_dict["condition"])
 
         if not keep_compiled:
             path = os.path.join(config["theoracle_local_path"], config["theoracle_repo_rules_dir"],
@@ -417,7 +416,8 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
                 "tags": sanitized_tags,
                 "rule": sanitized_rule_name,
                 "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
-                "strings": [YaraString(obs) for obs in yara_sources_dict["observables"]],
+                "strings":
+                    [YaraString(identifier, value["observable"]) for identifier, value in yara_sources_dict["observables"].items()],
                 "condition": condition_as_lines_str
                 })
 

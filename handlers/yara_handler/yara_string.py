@@ -113,7 +113,7 @@ class YaraStringModifier:
             return self.keyword
 
     def __repr__(self):
-        return "YaraStringModifier(type={mod_type}, data={data})".format(mod_type=self.type, data=self.data)
+        return "YaraStringModifier(type={mod_keyword}, data={data})".format(mod_keyword=self.keyword, data=self.data)
 
 
 def delimiter_wrap_type(value: str, string_type: str):
@@ -181,10 +181,12 @@ class YaraString:
                                 Valid modifiers: nocase, wide, ascii, xor, base64, base64wide, fullword or private.
         :param from_dict:       Define YARA String from a dict instead of individual values.
         """
+        self.identifier = None
+
         if from_dict is not None:
             self.create_from_dict(from_dict)
         else:
-            self.identifier = sanitize_identifier(identifier)
+            self.determine_identifier(identifier)
             self.value = value
 
             if modifiers is not None and len(modifiers) > 0:
@@ -212,11 +214,18 @@ class YaraString:
         return "YaraString(identifier={identifier}, value={value}, modifiers={modifiers})".format(
             identifier=self.identifier, value=self.value, modifiers=self.modifiers)
 
+    def determine_identifier(self, identifier):
+        if identifier[0] == YARA_VAR_SYMBOL:
+            # Handle being given identifiers without the YARA_VAR_SYMBOL pre-stripped.
+            self.identifier = sanitize_identifier(identifier[1:])
+        else:
+            self.identifier = sanitize_identifier(identifier)
+
     def determine_type(self):
         pass
 
     def create_from_dict(self, from_dict):
-        self.identifier = sanitize_identifier(from_dict.keys()[0])
+        self.determine_identifier(from_dict.keys()[0])
         self.value = from_dict["observable"]
 
         if "modifiers" in from_dict:
