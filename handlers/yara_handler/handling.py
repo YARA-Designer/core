@@ -7,8 +7,11 @@ from typing import overload, Union, List
 
 from handlers import config_handler
 from handlers.log_handler import create_logger
+from handlers.yara_handler.yara_string import YaraString
+from handlers.yara_handler.utils import sanitize_identifier, is_number
 
 # Get config
+
 config = config_handler.load_config()
 
 log = create_logger(__name__)
@@ -17,44 +20,6 @@ SOURCE_FILE_EXTENSION = ".yar"
 COMPILED_FILE_EXTENSION = ".bin"
 CALLBACK_DICTS: list = []
 CONDITION_INDENT_LENGTH = 8
-
-
-def is_number(s: str) -> bool:
-    """
-    Checks is a string value is numeric.
-
-    :param s:
-    :return:
-    """
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
-
-
-def sanitize_identifier(identifier: str) -> str:
-    """
-    Identifiers must follow the same lexical conventions of the C programming language,
-    they can contain any alphanumeric character and the underscore character, but the
-    first character can not be a digit. Rule identifiers are case sensitive and cannot
-    exceed 128 characters.
-
-    :param identifier:
-    :return:
-    """
-    if is_number(identifier[0]):
-        # If the first character is a digit, prepend an underscore as
-        # the first character can not be a digit.
-        identifier = '_' + identifier
-    elif identifier[0] == ' ':
-        # Strip leading whitespace.
-        identifier = identifier[1:]
-
-    # Replace all non-word characters and spaces (everything except numbers and letters) with underscore.
-    s = re.sub(r"([^\w\s+]|[^\w\S+])", '_', identifier)
-
-    return s
 
 
 def determine_yara_source_filename(rule_name: str):
@@ -153,7 +118,9 @@ def generate_source_string(src: dict) -> str:
     # Add the strings (read: variables) block, id provided.
     if "strings" in src:
         if bool(src["strings"]):
+            # Header
             strings = "    strings:"
+            # Content
             for k, v in get_referenced_strings(src["condition"], src["strings"]).items():
                 sanitized_identifier = k[0] + sanitize_identifier(k[1:])
                 strings = strings + "\n        {} = \"{}\"".format(sanitized_identifier, v)
@@ -395,7 +362,8 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
         "tags": sanitized_tags,
         "rule": sanitized_rule_name,
         "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
-        "strings": extract_yara_strings_dict(yara_sources_dict["observables"]),
+        # "strings": extract_yara_strings_dict(yara_sources_dict["observables"]),
+        "strings": [YaraString(obs) for obs in yara_sources_dict["observables"]],
         "condition": yara_sources_dict["condition"]
         })
 
@@ -449,7 +417,7 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
                 "tags": sanitized_tags,
                 "rule": sanitized_rule_name,
                 "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
-                "strings": extract_yara_strings_dict(yara_sources_dict["observables"]),
+                "strings": [YaraString(obs) for obs in yara_sources_dict["observables"]],
                 "condition": condition_as_lines_str
                 })
 
