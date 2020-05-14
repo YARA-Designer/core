@@ -4,7 +4,8 @@ from flask import Flask
 from flask.json import JSONEncoder
 from flask_cors import CORS
 
-from handlers import config_handler, webserver
+from handlers import config_handler
+from handlers.webserver import handling as webserver
 from handlers.log_handler import create_logger
 import handlers.git_handler as git
 from listener import api
