@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 
@@ -28,6 +29,9 @@ DEFAULT_CONFIG = {
     "theoracle_repo_rules_dir": "rules"
 }
 
+# Let's make sure we copy default config by value, not reference. So that it remains unmodified.
+CONFIG = copy.deepcopy(DEFAULT_CONFIG)
+
 
 def has_option(cfg: json, cfg_key: str):
     if cfg_key in cfg:
@@ -36,33 +40,47 @@ def has_option(cfg: json, cfg_key: str):
     return False
 
 
-def has_custom_config():
-    if os.path.isfile(CONFIG_FILE):
+def get_option(key, default=None):
+    if key in CONFIG:
+        return CONFIG[key]
+    else:
+        return default
+
+
+def has_custom_config(config_file=CONFIG_FILE):
+    if os.path.isfile(config_file):
         return True
     else:
         return False
 
 
-def update_sample_config():
-    with open(SAMPLE_CONFIG_FILE, 'w') as f:
+def update_sample_config(sample_config=SAMPLE_CONFIG_FILE):
+    with open(sample_config, 'w') as f:
         json.dump(DEFAULT_CONFIG, f, indent=4)
 
 
-def load_config():
+def set_custom_config_options(cfg: json):
+    global CONFIG
+
+    for key, value in cfg.items():
+        CONFIG[key] = value
+
+
+def load_config(config_file=CONFIG_FILE):
+    global CONFIG
+
     # Create a sample config file.
     update_sample_config()
 
     # If config file doesn't exist
-    if has_custom_config() is False:
-        cfg = DEFAULT_CONFIG
-    else:
+    if has_custom_config():
         try:
-            with open(CONFIG_FILE) as f:
-                cfg = json.load(f)
+            with open(config_file) as f:
+                # Override config options with those defined in the custom config file.
+                set_custom_config_options(json.load(f))
         except Exception as exc:
             print("Error: Exception occurred while opening config file: {}! "
-                  "Falling back to default config.".format(exc, CONFIG_FILE))
-            cfg = DEFAULT_CONFIG
+                  "Falling back to default config.".format(exc, config_file))
             pass
 
-    return cfg
+    return CONFIG
