@@ -7,6 +7,8 @@ from typing import overload, Union, List
 
 from handlers import config_handler
 from handlers.log_handler import create_logger
+from handlers.yara_handler.yara_meta import YaraMeta
+from handlers.yara_handler.yara_rule import YaraRule
 from handlers.yara_handler.yara_string import YaraString
 from handlers.yara_handler.utils import sanitize_identifier, is_number
 
@@ -357,15 +359,13 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
     sanitized_tags: list = [sanitize_identifier(x) for x in yara_sources_dict["tags"]]
     log.info("sanitized_tags: {}".format(sanitized_tags))
 
-    retv["source"]: str = generate_source_string({
-        "tags": sanitized_tags,
-        "rule": sanitized_rule_name,
-        "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
-        # "strings": extract_yara_strings_dict(yara_sources_dict["observables"]),
-        "strings":
-            [YaraString(identifier, value["observable"]) for identifier, value in yara_sources_dict["observables"].items()],
-        "condition": yara_sources_dict["condition"]
-        })
+    rule = YaraRule(
+        yara_sources_dict["rule"], yara_sources_dict["tags"],
+        [YaraMeta(identifier, value) for identifier, value in yara_sources_dict["meta"].items()],
+        [YaraString(identifier, value["observable"]) for identifier, value in yara_sources_dict["observables"].items()],
+        yara_sources_dict["condition"])
+
+    retv["source"] = str(rule)
 
     log.debug("source: \n{}".format(retv["source"]))    # FIXME: DEBUG
 
@@ -392,7 +392,6 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
         # Save compiled rule to binary file.
         save_compiled(rules=compiled_yara_rules, filename=sanitized_rule_name)
 
-        # retv["source"] = compiled_rules_to_source_string(sanitized_rule_name, condition=yara_sources_dict["condition"])
         compiled_rules_to_source_string(sanitized_rule_name, condition=yara_sources_dict["condition"])
 
         if not keep_compiled:
@@ -412,14 +411,14 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
         # Attempt to determine column no:
         condition_as_lines_str = newline_condition(yara_sources_dict["condition"])
         try:
-            source_ = generate_source_string({
-                "tags": sanitized_tags,
-                "rule": sanitized_rule_name,
-                "meta": {k: yara_sources_dict["meta"][k] for k in yara_sources_dict["meta"]},
-                "strings":
-                    [YaraString(identifier, value["observable"]) for identifier, value in yara_sources_dict["observables"].items()],
-                "condition": condition_as_lines_str
-                })
+            rule_ = YaraRule(
+                yara_sources_dict["rule"], yara_sources_dict["tags"],
+                [YaraMeta(identifier, value) for identifier, value in yara_sources_dict["meta"].items()],
+                [YaraString(identifier, value["observable"]) for identifier, value in
+                 yara_sources_dict["observables"].items()],
+                yara_sources_dict["condition"])
+
+            source_ = str(rule_)
 
             # Attempt a new (failed) compile with condition as newlined strings,
             # in order to detect which word it fails on.

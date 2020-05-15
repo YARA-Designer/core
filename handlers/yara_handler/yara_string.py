@@ -1,4 +1,4 @@
-from handlers.yara_handler.utils import sanitize_identifier
+from handlers.yara_handler.utils import sanitize_identifier, delimiter_wrap_type
 
 YARA_VAR_SYMBOL = "$"
 
@@ -29,29 +29,6 @@ MOD_RESTRICTIONS = {
 TEXT_TYPE = "text"
 HEX_TYPE = "hex"
 REGEX_TYPE = "regex"
-
-# YARA String type delimiters
-TEXT_DELIMITER_START = '"'
-TEXT_DELIMITER_END = '"'
-HEX_DELIMITER_START = '{'
-HEX_DELIMITER_END = '}'
-REGEX_DELIMITER_START = '/'
-REGEX_DELIMITER_END = '/'
-
-STRING_TYPE_DELIMITERS = {
-    TEXT_TYPE: {
-        "start": TEXT_DELIMITER_START,
-        "end": TEXT_DELIMITER_END
-    },
-    HEX_TYPE: {
-        "start": HEX_DELIMITER_START,
-        "end": HEX_DELIMITER_END
-    },
-    REGEX_TYPE: {
-        "start": REGEX_DELIMITER_START,
-        "end": REGEX_DELIMITER_END
-    }
-}
 
 
 class YaraStringModifierRestrictionError(Exception):
@@ -114,32 +91,6 @@ class YaraStringModifier:
 
     def __repr__(self):
         return "YaraStringModifier(type={mod_keyword}, data={data})".format(mod_keyword=self.keyword, data=self.data)
-
-
-def delimiter_wrap_type(value: str, string_type: str):
-    """
-    Returns a value wrapped in its corresponding delimiters (if not already present).
-
-    :param value:
-    :param string_type:
-    :return:
-    """
-    # Hexadecimals have a spacing between value and delimiter for readability.
-    indent = " " if string_type == HEX_TYPE else ""
-    retv = ""
-
-    # If value does not start with its delimiter, add it
-    if value[0] != STRING_TYPE_DELIMITERS[string_type]["start"]:
-        retv += STRING_TYPE_DELIMITERS[string_type]["start"] + indent
-
-    # Add the value string.
-    retv += value
-
-    # If value does not end with its delimiter, add it
-    if value[-1] != STRING_TYPE_DELIMITERS[string_type]["end"]:
-        retv += indent + STRING_TYPE_DELIMITERS[string_type]["end"]
-
-    return retv
 
 
 def validate_modifiers(modifiers: list):
