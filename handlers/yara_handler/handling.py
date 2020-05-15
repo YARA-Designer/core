@@ -10,7 +10,7 @@ from handlers.log_handler import create_logger
 from handlers.yara_handler.yara_meta import YaraMeta
 from handlers.yara_handler.yara_rule import YaraRule
 from handlers.yara_handler.yara_string import YaraString
-from handlers.yara_handler.utils import sanitize_identifier, is_number
+from handlers.yara_handler.utils import sanitize_identifier
 
 # Get config
 
@@ -68,77 +68,6 @@ def newline_condition(condition: str):
     :return:
     """
     return condition.replace(' ', '\n')
-
-
-def generate_source_string(src: dict) -> str:
-    """
-    Generates a YARA rule on string form.
-
-    example format:
-        rule RuleIdentifier
-        {
-            meta:
-                description = ""
-
-            strings:
-                $observable1 = ""
-
-            condition:
-                $observable1
-        }
-
-    :param src: dict on the form of: {tags: [""], rule: "", meta: {}, strings: {}, condition: ""}
-    :return:
-    """
-    identifier_line = "rule {}".format(src["rule"])
-    meta = ""
-    strings = ""
-
-    # Sanitize every identifier in the condition string before using it.
-    if len(src["condition"]) > 0:
-        sanitized_condition = \
-            " ".join([part[0] + sanitize_identifier(part[1:])
-                      if part[0] == '$' else part for part in src["condition"].split(' ')])
-    else:
-        sanitized_condition = src["condition"]
-
-    condition = "    condition:" \
-                "\n        {}".format(sanitized_condition)
-
-    # Append tags to rule line, if provided.
-    if "tags" in src:
-        if len(src["tags"]) > 0:
-            identifier_line = identifier_line + (": " + " ".join(src["tags"]))
-
-    # Add the meta info block, if provided.
-    if "meta" in src:
-        if bool(src["meta"]):
-            meta = "    meta:"
-            for k, v in src["meta"].items():
-                meta = meta + "\n        {} = \"{}\"".format(k, v)
-
-    # Add the strings (read: variables) block, id provided.
-    if "strings" in src:
-        if bool(src["strings"]):
-            # Header
-            strings = "    strings:"
-            # Content
-            for ys in get_referenced_strings(src["condition"], src["strings"]):
-                # sanitized_identifier = k[0] + sanitize_identifier(k[1:])
-                strings = strings + "\n        {}".format(str(ys))
-
-    # Compile the entire rule block string.
-    rule_string =           \
-        identifier_line     \
-        + '\n' + '{'        \
-        + '\n' + meta       \
-        + '\n'              \
-        + '\n' + strings    \
-        + '\n'              \
-        + '\n' + condition  \
-        + '\n' + '}'
-
-    return rule_string
 
 
 def save_compiled(rules: yara.Rules, filename: str, file_ext=COMPILED_FILE_EXTENSION, rules_dir=None):
@@ -264,7 +193,7 @@ def compiled_rules_to_source_string(rules: str, condition: str) -> str:
     pass
 
 
-def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: str) -> str:
+def compiled_rules_to_source_string(rules: Union[yara.Rules, str], condition: str):
     """
     Converts a compiled yara rule (binary) to a list of source strings (.yar format).
 
