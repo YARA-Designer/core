@@ -130,3 +130,4 @@ def delimiter_wrap_type(value: str, string_type: str):
         retv += indent + STRING_TYPE_DELIMITERS[string_type]["end"]
 
     return retv
+
