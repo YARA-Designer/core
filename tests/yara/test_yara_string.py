@@ -1,6 +1,6 @@
 import unittest
 
-from yara_handler.yara_string import YaraString, YaraStringModifierRestrictionError, \
+from yara_toolkit.yara_string import YaraString, YaraStringModifierRestrictionError, \
     NO_CASE, WIDE, ASCII, XOR, BASE64, TEXT_TYPE
 
 

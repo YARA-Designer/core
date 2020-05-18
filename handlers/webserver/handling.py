@@ -8,7 +8,7 @@ from flask import request, jsonify, make_response
 from database.operations import update_rule, get_rule, get_rules
 from handlers.config_handler import CONFIG
 from handlers.log_handler import create_logger
-from yara_handler.yara_rule import YaraRule, YaraRuleSyntaxError
+from yara_toolkit.yara_rule import YaraRule, YaraRuleSyntaxError
 
 the_oracle_repo: git.Repo
 
