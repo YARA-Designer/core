@@ -6,7 +6,7 @@ import handlers.git_handler as git
 from flask import request, jsonify, make_response
 
 from database.operations import update_rule, get_rule, get_rules
-from handlers.yara_handler.handling import compile_from_source
+from handlers.yara_handler.handling import create_yara_file
 import handlers.yara_handler.utils as yara_utils
 from handlers.config_handler import load_config
 from handlers.log_handler import create_logger
@@ -71,7 +71,7 @@ def generate_yara_rule(j: json):
 
     # Processing status, return values and so forth.
     try:
-        retv["out"] = compile_from_source(j)
+        retv["out"] = create_yara_file(j)
         log.debug("Returned YARA Rule Dict: {}".format(retv))
 
         if not retv["out"]["success"]:
