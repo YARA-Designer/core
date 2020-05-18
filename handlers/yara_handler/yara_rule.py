@@ -221,10 +221,8 @@ class YaraRule:
         strings = [YaraString(identifier, value.decode('utf-8')) for offset, identifier, value in match.strings]
         tags = match.tags
 
-        compiled_match_source = yara_match_callback.matches
-
         log.info("match: {}".format(match))
-        if match is True:
+        if yara_match_callback.matches is True:
             log.info("Compiled YARA matches source code.")
         else:
             log.warning("Compiled YARA does *NOT* match source code!")
@@ -236,7 +234,7 @@ class YaraRule:
 
         return cls(name, tags, meta, strings, condition,
                    namespace=namespace, compiled_blob=compiled_blob,
-                   compiled_path=compiled_filepath, compiled_match_source=compiled_match_source)
+                   compiled_path=compiled_filepath, compiled_match_source=yara_match_callback.matches)
 
     def get_referenced_strings(self) -> List[YaraString]:
         """
