@@ -1,6 +1,5 @@
 import os
 
-from handlers.config_handler import CONFIG
 from handlers.log_handler import create_logger
 from handlers.yara_handler.yara_rule import YaraRule, YaraRuleSyntaxError
 

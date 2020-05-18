@@ -16,11 +16,11 @@ log = create_logger(__name__)
 
 INVALID_IDENTIFIERS = [].extend(KEYWORDS)  # FIXME: Implement validity check against reserved kw.
 
-SOURCE_FILE_EXTENSION = ".yar"
-COMPILED_FILE_EXTENSION = ".bin"
-CALLBACK_DICTS: list = []
 YARA_VAR_SYMBOL = "$"
 CONDITION_INDENT_LENGTH = 8
+SOURCE_FILE_EXTENSION = ".yar"
+COMPILED_FILE_EXTENSION = ".bin"
+RULES_DIR = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"])
 
 
 class YaraRuleSyntaxError(Exception):
@@ -47,31 +47,71 @@ class YaraRuleSyntaxError(Exception):
         return self.message
 
 
-def compiled_rules_to_sources_str_callback(d: dict):
+class YaraMatchCallback:
     """
-    Callback function for when invoking yara.match method.
-    The provided function will be called for every rule, no matter if matching or not.
+    Class to use with yara.Rules.match in order to avoid messy globals that has issues if more than one
+    YaraRule uses it at the same time.
 
-    Function should expect a single parameter of dictionary type, and should return CALLBACK_CONTINUE
-    to proceed to the next rule or CALLBACK_ABORT to stop applying rules to your data.
-    :param d: Likely a dict.
-    :return:
+    Usage: Initialise it, then pass the callback function reference to yara.Rules.match(callback=...)
+
+    Official documentation: https://yara.readthedocs.io/en/latest/yarapython.html
     """
-    global CALLBACK_DICTS
+    def __init__(self):
+        self.log = create_logger(__name__)
 
-    log.info("CALLBACK: {}".format(d))
-    CALLBACK_DICTS.append(d)
+        self.matches = None
+        self.rule = None
+        self.namespace = None
+        self.tags = None
+        self.meta = None
+        self.strings = None
 
-    # Continue/Step
-    # return CALLBACK_CONTINUE to proceed to the next rule or
-    # CALLBACK_ABORT to stop applying rules to your data.
-    return yara.CALLBACK_CONTINUE
+    def callback(self, callback_dict: dict):
+        """
+        Function to be passed to yara.Rules.match.
+
+        :param callback_dict:   The passed dictionary will be something like this:
+                                    {
+                                      'tags': ['foo', 'bar'],
+                                      'matches': True,
+                                      'namespace': 'default',
+                                      'rule': 'my_rule',
+                                      'meta': {},
+                                      'strings': [(81L, '$a', 'abc'), (141L, '$b', 'def')]
+                                    }
+
+                                The matches field indicates if the rule matches the data or not.
+                                The strings fields is a list of matching strings, with vectors of the form:
+                                    (<offset>, <string identifier>, <string data>)
+
+
+
+        :return yara.CALLBACK_ABORT:    Stop after the first rule, as we only have one.
+        """
+        self.log.info("YaraMatchCallback.callback({})".format(callback_dict))
+
+        if "matches" in callback_dict:
+            self.matches = callback_dict["matches"]
+        if "rule" in callback_dict:
+            self.rule = callback_dict["rule"]
+        if "namespace" in callback_dict:
+            self.namespace = callback_dict["namespace"]
+        if "tags" in callback_dict:
+            self.tags = callback_dict["tags"]
+        if "meta" in callback_dict:
+            self.meta = callback_dict["meta"]
+        if "strings" in callback_dict:
+            self.strings = callback_dict["strings"]
+
+        # Stop applying rules to your data.
+        return yara.CALLBACK_ABORT
 
 
 class YaraRule:
     def __init__(self, name: str, tags: List[str] = None, meta: List[YaraMeta] = None,
                  strings: List[YaraString] = None, condition: str = None, namespace: str = None,
-                 compiled_blob: yara.Rules = None, compiled_path: str = None):
+                 compiled_blob: yara.Rules = None, compiled_path: str = None,
+                 compiled_match_source: bool = None):
         """
         YARA rule object.
 
@@ -108,6 +148,7 @@ class YaraRule:
         self.namespace = namespace
         self.compiled_blob = compiled_blob
         self.compiled_path = compiled_path
+        self.compiled_match_source = compiled_match_source
 
     @classmethod
     def from_dict(cls, dct: dict):
@@ -134,7 +175,7 @@ class YaraRule:
     @classmethod
     def from_compiled_file(cls, yara_rules: Union[yara.Rules, str],
                            source_filename=None, compiled_filepath=None,
-                           condition: str = None, rules_dir=None):
+                           condition: str = None, rules_dir=RULES_DIR):
         """
         Initialize YaraRule from a compiled (binary) file.
 
@@ -146,11 +187,9 @@ class YaraRule:
         :return:
         """
         if condition is None:
+            # It looks like compiled YARA rules don't have a condition,
+            # so we have to apply it ourselves or leave it blank.
             condition = ""
-
-        # If no custom rules dir is given, use TheOracle's.
-        if rules_dir is None:
-            rules_dir = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"])
 
         if isinstance(yara_rules, yara.Rules):
             if source_filename is None:
@@ -170,45 +209,25 @@ class YaraRule:
             raise ValueError("yara_rules must be 'yara.Rules' object or 'str' filepath to a compiled yara rules .bin")
 
         # The match method returns a list of instances of the class Match.
-        # Instances of this class have the same attributes as the dictionary passed to the callback function.
-        matches: yara.Match = compiled_blob.match(filepath=os.path.join(rules_dir, source_filename),
-                                                  callback=compiled_rules_to_sources_str_callback)
-        log.debug3(compiled_blob)
+        # Instances of this class have the same attributes as the dictionary passed to the callback function,
+        # with the exception of 'matches' which is ONLY passed to the callback function!
+        yara_match_callback = YaraMatchCallback()
+        match: yara.Match = compiled_blob.match(filepath=os.path.join(rules_dir, source_filename),
+                                                callback=yara_match_callback.callback)[0]
 
-        # Copy Matches attributes and misc over to a more malleable dict.
-        # match = match_to_dict(matches[0], condition=condition, matches=CALLBACK_DICTS[0]["matches"])
+        meta = [YaraMeta(identifier, value) for identifier, value in match.meta.items()]
+        namespace = match.namespace
+        name = match.rule
+        strings = [YaraString(identifier, value.decode('utf-8')) for offset, identifier, value in match.strings]
+        tags = match.tags
 
-        relevant_match = matches[0]
+        compiled_match_source = yara_match_callback.matches
 
-        # Returned values from yara.Match.match() is a list of Match objects on the form of:
-        # Match.meta: dict
-        meta = [YaraMeta(identifier, value) for identifier, value in relevant_match.meta.items()]
-        # Match.namespace: str
-        namespace = relevant_match.namespace
-        # Match.rule: str
-        name = relevant_match.rule
-        # Match.strings: List[Tuples]:
-        #   Tuple: (some_int: int, identifier: str, data: binary encoded str)
-        strings = \
-            [YaraString(identifier, value.decode('utf-8')) for some_int, identifier, value in relevant_match.strings]
-        # Match.tags: list
-        tags = relevant_match.tags
-
-        if condition is None:
-            # It looks like compiled YARA rules don't have a condition,
-            # so we have to apply it ourselves or leave it blank.
-            condition = ""
-
-        global CALLBACK_DICTS
-        rule_is_a_match = CALLBACK_DICTS[0]["matches"]  # FIXME: Unused.
-
-        # Reset the global callback data list.
-        CALLBACK_DICTS = []
-
-        log.info("match: {}".format(relevant_match))
-
-        # FIXME: Debug of above unused matches boolean.
-        log.debug("compiled_rules_to_source_strings matches: {}".format(rule_is_a_match))
+        log.info("match: {}".format(match))
+        if match is True:
+            log.info("Compiled YARA matches source code.")
+        else:
+            log.warning("Compiled YARA does *NOT* match source code!")
 
         if isinstance(yara_rules, yara.Rules) and compiled_filepath is None:
             log.warning("yara.Rules object was given, but compiled_filepath was not set, "
@@ -216,7 +235,8 @@ class YaraRule:
             compiled_filepath = os.path.join(rules_dir, name + COMPILED_FILE_EXTENSION)
 
         return cls(name, tags, meta, strings, condition,
-                   namespace=namespace, compiled_blob=compiled_blob, compiled_path=compiled_filepath)
+                   namespace=namespace, compiled_blob=compiled_blob,
+                   compiled_path=compiled_filepath, compiled_match_source=compiled_match_source)
 
     def get_referenced_strings(self) -> List[YaraString]:
         """
@@ -237,7 +257,7 @@ class YaraRule:
 
         return confirmed_items
 
-    def condition_as_lines(self):
+    def condition_as_lines(self) -> str:
         """
         Takes a condition string and returns a string with each condition on a separate line.
 
@@ -245,7 +265,7 @@ class YaraRule:
         """
         return self.condition.replace(' ', '\n')
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Generates a YARA rule on string form.
     
@@ -304,7 +324,7 @@ class YaraRule:
     
         return rule_string
 
-    def save_source(self, filename: str = None, file_ext=SOURCE_FILE_EXTENSION, rules_dir=None):
+    def save_source(self, filename: str = None, file_ext=SOURCE_FILE_EXTENSION, rules_dir=RULES_DIR) -> str:
         """
         Saves source (plaintext) YARA rules to file.
 
@@ -316,22 +336,18 @@ class YaraRule:
         if filename is None:
             filename = self.name
 
-        # If no custom rules dir is given, use TheOracle's.
-        if rules_dir is None:
-            rules_dir = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"])
-
         # If destination directory does not exist, create it.
         if not os.path.isdir(rules_dir):
             os.mkdir(rules_dir)
 
-        # filepath = Path(os.path.join(rules_dir, filename + file_ext))
         filepath = Path(rules_dir).joinpath(filename + file_ext)
 
         # Save YARA source rule to plaintext file using regular Python standard file I/O.
         with open(filepath, 'w') as f:
             f.write(self.__str__())
 
-        self.log.info("Saved YARA rules to file: {}".format(filepath))
+        self.log.info("Save YARA rules to file: {}".format(filepath))
+
         return str(filepath.resolve(strict=True))
 
     def determine_syntax_error_column(self, line_number: int, splitline_number: int, raise_exc=True) -> dict:
@@ -404,7 +420,7 @@ class YaraRule:
                 # using line and splitline to determine the true word offset.
                 self.determine_syntax_error_column(int(line_number), splitline_number, raise_exc=True)
 
-    def save_compiled(self, filename: str = None, file_ext=COMPILED_FILE_EXTENSION, rules_dir=None):
+    def save_compiled(self, filename: str = None, file_ext=COMPILED_FILE_EXTENSION, rules_dir=RULES_DIR):
         """
         Saves compiled (binary blob) YARA rule to file.
 
@@ -415,10 +431,6 @@ class YaraRule:
         """
         if filename is None:
             filename = self.name
-
-        # If no custom rules dir is given, use TheOracle's.
-        if rules_dir is None:
-            rules_dir = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"])
 
         # If destination directory does not exist, create it.
         if not os.path.isdir(rules_dir):
