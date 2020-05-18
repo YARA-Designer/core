@@ -2,14 +2,9 @@ import os
 
 import yara
 
-from handlers import config_handler
+from handlers.config_handler import CONFIG
 from handlers.log_handler import create_logger
 from handlers.yara_handler.yara_rule import YaraRule, YaraRuleSyntaxError
-from handlers.yara_handler.utils import sanitize_identifier
-
-# Get config
-
-config = config_handler.load_config()
 
 log = create_logger(__name__)
 SOURCE_FILE_EXTENSION = ".yar"
@@ -50,10 +45,10 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
     retv = RETV_BASE_STRUCTURE
 
     rule = YaraRule.from_dict(yara_sources_dict)
+    retv["source"] = rule.__str__()
+    log.debug("source: \n{}".format(retv["source"]))
 
     try:
-        retv["source"] = rule.__str__()
-        log.debug("source: \n{}".format(retv["source"]))    # FIXME: DEBUG
 
         # Save rule source code to text file and store the returned filepath for use in frontend.
         retv["generated_yara_source_file"] = rule.save_source()
@@ -72,7 +67,7 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
         rule_from_binary: YaraRule = YaraRule.from_compiled_file(rule.name)
 
         if not keep_compiled:
-            path = os.path.join(config["theoracle_local_path"], config["theoracle_repo_rules_dir"],
+            path = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"],
                                 rule.name + COMPILED_FILE_EXTENSION)
             log.info("Removing compiled YARA binary: {}".format(path))
             os.remove(path)
@@ -80,11 +75,6 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
 
         retv["success"] = True
 
-    except yara.Error as e:
-        retv["success"] = False
-        retv["error"] = {"type": "error", "message": str(e)}
-        log.exception("YARA Error Exception!", exc_info=e)
-        pass
     except Exception as e:
         retv["success"] = False
         retv["error"] = {"type": "exception", "message": str(e)}
