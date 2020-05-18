@@ -42,6 +42,9 @@ STRING_TYPE_DELIMITERS = {
     }
 }
 
+SOURCE_FILE_EXTENSION = ".yar"
+COMPILED_FILE_EXTENSION = ".bin"
+
 
 def get_string_type(string_type) -> str:
     string_types = [TEXT_TYPE, str, "str", "string"]
@@ -131,3 +134,6 @@ def delimiter_wrap_type(value: str, string_type: str):
 
     return retv
 
+
+def determine_yara_source_filename(rule_name: str):
+    return "{fname}{ext}".format(fname=sanitize_identifier(rule_name), ext=SOURCE_FILE_EXTENSION)

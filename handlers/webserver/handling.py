@@ -6,7 +6,8 @@ import handlers.git_handler as git
 from flask import request, jsonify, make_response
 
 from database.operations import update_rule, get_rule, get_rules
-from handlers.yara_handler import handling as yara_handler
+from handlers.yara_handler.handling import compile_from_source
+import handlers.yara_handler.utils as yara_utils
 from handlers.config_handler import load_config
 from handlers.log_handler import create_logger
 
@@ -55,7 +56,7 @@ def reset_invalid_yara_rule(rule_name):
     :return:
     """
     config = load_config()
-    invalid_file = yara_handler.determine_yara_source_filename(rule_name)
+    invalid_file = yara_utils.determine_yara_source_filename(rule_name)
     path = os.path.join(config["theoracle_repo_rules_dir"], invalid_file)
 
     log.info("Invalid file: {}".format(invalid_file))
@@ -70,7 +71,7 @@ def generate_yara_rule(j: json):
 
     # Processing status, return values and so forth.
     try:
-        retv["out"] = yara_handler.compile_from_source(j)
+        retv["out"] = compile_from_source(j)
         log.debug("Returned YARA Rule Dict: {}".format(retv))
 
         if not retv["out"]["success"]:

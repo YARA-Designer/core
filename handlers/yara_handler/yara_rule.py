@@ -93,6 +93,28 @@ class YaraRule:
         self.compiled_blob = None
 
     @classmethod
+    def from_dict(cls, dct: dict):
+        """
+        Initialize YaraRule from a dict.
+
+        :param dct: Dict on the form of:
+                    {
+                        rule: str,
+                        tags: List[str],
+                        meta: {identifier: value},
+                        observables: {identifier: value},
+                        condition: str
+                    }.
+        :return:
+        """
+        return cls(name=dct["rule"],
+                   tags=dct["tags"],
+                   meta=[YaraMeta(identifier, value) for identifier, value in dct["meta"].items()],
+                   strings=
+                   [YaraString(identifier, value["observable"]) for identifier, value in dct["observables"].items()],
+                   condition=dct["condition"])
+
+    @classmethod
     def from_compiled_file(cls, yara_rules: Union[yara.Rules, str], condition: str = None, rules_dir=None):
         """
         Initialize YaraRule from a compiled (binary) file.

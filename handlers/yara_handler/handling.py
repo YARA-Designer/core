@@ -1,15 +1,10 @@
 import os
-from pathlib import Path
 
 import yara
-import re
-from typing import overload, Union, List
 
 from handlers import config_handler
 from handlers.log_handler import create_logger
-from handlers.yara_handler.yara_meta import YaraMeta
 from handlers.yara_handler.yara_rule import YaraRule, YaraRuleSyntaxError
-from handlers.yara_handler.yara_string import YaraString
 from handlers.yara_handler.utils import sanitize_identifier
 
 # Get config
@@ -36,14 +31,16 @@ RETV_BASE_STRUCTURE = {
 }
 
 
-def determine_yara_source_filename(rule_name: str):
-    return "{fname}{ext}".format(fname=sanitize_identifier(rule_name), ext=SOURCE_FILE_EXTENSION)
-
-
 def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_compiled=False, **kwargs) -> dict:
     """
     Generates a YARA rule based on a given dict on the form of:
-     {rule: "", tags: [""], meta: {}, observables: [observable: "", id: "", type: ""], condition: ""}.
+    {
+        rule: str,
+        tags: List[str],
+        meta: {identifier: value},
+        observables: {identifier: value},
+        condition: str
+    }.
 
     :param keep_compiled: Whether or not to keep compiled binary files.
     :param error_on_warning: If true warnings are treated as errors, raising an exception.
@@ -52,16 +49,10 @@ def compile_from_source(yara_sources_dict: dict, error_on_warning=True, keep_com
     """
     retv = RETV_BASE_STRUCTURE
 
-    rule = YaraRule(
-        name=yara_sources_dict["rule"],
-        tags=yara_sources_dict["tags"],
-        meta=[YaraMeta(identifier, value) for identifier, value in yara_sources_dict["meta"].items()],
-        strings=
-        [YaraString(identifier, value["observable"]) for identifier, value in yara_sources_dict["observables"].items()],
-        condition=yara_sources_dict["condition"])
+    rule = YaraRule.from_dict(yara_sources_dict)
 
     try:
-        retv["source"] = str(rule)
+        retv["source"] = rule.__str__()
         log.debug("source: \n{}".format(retv["source"]))    # FIXME: DEBUG
 
         # Save rule source code to text file and store the returned filepath for use in frontend.
