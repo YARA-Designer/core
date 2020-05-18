@@ -1,6 +1,6 @@
 import re
 
-from handlers.yara_handler.keywords import KEYWORDS
+from yara_handler.keywords import KEYWORDS
 
 # YARA String types
 TEXT_TYPE = "text"

@@ -6,10 +6,10 @@ from typing import List, Union
 import yara
 
 from handlers.log_handler import create_logger
-from handlers.yara_handler.utils import sanitize_identifier
-from handlers.yara_handler.yara_meta import YaraMeta
-from handlers.yara_handler.yara_string import YaraString
-from handlers.yara_handler.keywords import KEYWORDS
+from yara_handler.utils import sanitize_identifier
+from yara_handler.yara_meta import YaraMeta
+from yara_handler.yara_string import YaraString
+from yara_handler.keywords import KEYWORDS
 from handlers.config_handler import CONFIG
 
 log = create_logger(__name__)

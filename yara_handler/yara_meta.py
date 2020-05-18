@@ -1,7 +1,6 @@
 from typing import Union
 
-from handlers.yara_handler.keywords import KEYWORDS, TRUE, FALSE
-from handlers.yara_handler.utils import sanitize_identifier, delimiter_wrap_type
+from yara_handler.utils import sanitize_identifier, delimiter_wrap_type
 
 VALID_DATA_TYPES = [str, bool, int]
 

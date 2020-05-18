@@ -1,8 +1,7 @@
 import unittest
 
-from handlers.yara_handler.yara_string import YaraString, YaraStringModifierRestrictionError, \
-    NO_CASE, WIDE, ASCII, XOR, BASE64, BASE64_WIDE, FULL_WORD, PRIVATE, \
-    TEXT_TYPE, REGEX_TYPE, HEX_TYPE
+from yara_handler.yara_string import YaraString, YaraStringModifierRestrictionError, \
+    NO_CASE, WIDE, ASCII, XOR, BASE64, TEXT_TYPE
 
 
 class TestYaraString(unittest.TestCase):

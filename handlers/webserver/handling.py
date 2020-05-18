@@ -6,10 +6,10 @@ import handlers.git_handler as git
 from flask import request, jsonify, make_response
 
 from database.operations import update_rule, get_rule, get_rules
-import handlers.yara_handler.utils as yara_utils
+import yara_handler.utils as yara_utils
 from handlers.config_handler import load_config
 from handlers.log_handler import create_logger
-from handlers.yara_handler.yara_rule import YaraRule, YaraRuleSyntaxError
+from yara_handler.yara_rule import YaraRule, YaraRuleSyntaxError
 
 the_oracle_repo: git.Repo
 

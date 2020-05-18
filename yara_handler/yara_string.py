@@ -1,4 +1,4 @@
-from handlers.yara_handler.utils import sanitize_identifier, delimiter_wrap_type
+from yara_handler.utils import sanitize_identifier, delimiter_wrap_type
 
 YARA_VAR_SYMBOL = "$"
 
