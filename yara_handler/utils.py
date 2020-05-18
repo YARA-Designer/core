@@ -1,7 +1,5 @@
 import re
 
-from yara_handler.keywords import KEYWORDS
-
 # YARA String types
 TEXT_TYPE = "text"
 HEX_TYPE = "hex"
@@ -133,7 +131,3 @@ def delimiter_wrap_type(value: str, string_type: str):
         retv += indent + STRING_TYPE_DELIMITERS[string_type]["end"]
 
     return retv
-
-
-def determine_yara_source_filename(rule_name: str):
-    return "{fname}{ext}".format(fname=sanitize_identifier(rule_name), ext=SOURCE_FILE_EXTENSION)
