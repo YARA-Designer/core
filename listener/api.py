@@ -34,12 +34,14 @@ def imd_to_dict(imd: ImmutableMultiDict):
 def create_yara_whitelist_rule():
     if request.method == 'POST':
         if request.form is None:
+            log.error("ERROR: Received data was NoneType!")
             return "ERROR: Received data was NoneType!"
         elif not request.is_json:
+            log.error("ERROR: Received data was NOT JSON!\n{}".format(request.form))
             return "ERROR: Received data was NOT JSON!\n{}".format(request.form)
 
         thehive_case = request.json
-        log.info("thehive_case: ".format(json.dumps(thehive_case, indent=4)))
+        log.info("thehive_case: {}".format(json.dumps(thehive_case, indent=4)))
 
         # rule = YaraWhitelistAlertRule(request.form['title'], description=request.form['description'])
         # js = json.loads(json.dumps(rule.get_dict()))
