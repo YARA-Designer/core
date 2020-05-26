@@ -9,7 +9,6 @@ from handlers import config_handler
 from handlers.webserver import handling as webserver
 from handlers.log_handler import create_logger
 import handlers.git_handler as git
-from listener import api
 from database import init_db
 
 log = create_logger(__name__)
@@ -112,10 +111,10 @@ if __name__ == "__main__":
     log.info("Added Flask app Jinja2 filters: ['ignore_none'].")
 
     # Add TheHive listener endpoint.
-    app.add_url_rule(config["hive_listener_endpoint"], methods=['POST'], view_func=api.create_yara_whitelist_rule)
+    app.add_url_rule(config["hive_listener_endpoint"], methods=['POST'], view_func=webserver.create_yara_whitelist_rule)
     log_added_route(config["hive_listener_endpoint"])
 
-    # -- Page to design yara rules on (root endpoint for frontend Web GUI).
+    # -- Page to design yara rules on (root endpoint for frontend Web GUI). # TODO: Make root display API docs.
     # add_app_route(app, '/', view_func=webserver.new_rule_designer, methods=['GET', 'POST'])
 
     # -- Pages to receive POST request from new_yara_rule so it can be processed by the codebase.
