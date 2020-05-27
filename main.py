@@ -6,7 +6,7 @@ from flask.json import JSONEncoder
 from flask_cors import CORS
 
 from handlers import config_handler
-from handlers.webserver import handling as webserver
+from webserver import handling as webserver
 from handlers.log_handler import create_logger
 import handlers.git_handler as git
 from database import init_db
@@ -17,7 +17,7 @@ log_utility_functions = create_logger("{}.utility_functions".format(__name__))
 
 class MyJSONEncoder(JSONEncoder):
     def default(self, o):
-        # Override Flask JSONEncoder's date serializer (RFC 1123) to use ISO8601..
+        """Override Flask JSONEncoder's date serializer (RFC 1123) to use ISO8601.."""
         if isinstance(o, date):
             return o.isoformat()
 
