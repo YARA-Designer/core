@@ -1,12 +1,15 @@
 import json
 from datetime import date
+from typing import Union
 
 from flask import Flask
 from flask.json import JSONEncoder
 from flask_cors import CORS
+# from flask_restx import Api, Resource
 
+import apis.handling
+from apis import blueprint as api
 from handlers import config_handler
-from api import handling as webserver
 from handlers.log_handler import create_logger
 import handlers.git_handler as git
 from database import init_db
@@ -69,19 +72,6 @@ def log_added_route(name: str, include_obj=True):
         log.debug2(rule.__dict__)
 
 
-def add_app_route(flask_app: Flask, route: str, **kwargs):
-    """
-    Expand route adding to also update webserver routes dict and log action.
-
-    :param flask_app:   A Flask app handle.
-    :param route:       Route pathname.
-    :param kwargs:      Additional Flask app kwargs.
-    :return:
-    """
-    flask_app.add_url_rule(route, **kwargs)
-    log_added_route(route)
-
-
 if __name__ == "__main__":
     # Get config.
     config = config_handler.load_config()
@@ -94,7 +84,7 @@ if __name__ == "__main__":
     log.info("Initialized database.")
 
     # Set up TheOracle Git.
-    webserver.the_oracle_repo = git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
+    git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
 
     # Set up Flask.
     app = MyFlask(__name__)
@@ -110,20 +100,8 @@ if __name__ == "__main__":
     app.jinja_env.filters['ignore_none'] = filter_suppress_none
     log.info("Added Flask app Jinja2 filters: ['ignore_none'].")
 
-    # Add TheHive listener endpoint.
-    app.add_url_rule(config["hive_listener_endpoint"], methods=['POST'], view_func=webserver.create_yara_whitelist_rule)
-    log_added_route(config["hive_listener_endpoint"])
-
-    # -- Page to design yara rules on (root endpoint for frontend Web GUI). # TODO: Make root display API docs.
-    # add_app_route(app, '/', view_func=webserver.new_rule_designer, methods=['GET', 'POST'])
-
-    # -- Pages to receive POST request from new_yara_rule so it can be processed by the codebase.
-    add_app_route(app, '/post_yara_rule_json', view_func=webserver.post_rule_json, methods=['POST'])
-    add_app_route(app, '/post_yara_commit_json', view_func=webserver.post_commit_json, methods=['POST'])
-    add_app_route(app, '/post_get_rule_request', view_func=webserver.post_get_rule_request, methods=['POST'])
-
-    # -- Pages to receive GET requests on.
-    add_app_route(app, '/get_rules_request', view_func=webserver.get_rules_request, methods=['GET'])
+    # Set up Flask-RESTX (API).
+    app.register_blueprint(api, url_prefix='/api/v1')
 
     # Run the Flask Webserver.
     log.info("Starting Flask App Webserver, listening on: {host}:{port}".format(

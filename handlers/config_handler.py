@@ -12,7 +12,6 @@ DEFAULT_CONFIG = {
     "logging_dir": "logs/",
     "hive_server": "127.0.0.1",
     "hive_port": 9000,
-    "hive_listener_endpoint": "/cortex-responder",
     "hive_api_key": "SuGd5Aj4NNudH8unh5CpWLm4U/MYDeVc",
     "listener_bind_host": "0.0.0.0",
     "listener_bind_port": 5001,

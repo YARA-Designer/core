@@ -13,6 +13,7 @@ yara-python = "*"
 sqlalchemy = "*"
 gitpython = "*"
 flask-cors = "*"
+flask-restx = "*"
 
 [packages.python-magic-bin]
 version = "*"
