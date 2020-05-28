@@ -18,6 +18,32 @@ api = Namespace('core', description='Core API')
 log = create_logger(__name__)
 
 
+rule_metadata_model = api.model("RuleMetadata", {
+    "description": fields.String
+})
+
+rule_observables_model = api.model("RuleObservables", {
+    "example-observable": fields.String
+})
+
+get_rule_model = api.model('GET Rule', {
+    "added_on": fields.DateTime,
+    "case_id": fields.String,
+    "data": fields.Raw(),
+    "last_modified": fields.DateTime,
+    "pending": fields.Boolean,
+    "yara_file": fields.String
+})
+
+post_rule_model = api.model('POST Rule', {
+    "meta": fields.Raw(),
+    "rule": fields.String,
+    "tags": fields.List(fields.String),
+    "observables": fields.Raw(),
+    "condition": fields.String
+})
+
+
 @api.route('/commit', methods=['POST'])
 class PostCommit(Resource):
     def post(self):
@@ -126,70 +152,12 @@ class PostCommit(Resource):
         return make_response(jsonify(result), 200)
 
 
-# post_rule_model_plain = api.model('POSTedRulePlain', {
-#     "meta": {"description": "example description "},
-#     "rule": "example_rule",
-#     "tags": [],
-#     "observables": {
-#         "example-observable": {
-#             "observable": "example"
-#         }
-#     },
-#     "condition": "example condition"
-# })
-
-# post_rule_model = api.model('Resource', {
-#     "meta": {"description": fields.String},
-#     "rule": fields.String,
-#     "tags": fields.List,
-#     "observables": {
-#         "example-observable": {
-#             "observable": fields.String
-#         }
-#     },
-#     "condition": fields.String
-# })
-
-print(fields.Raw.__subclasses__())
-
-rule_metadata_model = api.model("RuleMetadata", {
-    "description": fields.String
-})
-
-rule_observables_model = api.model("RuleObservables", {
-    "example-observable": fields.String
-})
-
-# rule_metadata_model = {
-#     "description": fields.String
-# }
-#
-# rule_observables_model = {
-#     "example-observable": fields.String
-# }
-
-# post_rule_model = api.model('POSTRule', {
-#     "meta": fields.Nested(rule_metadata_model),
-#     "rule": fields.String,
-#     "tags": fields.List,
-#     "observables": custom_fields.ListData(fields.Nested(rule_observables_model)),
-#     "condition": fields.String
-# })
-
-post_rule_model = api.model('POSTRule', {
-    "meta": fields.Raw(),
-    "rule": fields.String,
-    "tags": fields.List(fields.String),
-    "observables": fields.Raw(),
-    "condition": fields.String
-})
-
-
 # noinspection PyUnresolvedReferences
 @api.route('/rule/<id>', methods=['GET'])
 @api.route('/rule', methods=['POST'])
 class RuleRequest(Resource):
-    @api.param('id', 'Rule/ TheHive case ID')
+    @api.param('id', 'Rule/TheHive case ID')
+    @api.response(200, "Success", model=get_rule_model)
     def get(self, id):
         """Returns a specific rule."""
         rule = get_rule(case_id=id)
@@ -200,7 +168,6 @@ class RuleRequest(Resource):
 
         return retv
 
-    # @api.marshal_with(post_rule_model)
     @api.response(200, "Success", model=post_rule_model)
     def post(self):
         """
@@ -213,53 +180,7 @@ class RuleRequest(Resource):
             mimetype=" ({})".format(request.headers['Content-Type']) if 'Content-Type' in request.headers else "")
         )
 
-        # return make_response(jsonify(generate_yara_rule(request.json)), 200)
-        rule = generate_yara_rule(request.json)
-
-        # Perform model marshalling to make swagger recognise the response model.
-
-        # # data = rule
-        # meta = marshal(rule["meta"], rule_metadata_model, envelope='data')
-        # observables = marshal(rule["observables"], rule_observables_model, envelope='data')
-        # # data = marshal
-        # # data = {
-        # #     "meta": self.get_metadata(rule),
-        # #     "rule": self.get_rulename(rule),
-        # #     "tags": self.get_tags(rule),
-        # #     "observables": self.get_observables(rule),
-        # #     "condition": self.get_condition(rule)
-        # # }
-        # data = {
-        #     "meta": meta,
-        #     "rule": {},
-        #     "tags": {},
-        #     "observables": observables,
-        #     "condition": {}
-        # }
-        #
-        # return data
-
-        return rule
-
-    # def get_metadata(self, rule):
-    #     # The kwarg envelope does the trick
-    #     return marshal(rule, user_model, envelope='data')
-    #
-    # def get_rulename(self, rule):
-    #     # The kwarg envelope does the trick
-    #     return marshal(user_data, user_model, envelope='data')
-    #
-    # def get_tags(self, rule):
-    #     # The kwarg envelope does the trick
-    #     return marshal(user_data, user_model, envelope='data')
-    #
-    # def get_observables(self, rule):
-    #     # The kwarg envelope does the trick
-    #     return marshal(user_data, user_model, envelope='data')
-    #
-    # def get_condition(self, rule):
-    #     # The kwarg envelope does the trick
-    #     return marshal(user_data, user_model, envelope='data')
+        return generate_yara_rule(request.json)
 
 
 @api.route('/rules', methods=['GET'])
