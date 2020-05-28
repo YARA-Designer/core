@@ -16,7 +16,7 @@
 2. Use the responder on a case.
 
 ## Workflow
-![responder-workflow](markdown_assets/responder_workflow_diagram.png)
+![responder-workflow](docs/assets/responder_workflow_diagram.png)
 
 
 ## YARA Rule Designer
