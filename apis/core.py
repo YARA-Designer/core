@@ -47,11 +47,13 @@ class PostCommit(Resource):
     @api.doc('Receives a JSON of the operators which needs to be matched against the original list of observables.')
     def post(self):
         """
-        Receives a JSON of the operators which needs to be matched against the original list of observables.
-        :return: JSON on the form of:
-        { "observables: [{ "observableN": { "observable", "id", "type" } }]", condition: "" }
+        Receives a JSON of the operators which needs to be
+        matched against the original list of observables.
         """
-        log.debug("Received HTTP POST Request (application/json): {}".format(json.dumps(request.json, indent=4)))
+        log.debug("Received HTTP POST Request{mimetype}: {req_json}".format(
+            req_json=json.dumps(request.json, indent=4),
+            mimetype=" ({})".format(request.headers['Content-Type']) if 'Content-Type' in request.headers else "")
+        )
 
         result = {
             "in": request.json,
@@ -166,10 +168,11 @@ class PostGetRuleRequest(Resource):
 
 
 # noinspection PyUnresolvedReferences
-@api.route('/get_rule/<id>', methods=['GET'])
+@api.route('/rule/<id>', methods=['GET'])
 @api.param('id', 'Rule/ TheHive case ID')
 class GetRule(Resource):
     def get(self, id):
+        """Fetch a specific rule."""
         rule = get_rule(case_id=id)
         modified_rule = add_yara_filename(rule)
 
@@ -179,9 +182,10 @@ class GetRule(Resource):
         return retv
 
 
-@api.route('/get_rules', methods=['GET'])
+@api.route('/rules', methods=['GET'])
 class GetRules(Resource):
     def get(self):
+        """Fetch all rules."""
         rules = get_rules()
         rules_modified = add_yara_filenames(rules)
 
