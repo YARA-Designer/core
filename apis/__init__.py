@@ -8,7 +8,7 @@ blueprint = Blueprint('api', __name__)
 api = Api(blueprint,
           title='YARA-Designer Core APIs',
           version='1.0',
-          description='A description',
+          description='A description',  # FIXME: Add an API description.
           # All API metadata
           )
 

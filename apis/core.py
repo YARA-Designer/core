@@ -2,9 +2,9 @@ import datetime
 import json
 
 from flask import make_response, jsonify, request
-from flask_restx import Namespace, Resource, fields
+from flask_restx import Namespace, Resource, fields, reqparse
 
-from .handling import generate_yara_rule, add_yara_filename
+from .handling import generate_yara_rule, add_yara_filenames, add_yara_filename
 
 import handlers.git_handler as git
 from database.operations import update_rule, get_rule, get_rules
@@ -44,24 +44,12 @@ class PostJson(Resource):
 
 @api.route('/post_yara_commit_json', methods=['POST'])
 class PostCommit(Resource):
+    @api.doc('Receives a JSON of the operators which needs to be matched against the original list of observables.')
     def post(self):
         """
         Receives a JSON of the operators which needs to be matched against the original list of observables.
         :return: JSON on the form of:
-        {
-            "observables:
-            [
-                {
-                "observableN":
-                {
-                    "observable",
-                    "id",
-                    "type"
-                }
-                }
-            ]",
-            condition: ""
-        }
+        { "observables: [{ "observableN": { "observable", "id", "type" } }]", condition: "" }
         """
         log.debug("Received HTTP POST Request (application/json): {}".format(json.dumps(request.json, indent=4)))
 
@@ -169,7 +157,7 @@ class PostGetRuleRequest(Resource):
         log.debug(request.form)
         log.debug(request.json)
         rule = get_rule(request.json["id"])
-        rule_modified = add_yara_filename([rule])[0]
+        rule_modified = add_yara_filenames([rule])[0]
 
         retv = jsonify(rule_modified)
         log.info("GET rule return JSON: {}".format(json.dumps(retv.json, indent=4)))
@@ -177,11 +165,25 @@ class PostGetRuleRequest(Resource):
         return retv
 
 
-@api.route('/get_rules_request', methods=['GET'])
-class GetRulesRequest(Resource):
+# noinspection PyUnresolvedReferences
+@api.route('/get_rule/<id>', methods=['GET'])
+@api.param('id', 'Rule/ TheHive case ID')
+class GetRule(Resource):
+    def get(self, id):
+        rule = get_rule(case_id=id)
+        modified_rule = add_yara_filename(rule)
+
+        retv = jsonify(modified_rule)
+        log.info("GET Rule '{id}' return JSON: {retv}".format(id=id, retv=json.dumps(retv.json, indent=4)))
+
+        return retv
+
+
+@api.route('/get_rules', methods=['GET'])
+class GetRules(Resource):
     def get(self):
         rules = get_rules()
-        rules_modified = add_yara_filename(rules)
+        rules_modified = add_yara_filenames(rules)
 
         retv = jsonify(rules_modified)
         log.info("GET rules return JSON: {}".format(json.dumps(retv.json, indent=4)))
