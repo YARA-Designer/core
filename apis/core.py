@@ -152,21 +152,6 @@ class PostCommit(Resource):
         return make_response(jsonify(result), 200)
 
 
-@api.route('/post_get_rule_request', methods=['POST'])
-class PostGetRuleRequest(Resource):
-    def post(self, **kwargs):
-        log.debug(request)
-        log.debug(request.form)
-        log.debug(request.json)
-        rule = get_rule(request.json["id"])
-        rule_modified = add_yara_filenames([rule])[0]
-
-        retv = jsonify(rule_modified)
-        log.info("GET rule return JSON: {}".format(json.dumps(retv.json, indent=4)))
-
-        return retv
-
-
 # noinspection PyUnresolvedReferences
 @api.route('/rule/<id>', methods=['GET'])
 @api.param('id', 'Rule/ TheHive case ID')
