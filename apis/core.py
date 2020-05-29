@@ -180,7 +180,7 @@ class RuleRequest(Resource):
             mimetype=" ({})".format(request.headers['Content-Type']) if 'Content-Type' in request.headers else "")
         )
 
-        return generate_yara_rule(request.json)
+        return jsonify(generate_yara_rule(request.json))
 
 
 @api.route('/rules', methods=['GET'])
