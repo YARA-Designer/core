@@ -27,7 +27,8 @@ The following projects must be running and available over network.
         # Install dependencies.
         $ pip install -r requirements.txt
         ```
-2. Copy `config.json.sample` to `config.json` and configure it.
+2. Create a `config.json` and configure it (use `config.json.sample` as reference).
+    - NB: You don't need to specify every option, just the ones you want to override.
 3. Make sure Cortex is set up with `yara-designer-responder` and is available over network.
 
 ## Usage
