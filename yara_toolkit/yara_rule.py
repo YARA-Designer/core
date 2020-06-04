@@ -157,19 +157,21 @@ class YaraRule:
 
         :param dct: Dict on the form of:
                     {
-                        rule: str,
+                        name: str,
                         tags: List[str],
                         meta: {identifier: value},
-                        observables: {identifier: value},
+                        strings: [{identifier, value, type, modifiers}]
                         condition: str
                     }.
         :return:
         """
-        return cls(name=dct["rule"],
+        return cls(name=dct["name"],
                    tags=dct["tags"],
                    meta=[YaraMeta(identifier, value) for identifier, value in dct["meta"].items()],
+                   # strings=
+                   # [YaraString(identifier, value["observable"]) for identifier, value in dct["observables"].items()],
                    strings=
-                   [YaraString(identifier, value["observable"]) for identifier, value in dct["observables"].items()],
+                   [YaraString(ys["identifier"], ys["value"], ys["type"], ys["modifiers"]) for ys in dct["strings"]],
                    condition=dct["condition"])
 
     @classmethod

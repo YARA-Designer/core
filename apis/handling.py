@@ -64,10 +64,10 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
     :param keep_compiled: Whether or not to keep compiled binary files.
     :param yara_sources_dict: dict on the form of:
         {
-            rule: str,
+            name: str,
             tags: List[str],
             meta: {identifier: value},
-            observables: {identifier: value},
+            strings: [{identifier, value, type, modifiers}]
             condition: str
         }.
     :return retv:

@@ -18,12 +18,15 @@ api = Namespace('core', description='Core API')
 log = create_logger(__name__)
 
 
-rule_metadata_model = api.model("RuleMetadata", {
-    "description": fields.String
+yara_metadata_model = api.model("YARA-Metadata", {
+    "description": fields.String(required=True)
 })
 
-rule_observables_model = api.model("RuleObservables", {
-    "example-observable": fields.String
+yara_string_model = api.model("YARA-String", {
+    "identifier": fields.String(required=True),
+    "value": fields.String(required=True),
+    "type": fields.String(required=True),
+    "modifiers": fields.List(fields.String, required=True)
 })
 
 get_rule_model = api.model('GET Rule', {
@@ -36,12 +39,48 @@ get_rule_model = api.model('GET Rule', {
 })
 
 post_rule_model = api.model('POST Rule', {
-    "meta": fields.Raw(),
-    "rule": fields.String,
-    "tags": fields.List(fields.String),
-    "observables": fields.Raw(),
-    "condition": fields.String
+    "meta": fields.Nested(yara_metadata_model, required=True),
+    "name": fields.String(required=True),
+    "tags": fields.List(fields.String, required=True),
+    "strings": fields.List(fields.Nested(yara_string_model, required=True), required=True),
+    "condition": fields.String(required=True)
 })
+
+# post_rule_model = api.schema_model('POST Rule', {
+#     # "required": "",
+#     "properties": {
+#         "meta": {
+#             "type": "json",
+#         },
+#         "name": {
+#             "type": "string"
+#         },
+#         "tags": {
+#             "type": "array"
+#         },
+#         "strings": {
+#             "properties": {
+#                 "identifier": {
+#                     "type": "string"
+#                 },
+#                 "value": {
+#                     "type": "string"
+#                 },
+#                 "string_type": {
+#                     "type": "string"
+#                 },
+#                 "modifiers": {
+#                     "type": "array"
+#                 }
+#             },
+#             "type": "object"
+#         },
+#         "condition": {
+#             "type": "string"
+#         }
+#     },
+#     "type": "object"
+# })
 
 
 @api.route('/commit', methods=['POST'])
@@ -172,8 +211,6 @@ class RuleRequest(Resource):
     def post(self):
         """
         Takes a JSON containing the recipe for a YARA Rule, then returns the generated YARA Rule.
-
-        JSON template: { "meta": {...}, "rule": str, "tags": list, "observables": {...}, "condition": str }
         """
         log.debug("Received HTTP POST Request{mimetype}: {req_json}".format(
             req_json=json.dumps(request.json, indent=4),
