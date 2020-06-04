@@ -17,6 +17,45 @@ api = Namespace('core', description='Core API')
 
 log = create_logger(__name__)
 
+thehive_case_observables_model = api.model("TheHive-Case-Observables", {
+    "_id": fields.String,
+    "_parent": fields.String,
+    "_routing": fields.String,
+    "_type": fields.String,
+    "_version": fields.Integer,
+    "createdAt": fields.Integer,
+    "createdBy": fields.String,
+    "data": fields.String,
+    "dataType": fields.String,
+    "id": fields.String,
+    "ioc": fields.Boolean,
+    "message": fields.String,
+    "reports": fields.Raw(),
+    "sighted": fields.Boolean,
+    "startDate": fields.Integer,
+    "status": fields.String,
+    "tags": fields.List(fields.String),
+    "tlp": fields.Integer(min=0, max=3),
+    "updatedAt": fields.Integer,
+    "updatedBy": fields.String
+})
+
+thehive_case_model = api.model("TheHive-Case", {
+    "_id": fields.String,
+    "_parent": fields.String,
+    "_routing": fields.String,
+    "_type": fields.String,
+    "_version": fields.Integer,
+    "caseId": fields.Integer,
+    "createdAt": fields.Integer,
+    "createdBy": fields.String,
+    "customFields": fields.Raw(),
+    "description": fields.String,
+    "flag": fields.Boolean,
+    "id": fields.String,
+    "metrics": fields.Raw(),
+    "observables": fields.List(fields.Nested(thehive_case_observables_model))
+})
 
 yara_metadata_model = api.model("YARA-Metadata", {
     "description": fields.String(required=True)
@@ -29,10 +68,10 @@ yara_string_model = api.model("YARA-String", {
     "modifiers": fields.List(fields.String, required=True)
 })
 
-get_rule_model = api.model('GET Rule', {
+db_rule_model = api.model('DB Rule', {
     "added_on": fields.DateTime,
     "case_id": fields.String,
-    "data": fields.Raw(),
+    "data": fields.Nested(thehive_case_model),
     "last_modified": fields.DateTime,
     "pending": fields.Boolean,
     "yara_file": fields.String
@@ -196,7 +235,7 @@ class PostCommit(Resource):
 @api.route('/rule', methods=['POST'])
 class RuleRequest(Resource):
     @api.param('id', 'Rule/TheHive case ID')
-    @api.response(200, "Success", model=get_rule_model)
+    @api.response(200, "Success", model=db_rule_model)
     def get(self, id):
         """Returns a specific rule."""
         rule = get_rule(case_id=id)
