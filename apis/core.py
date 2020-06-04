@@ -77,6 +77,10 @@ db_rule_model = api.model('DB Rule', {
     "yara_file": fields.String
 })
 
+db_rules_model = api.model('DB Rules', {
+    "": fields.List(fields.Nested(db_rule_model))
+})
+
 post_rule_model = api.model('POST Rule', {
     "meta": fields.Nested(yara_metadata_model, required=True),
     "name": fields.String(required=True),
@@ -261,6 +265,7 @@ class RuleRequest(Resource):
 
 @api.route('/rules', methods=['GET'])
 class RulesRequest(Resource):
+    @api.response(200, "Success", model=db_rules_model)
     def get(self):
         """Returns all rules."""
         rules = get_rules()
