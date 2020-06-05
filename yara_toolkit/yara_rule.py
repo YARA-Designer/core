@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import List, Union
 
 import yara
+from yara import WarningError as YaraWarningError
+from yara import TimeoutError as YaraTimeoutError
 
 from handlers.log_handler import create_logger
 from yara_toolkit.utils import sanitize_identifier
@@ -134,7 +136,7 @@ class YaraRule:
             self.tags: list = [sanitize_identifier(x) for x in tags]
 
         self.meta: List[YaraMeta] = meta
-        self.strings = strings
+        self.strings: List[YaraString] = strings
 
         if condition is not None:
             # Sanitize every identifier in the condition string.
@@ -177,10 +179,12 @@ class YaraRule:
     @classmethod
     def from_compiled_file(cls, yara_rules: Union[yara.Rules, str],
                            source_filename=None, compiled_filepath=None,
-                           condition: str = None, rules_dir=RULES_DIR):
+                           condition: str = None, rules_dir=RULES_DIR, timeout=60):
         """
         Initialize YaraRule from a compiled (binary) file.
 
+        :param timeout:             If the match function does not finish before the specified number
+                                    of seconds elapsed, a TimeoutError exception is raised.
         :param compiled_filepath:
         :param source_filename:
         :param condition:
@@ -214,20 +218,24 @@ class YaraRule:
         # Instances of this class have the same attributes as the dictionary passed to the callback function,
         # with the exception of 'matches' which is ONLY passed to the callback function!
         yara_match_callback = YaraMatchCallback()
-        match: yara.Match = compiled_blob.match(filepath=os.path.join(rules_dir, source_filename),
-                                                callback=yara_match_callback.callback)[0]
+        matches: yara.Match = compiled_blob.match(filepath=os.path.join(rules_dir, source_filename),
+                                                  callback=yara_match_callback.callback,
+                                                  timeout=timeout)
 
-        meta = [YaraMeta(identifier, value) for identifier, value in match.meta.items()]
-        namespace = match.namespace
-        name = match.rule
-        strings = [YaraString(identifier, value.decode('utf-8')) for offset, identifier, value in match.strings]
-        tags = match.tags
+        meta = [YaraMeta(identifier, value) for identifier, value in yara_match_callback.meta.items()]
+        namespace = yara_match_callback.namespace
+        name = yara_match_callback.rule
+        strings = [
+            YaraString(identifier, value.decode('utf-8')) for offset, identifier, value in yara_match_callback.strings]
+        tags = yara_match_callback.tags
 
-        log.info("match: {}".format(match))
-        if yara_match_callback.matches is True:
-            log.info("Compiled YARA matches source code.")
+        if not yara_match_callback.matches:
+            log.error("Compiled YARA does *NOT* match source code!")
+            # raise
         else:
-            log.warning("Compiled YARA does *NOT* match source code!")
+            log.info("Compiled YARA matches source code.")
+            match = matches[0]
+            log.info("match: {}".format(match))
 
         if isinstance(yara_rules, yara.Rules) and compiled_filepath is None:
             log.warning("yara.Rules object was given, but compiled_filepath was not set, "
@@ -386,13 +394,13 @@ class YaraRule:
                 "word": condition_as_lines_list[errored_word_index]
             }
 
-    def compile(self, save_file=True, error_on_warning=True, **kwargs):
+    def compile(self, save_file=True, error_on_warning=False, **kwargs):
         """
         Compile YARA sourcecode into a binary (blob) file.
 
-        :param save_file:
-        :param error_on_warning:
-        :param kwargs:
+        :param save_file:           Saves compiled (binary blob) YARA rule to file.
+        :param error_on_warning:    If true warnings are treated as errors, raising an exception.
+        :param kwargs:              https://yara.readthedocs.io/en/latest/yarapython.html#yara.yara.compile
         :return:
         """
         try:
@@ -403,7 +411,7 @@ class YaraRule:
                 self.save_compiled()
         except yara.SyntaxError as e:
             # Get line number (split on colon, then split first element
-            # on whitespace then grab the last element.
+            # on whitespace, then grab the last element).
             line_number = str(e).split(':')[0].split(' ')[-1]
 
             try:

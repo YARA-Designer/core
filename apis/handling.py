@@ -13,7 +13,7 @@ from handlers import config_handler
 from database.operations import update_rule, get_rule, get_rules
 from handlers.config_handler import CONFIG
 from handlers.log_handler import create_logger
-from yara_toolkit.yara_rule import YaraRule, YaraRuleSyntaxError
+from yara_toolkit.yara_rule import YaraRule, YaraRuleSyntaxError, YaraWarningError, YaraTimeoutError
 
 log = create_logger(__name__)
 
@@ -75,6 +75,7 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
     retv = {
         "source": None,
         "success": False,
+        "has_warning": False,
         "compilable": False,
         "error": {
             "type": None,
@@ -83,6 +84,13 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
             "column_number": None,
             "word": None
         },
+        "warning": {    # Singular, due to yara raising an exception on the first one, unable to get any further ones.
+            "type": None,
+            "message": "",
+            "line_number": None,
+            "column_number": None,
+            "word": None
+        }
     }
 
     # Create YaraRule from given dict.
@@ -98,8 +106,33 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
         # Compilation try-block to specifically catch syntax errors.
         try:
             # Compile and save file to verify the validity of the YARA code.
-            rule.compile(save_file=verify_compiled)
-            retv["compilable"] = True
+            try:
+                # Run first with error_on_warning so that warning are raised as exceptions and can be stored.
+                rule.compile(save_file=verify_compiled, error_on_warning=True)
+                retv["compilable"] = True
+            except YaraWarningError as yarawe_exc:
+                log.warning("YARA Rule Compilation warning", exc_info=yarawe_exc)
+
+                retv["has_warning"] = True
+                retv["warning"]["type"] = "compilation"
+                retv["warning"]["message"] = str(yarawe_exc)
+
+                # Add line number info if it is in the string.
+                if str(yarawe_exc).startswith("line"):
+                    retv["warning"]["line_number"] = str(yarawe_exc).split(':')[0][len('line '):]
+
+                    # If line number is in the string then the offending string should also be in there.
+                    try:
+                        retv["warning"]["word"] = str(yarawe_exc).split(':')[1].split(' ')[1]
+                    except Exception as exc:
+                        # If it fails, it shouldn't be critical, we just end up with less available info.
+                        log.warning("Failed to determine word from YaraWarningError exception", exc_info=exc)
+                        pass
+                pass
+            finally:
+                # Run without warnings raising exceptions, in order to check if it is at all compilable.
+                rule.compile(save_file=verify_compiled, error_on_warning=False)
+                retv["compilable"] = True
         except YaraRuleSyntaxError as syn_exc:
             # Handle syntax error if raised by YaraRule.
             retv["success"] = False
@@ -161,11 +194,12 @@ def generate_yara_rule(j: json):
 
     except Exception as exc:
         try:
-            if "rule" in j:
+            if "name" in j:
                 # Reset invalid changed file to avoid git-within-git changelist issues,
                 reset_invalid_yara_rule(the_oracle_repo, retv["generated_yara_source_file"])
             else:
-                log.error("Received JSON is missing VITAL key 'rule'!\nj = {}".format(json.dumps(j, indent=4)))
+                log.error("Received JSON is missing VITAL key 'name', unable to git unstage!\nj = {}".format(
+                    json.dumps(j, indent=4)))
 
             retv["out"] = {
                 "success": False,
