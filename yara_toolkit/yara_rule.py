@@ -26,16 +26,31 @@ RULES_DIR = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_
 
 
 class YaraRuleSyntaxError(Exception):
-    def __init__(self, message: Union[str, None], rule=None, line_number=None,
+    def __init__(self, message: Union[str, None], yara_syntax_error_exc: yara.SyntaxError = None, rule=None, line_number=None,
                  column_number=None, column_range=None, word=None):
         super().__init__(message)
 
         if message is None:
-            self.message = "Syntax error! -- column number: {column_number} (columns: " \
-                "{column_number}-{column_range}, word: '{word}')".format(
-                    column_number=column_number,
-                    column_range=column_range,
-                    word=word)
+            if yara_syntax_error_exc is None:
+                self.message = "Column number: {column_number} (columns: " \
+                    "{column_number}-{column_range}, word: '{word}')".format(
+                        column_number=column_number,
+                        column_range=column_range,
+                        word=word)
+            else:
+                # Parse syntax error reason out of the SyntaxError message.
+                log.debug(str(yara_syntax_error_exc))
+                log.debug(str(yara_syntax_error_exc).split(':'))
+                self.reason = str(yara_syntax_error_exc).split(':')[1][1:]
+                log.debug(self.reason)
+
+                self.message = "{reason} in string '{word}', columns: " \
+                               "{column_number}-{column_range}.".format(
+                                reason=self.reason,
+                                column_number=column_number,
+                                column_range=column_range,
+                                word=word)
+                log.debug(self.message)
         else:
             self.message = message
 
@@ -170,8 +185,6 @@ class YaraRule:
         return cls(name=dct["name"],
                    tags=dct["tags"],
                    meta=[YaraMeta(identifier, value) for identifier, value in dct["meta"].items()],
-                   # strings=
-                   # [YaraString(identifier, value["observable"]) for identifier, value in dct["observables"].items()],
                    strings=
                    [YaraString(ys["identifier"], ys["value"], ys["type"], ys["modifiers"]) for ys in dct["strings"]],
                    condition=dct["condition"])
@@ -273,7 +286,7 @@ class YaraRule:
         """
         return self.condition.replace(' ', '\n')
 
-    def __str__(self) -> str:
+    def __str__(self, condition_as_lines=False) -> str:
         """
         Generates a YARA rule on string form.
     
@@ -296,7 +309,12 @@ class YaraRule:
         identifier_line = "rule {name}".format(name=self.name)
         meta = ""
         strings = ""
-        condition = "{indent}condition:\n{indent}{indent}{condition}".format(indent=indent, condition=self.condition)
+        if condition_as_lines:
+            condition = "{indent}condition:\n{indent}{indent}{condition}".format(
+                indent=indent, condition=self.condition_as_lines())
+        else:
+            condition = "{indent}condition:\n{indent}{indent}{condition}".format(
+                indent=indent, condition=self.condition)
     
         # Append tags to rule line, if provided.
         tags_str = ""
@@ -317,7 +335,7 @@ class YaraRule:
                 strings = "{indent}strings:".format(indent=indent)
                 for ys in self.get_referenced_strings():
                     strings += "\n{indent}{indent}{yara_string}".format(indent=indent, yara_string=str(ys))
-    
+
         # Compile the entire rule block string.
         rule_string = \
             "{identifier_line}{tags_str}\n" \
@@ -330,6 +348,7 @@ class YaraRule:
             "{end}\n".format(identifier_line=identifier_line, tags_str=tags_str,
                              meta=meta, strings=strings, condition=condition, start='{', end='}')
     
+        log.debug(rule_string)
         return rule_string
 
     def save_source(self, filename: str = None, file_ext=SOURCE_FILE_EXTENSION, rules_dir=RULES_DIR) -> str:
@@ -358,11 +377,13 @@ class YaraRule:
 
         return str(filepath.resolve(strict=True))
 
-    def determine_syntax_error_column(self, line_number: int, splitline_number: int, raise_exc=True) -> dict:
+    def determine_syntax_error_column(self, yara_syntax_error_exc, line_number: int, splitline_number: int,
+                                      raise_exc=True) -> dict:
         """
         Determines the column (and range) that compilation failed on,
         using whitespace line number and newline line numbers to determine the character offset to the word.
 
+        :param yara_syntax_error_exc:
         :param raise_exc:               Raises YaraRuleSyntaxError immediately upon finish.
         :param line_number:             Line number that failed in the whitespace string.
         :param splitline_number:        Line number that failed in the newline string.
@@ -382,6 +403,7 @@ class YaraRule:
 
         if raise_exc:
             raise YaraRuleSyntaxError(message=None,
+                                      yara_syntax_error_exc=yara_syntax_error_exc,
                                       rule=self,
                                       line_number=line_number,
                                       column_number=str(char_offset),
@@ -419,14 +441,15 @@ class YaraRule:
                 # Attempt a new (failed) compilation with condition as newlined strings,
                 # in order to detect which word it fails on.
                 self.compiled_blob: yara.Rules = yara.compile(
-                    source=self.__str__(), error_on_warning=error_on_warning, **kwargs)
+                    source=self.__str__(condition_as_lines=True), error_on_warning=error_on_warning, **kwargs)
 
-            except yara.SyntaxError:
+            except yara.SyntaxError as yara_condition_newlined_exc:
+                log.info("Caught YARA Syntax Error with newlined condition", exc_info=yara_condition_newlined_exc)
                 splitline_number = int(str(e).split(':')[0].split(' ')[-1])
 
                 # Determine the column (and range) that failed,
                 # using line and splitline to determine the true word offset.
-                self.determine_syntax_error_column(int(line_number), splitline_number, raise_exc=True)
+                self.determine_syntax_error_column(e, int(line_number), splitline_number, raise_exc=True)
 
     def save_compiled(self, filename: str = None, file_ext=COMPILED_FILE_EXTENSION, rules_dir=RULES_DIR):
         """
