@@ -136,7 +136,16 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
         except YaraRuleSyntaxError as syn_exc:
             # Handle syntax error if raised by YaraRule.
             retv["success"] = False
-            retv["error"] = {"type": "syntax_error", "message": str(syn_exc)}
+
+            retv["error"] = {
+                "type": "Syntax",
+                "message": str(syn_exc),
+                "line_number": syn_exc.line_number,
+                "column_number": syn_exc.column_number,
+                "column_range": syn_exc.column_range,
+                "word": syn_exc.word
+            }
+
             log.exception("YaraRuleSyntaxError Exception!", exc_info=syn_exc)
 
             return retv
@@ -167,6 +176,7 @@ def reset_invalid_yara_rule(repo, filepath):
 
     Performs a `git checkout` on the generated file using GitPython.
 
+    :param repo:
     :param filepath: Full/absolute path to the file you want reset/checked out.
     :return:
     """
@@ -189,14 +199,14 @@ def generate_yara_rule(j: json):
 
         if not retv["out"]["success"]:
             if not retv["out"]["compilable"]:
-                # Reset invalid changed file to avoid git-within-git changelist issues,
-                reset_invalid_yara_rule(the_oracle_repo, retv["generated_yara_source_file"])
+                log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
+                reset_invalid_yara_rule(the_oracle_repo, retv["out"]["generated_yara_source_file"])
 
     except Exception as exc:
         try:
             if "name" in j:
-                # Reset invalid changed file to avoid git-within-git changelist issues,
-                reset_invalid_yara_rule(the_oracle_repo, retv["generated_yara_source_file"])
+                log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
+                reset_invalid_yara_rule(the_oracle_repo, retv["out"]["generated_yara_source_file"])
             else:
                 log.error("Received JSON is missing VITAL key 'name', unable to git unstage!\nj = {}".format(
                     json.dumps(j, indent=4)))
