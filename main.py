@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     # FIXME: Remove
     mah_rulez = get_rules()
-    print(mah_rulez)
+    [print(json.dumps(j, indent=4)) for j in mah_rulez]
 
     # Set up Flask.
     app = MyFlask(__name__)
