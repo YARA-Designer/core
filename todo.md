@@ -1,12 +1,10 @@
 ## Requests
 *  Compare YARA rules' similarity (particularly conditions) - backend component.
 *  Customisable metadata fields (user input @ frontend).
-*  Implement support for an optional string type/modifier (case/wide/XOR/Base64) in the strings structure/object.
 
 ## Other
+* Read and parse YARA files
 *  Rename post_rule_json and post_commit_json far more sensibly / unambiguously.
-* Rename retv dict to be attribute compatible (no fancy characters).
-* Look into merging (responder's) listener webserver code into handlers.webserver.
 * Get a WSGI production server when deploying to production:
     * https://stackoverflow.com/questions/51025893/flask-at-first-run-do-not-use-the-development-server-in-a-production-environmen
     * https://flask.palletsprojects.com/en/1.1.x/tutorial/deploy/

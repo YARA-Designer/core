@@ -85,7 +85,7 @@ def update_rule(case_id: str, update_attrs: dict = None, **kwargs):
     session = db_session()
 
     try:
-        rule = session.query(Rule).filter(Rule.case_id == case_id).one()
+        rule = session.query(Rule).filter(Rule.thehive_case_id == case_id).one()
 
         rule.update_last_modified()
 
@@ -118,7 +118,7 @@ def get_rule(case_id: str) -> dict:
 
     try:
         # Get the first item in the list of queries
-        rule_dict: dict = session.query(Rule).filter(Rule.case_id == case_id)[0].as_dict()
+        rule_dict: dict = session.query(Rule).filter(Rule.thehive_case_id == case_id)[0].as_dict()
 
         # Commit transaction (NB: makes detached instances expire)
         session.commit()
