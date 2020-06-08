@@ -242,7 +242,7 @@ class RuleRequest(Resource):
     @api.response(200, "Success", model=db_rule_model)
     def get(self, id):
         """Returns a specific rule."""
-        rule = get_rule(case_id=id)
+        rule = get_rule(thehive_case_id=id)
         modified_rule = add_yara_filename(rule)
 
         retv = jsonify(modified_rule)

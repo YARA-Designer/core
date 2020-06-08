@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, DateTime, VARCHAR, Boolean, Table, Forei
 from sqlalchemy.orm import relationship, backref
 
 from database import Base
+from handlers.log_handler import create_logger
 
 from yara_toolkit.yara_meta import YaraMeta
 from yara_toolkit.yara_string import YaraString, YaraStringModifier
@@ -31,6 +32,10 @@ BASE64 = "base64"
 BASE64_WIDE = "base64wide"
 FULL_WORD = "fullword"
 PRIVATE = "private"
+
+YARA_RULE_DB_RELATION_COLUMNS = ["tags", "meta", "strings"]
+
+log = create_logger(__name__)
 
 # Association tables that are used for many-to-many relationships.
 yara_tag_association_table = Table(
@@ -185,10 +190,10 @@ class YaraRuleDB(Base):
     __tablename__ = 'rule'
     id = Column(Integer, primary_key=True)
     thehive_case_id = Column(VARCHAR)
-    thehive_case_creator = Column(VARCHAR)
     added_on = Column(DateTime)
     last_modified = Column(DateTime)
     name = Column(VARCHAR)
+    title = Column(VARCHAR)
     description = Column(VARCHAR)
     tags = relationship(
         'YaraTagDB', secondary=yara_tag_association_table, lazy='subquery', backref=backref('yara_rules', lazy=True))
@@ -202,24 +207,38 @@ class YaraRuleDB(Base):
     source_path = Column(VARCHAR)
 
     def __init__(self,
-                 name: str,
+                 name: str = None,
+                 title: str = None,
+                 description: str = None,
                  thehive_case_id: str = None,
-                 thehive_case_creator: str = None,
                  tags: list = None,
                  meta: List[Union[YaraMeta, dict]] = None,
                  strings: list = None,
                  condition: str = None,
                  namespace: str = None,
-                 source_path: str = None):
+                 source_path: str = None,
+                 pending: bool = True):
 
         self.added_on = datetime.datetime.utcnow()
         self.last_modified = datetime.datetime.utcnow()
         self.thehive_case_id = thehive_case_id
-        self.thehive_case_creator = thehive_case_creator
 
         self.name = name
+        self.title = title
+        self.description = description
+        self.set_tags(tags)
+        self.set_meta(meta)
+        self.set_strings(strings)
+
+        self.condition = condition
+        self.namespace = namespace
+        self.source_path = source_path
+        self.pending = pending
+
+    def set_tags(self, tags):
         self.tags = [YaraTagDB(t) for t in tags]
 
+    def set_meta(self, meta):
         for m in meta:
             if isinstance(m, YaraMeta):
                 self.meta.append(YaraMetaDB(m.identifier, m.data, m.type))
@@ -228,6 +247,7 @@ class YaraRuleDB(Base):
             else:
                 raise ValueError("YARA-Meta object is neither YaraMeta nor dict: {obj}".format(obj=m))
 
+    def set_strings(self, strings):
         for s in strings:
             if isinstance(s, YaraString):
                 self.strings.append(YaraStringDB(s.identifier, s.value, type(s.value).__name__, s.type, s.modifiers))
@@ -236,14 +256,6 @@ class YaraRuleDB(Base):
             else:
                 raise ValueError("YARA-String object is neither YaraString nor dict: {obj}".format(obj=s))
 
-        self.condition = condition
-        self.namespace = namespace
-        self.source_path = source_path
-
-    def __repr__(self):
-        return "<YaraRule(id='{my_id}', yara_file='{yara_file}, data='{data}')>".format(  # FIXME: insert actual attrs
-            my_id=self.id, data=self.as_dict(), yara_file=self.source_path)
-
     def update_last_modified(self):
         self.last_modified = datetime.datetime.utcnow()
 
@@ -251,7 +263,6 @@ class YaraRuleDB(Base):
         return {
             "name": self.name,
             "thehive_case_id": self.thehive_case_id,
-            "thehive_case_creator": self.thehive_case_creator,
             "namespace": self.namespace,
             "tags": [t.name for t in self.tags],
             "meta": [m.as_dict() for m in self.meta],
@@ -262,3 +273,31 @@ class YaraRuleDB(Base):
             "source_path": self.source_path,
             "pending": bool(self.pending)
         }
+
+    def set_relation_attr(self, attr, value):
+        """setattr helper for complex SQLAlchemy attributes that don't accept simple assignment."""
+        if attr == "tags":
+            self.tags = [YaraTagDB(t) for t in value]
+        elif attr == "meta":
+            self.set_meta(value)
+        elif attr == "strings":
+            self.set_strings(value)
+        else:
+            msg = "set_relation_attr got unexpected attr: {}".format(attr)
+            log.error(msg)
+            raise ValueError(msg)
+
+    def __repr__(self):
+        return "<{class_name}}(id='{id}', " \
+               "name='{name}', " \
+               "thehive_case_id='{thehive_case_id}', " \
+               "namespace='{namespace}, " \
+               "tags='{tags}, " \
+               "meta='{meta}, " \
+               "strings='{strings}, " \
+               "condition='{condition}, " \
+               "added_on='{added_on}, " \
+               "last_modified='{last_modified}, " \
+               "source_path='{source_path}, " \
+               "pending='{pending}".format(
+                class_name=self.__class__.__name__, id=self.id, **self.as_dict())

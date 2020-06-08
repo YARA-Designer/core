@@ -25,7 +25,9 @@ DEFAULT_CONFIG = {
     "theoracle_user": "git",
     "theoracle_remote_repo": "",
     "theoracle_local_path": "the-oracle",
-    "theoracle_repo_rules_dir": "rules"
+    "theoracle_repo_rules_dir": "rules",
+    "hive_case_meta_fields": ["createdBy", "owner", "description", "id", "title", "pap", "tlp"],
+    "hive_case_string_fields": []
 }
 
 # Let's make sure we copy default config by value, not reference. So that it remains unmodified.

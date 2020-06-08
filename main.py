@@ -87,10 +87,6 @@ if __name__ == "__main__":
     # Set up TheOracle Git.
     git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
 
-    # FIXME: Remove
-    mah_rulez = get_rules()
-    [print(json.dumps(j, indent=4)) for j in mah_rulez]
-
     # Set up Flask.
     app = MyFlask(__name__)
     log.info("Configured Flask app.")
