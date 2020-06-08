@@ -9,6 +9,7 @@ from flask_cors import CORS
 
 import apis.handling
 from apis import blueprint as api
+from database.operations import get_rules
 from handlers import config_handler
 from handlers.log_handler import create_logger
 import handlers.git_handler as git
@@ -86,6 +87,10 @@ if __name__ == "__main__":
     # Set up TheOracle Git.
     git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
 
+    # FIXME: Remove
+    mah_rulez = get_rules()
+    print(mah_rulez)
+
     # Set up Flask.
     app = MyFlask(__name__)
     log.info("Configured Flask app.")
@@ -107,3 +112,4 @@ if __name__ == "__main__":
     log.info("Starting Flask App Webserver, listening on: {host}:{port}".format(
         host=config["listener_bind_host"], port=config["listener_bind_port"]))
     app.run(host=config["listener_bind_host"], port=config["listener_bind_port"], debug=True)
+

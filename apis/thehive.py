@@ -7,7 +7,7 @@ from thehive4py.api import TheHiveApi
 from database.operations import has_row, update_rule, add_row
 from handlers.log_handler import create_logger
 from handlers.config_handler import CONFIG
-from database.models import Rule
+from database.models import YaraRuleDB
 
 api = Namespace('thehive', description='TheHive and Cortex endpoint.')
 

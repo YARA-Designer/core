@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 # Create a database engine.
-engine = create_engine('sqlite:///rules.db')
+engine = create_engine('sqlite:///yara_rules.db')
 
 # Create a configured "Session" class.
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
@@ -16,7 +16,7 @@ def init_db():
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
-    from database.models import Rule
+    from database.models import YaraRuleDB, YaraTagDB
     Base.metadata.create_all(bind=engine)
 
 
