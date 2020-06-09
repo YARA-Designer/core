@@ -235,10 +235,31 @@ class YaraRuleDB(Base):
         self.source_path = source_path
         self.pending = pending
 
-    def set_tags(self, tags):
-        self.tags = [YaraTagDB(t) for t in tags]
+    def set_tags(self, tags: List[str], session=None):
+        """
+        Replaces tags in the association table with the ones given.
 
-    def set_meta(self, meta):
+        :param tags:        List of tags.
+        :param session:     If provided, check if row(s) already exist, to avoid dupe entries.
+        :return:
+        """
+        new_tags = []
+
+        if session:
+            # Check if the attr row already exists in DB (avoid dupes)
+            for tag in tags:
+                # Get DB row.
+                db_query = session.query(YaraTagDB).filter_by(name=tag)
+
+                # Append existing if exist else append a new DB row.
+                new_tags.append(db_query.one()) if db_query.scalar() else new_tags.append(YaraTagDB(tag))
+        else:
+            # If no session is given, no existence checks can be performed; Append new DB rows.
+            new_tags = [YaraTagDB(t) for t in tags]
+
+        self.tags = new_tags
+
+    def set_meta(self, meta, session=None):
         for m in meta:
             if isinstance(m, YaraMeta):
                 self.meta.append(YaraMetaDB(m.identifier, m.data, m.type))
@@ -247,7 +268,7 @@ class YaraRuleDB(Base):
             else:
                 raise ValueError("YARA-Meta object is neither YaraMeta nor dict: {obj}".format(obj=m))
 
-    def set_strings(self, strings):
+    def set_strings(self, strings, session=None):
         for s in strings:
             if isinstance(s, YaraString):
                 self.strings.append(YaraStringDB(s.identifier, s.value, type(s.value).__name__, s.type, s.modifiers))
@@ -274,21 +295,21 @@ class YaraRuleDB(Base):
             "pending": bool(self.pending)
         }
 
-    def set_relation_attr(self, attr, value):
+    def set_relation_attr(self, attr, value, session):
         """setattr helper for complex SQLAlchemy attributes that don't accept simple assignment."""
         if attr == "tags":
-            self.tags = [YaraTagDB(t) for t in value]
+            self.set_tags(value, session=session)
         elif attr == "meta":
-            self.set_meta(value)
+            self.set_meta(value, session=session)
         elif attr == "strings":
-            self.set_strings(value)
+            self.set_strings(value, session=session)
         else:
             msg = "set_relation_attr got unexpected attr: {}".format(attr)
             log.error(msg)
             raise ValueError(msg)
 
     def __repr__(self):
-        return "<{class_name}}(id='{id}', " \
+        return "<{class_name}(id='{id}', " \
                "name='{name}', " \
                "thehive_case_id='{thehive_case_id}', " \
                "namespace='{namespace}, " \
@@ -299,5 +320,5 @@ class YaraRuleDB(Base):
                "added_on='{added_on}, " \
                "last_modified='{last_modified}, " \
                "source_path='{source_path}, " \
-               "pending='{pending}".format(
+               "pending='{pending})>".format(
                 class_name=self.__class__.__name__, id=self.id, **self.as_dict())

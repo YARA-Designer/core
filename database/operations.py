@@ -99,7 +99,7 @@ def update_rule(thehive_case_id: str, update_attrs: dict = None, **kwargs):
                     log.info("Rule({cid}).{attr} = {value}".format(cid=thehive_case_id, attr=attr, value=value))
                     # Special handling required for SQLAlchemy relation tables.
                     if attr in YARA_RULE_DB_RELATION_COLUMNS:
-                        rule.set_relation_attr(attr, value)
+                        rule.set_relation_attr(attr, value, session)
                     else:
                         setattr(rule, attr, value)
                 else:
