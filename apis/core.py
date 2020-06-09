@@ -58,23 +58,42 @@ thehive_case_model = api.model("TheHive-Case", {
 })
 
 yara_metadata_model = api.model("YARA-Metadata", {
-    "description": fields.String(required=True)
+    "identifier": fields.String(required=True, pattern=r"([a-zA-Z]([a-z0-9])+)"),
+    "value": fields.String(required=True, pattern=r'.*'),
+    "value_type": fields.String(required=True, pattern=r'str|int|bool'),
 })
 
 yara_string_model = api.model("YARA-String", {
-    "identifier": fields.String(required=True),
-    "value": fields.String(required=True),
-    "type": fields.String(required=True),
-    "modifiers": fields.List(fields.String, required=True)
+    "identifier": fields.String(required=True, pattern=r"([a-zA-Z]([a-z0-9])+)"),
+    "value": fields.String(required=True, pattern=r'.*'),
+    "value_type": fields.String(required=True, pattern=r'str|int|bool'),
+    "string_type": fields.String(required=True, pattern=r'text|hex|regex'),
+    "modifiers": fields.List(
+        fields.String(
+            required=True,
+            pattern=r"nocase|wide|ascii|xor|base64(wide)?(?'base64_alphabet'.*)?|fullword|private")
+    ),
+    "modifier_str": fields.String(
+        required=True,
+        pattern=r"[nocase|wide|ascii|xor|base64(wide)?(?'base64_alphabet'.*)?|fullword|private]+(\s+)?"),
+    "str": fields.String(
+            required=True,
+            pattern=r"^(?'identifier'(?'prefix'(observable|[a-z]([a-z0-9]+))_)?[a-f0-9]{32})\s+=\s+(?'value'\".*\")$"
+    )
 })
 
 db_rule_model = api.model('DB Rule', {
+    "name": fields.String,
+    "thehive_case_id": fields.String,
+    "namespace": fields.String,
+    "tags": fields.List(fields.String),
+    "meta": fields.Nested(yara_metadata_model),
+    "strings": fields.Nested(yara_string_model),
+    "condition": fields.String,
     "added_on": fields.DateTime,
-    "case_id": fields.String,
-    "data": fields.Nested(thehive_case_model),
     "last_modified": fields.DateTime,
     "pending": fields.Boolean,
-    "yara_file": fields.String
+    "source_path": fields.String
 })
 
 db_rules_model = api.model('DB Rules', {
