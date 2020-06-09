@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 import git as gitpy
@@ -93,7 +94,12 @@ def pull(remote: gitpy.Remote):
     :return:
     """
     log.info("Pulling data from remote '{}'...".format(remote))
-    remote.pull()
+    try:
+        remote.pull()
+    except gitpy.exc.GitCommandError as git_exc:
+        log.exception("Failed to pull from remote '{}'!".format(remote), exc_info=git_exc)
+        sys.stderr.write("Failed to pull from remote '{}', "
+                         "check that git host is online, then restart or perform a manual pull!".format(remote))
 
 
 def clone_if_not_exist(url: str, path: str) -> gitpy.Repo:
