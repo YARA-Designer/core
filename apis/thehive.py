@@ -11,6 +11,8 @@ from database.models import YaraRuleDB
 from yara_toolkit.yara_meta import YaraMeta
 from yara_toolkit.yara_string import YaraString
 
+from hashlib import md5
+
 api = Namespace('thehive', description='TheHive and Cortex endpoint.')
 
 log = create_logger(__name__)
@@ -42,6 +44,22 @@ class CortexResponder(Resource):
             # Add observables to thehive:case as its own sub-dict
             case['observables'] = observables_response.json()
 
+            strings = []
+            for o in case["observables"]:
+                # FIXME: Implement backend str type determination.
+                strings.append(YaraString("observable_{md5sum}".format(
+                    md5sum=md5(o["data"].encode("utf-8")).hexdigest()), o["data"]))
+
+            # Append additional strings if specified in config.
+            strings.extend(
+                [
+                    YaraString(
+                        "observable_{md5sum}".format(
+                            md5sum=md5(field.encode("utf-8")).hexdigest()),
+                        case[field]) for field in CONFIG["hive_case_string_fields"]
+                ]
+            )
+
             all_tags = case["tags"]
             observables_tags = [t for li in [o["tags"] for o in case["observables"]] for t in li]
             all_tags.extend(observables_tags)
@@ -53,7 +71,7 @@ class CortexResponder(Resource):
                 thehive_case_id=case_id,
                 tags=all_unique_tags,
                 meta=[YaraMeta(field, case[field]) for field in CONFIG["hive_case_meta_fields"]],
-                strings=[YaraString(field, case[field]) for field in CONFIG["hive_case_string_fields"]],
+                strings=strings,
                 pending=True
                 )
 
