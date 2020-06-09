@@ -263,8 +263,7 @@ class YaraRuleDB(Base):
         """
         Replaces tags in the association table with the ones given.
 
-        :param meta:        List of meta objects (YaraMeta or dict).
-                            dict format: {"identifier", "value", "value_type"} (maps to YaraMetaDB constructor)
+        :param meta:        List of string objects (YaraMetaDB or dict (see: YaraMetaDB.as_dict)).
         :param session:     If provided, check if row(s) already exist, to avoid dupe entries.
         :return:
         """
@@ -308,14 +307,57 @@ class YaraRuleDB(Base):
                 else:
                     raise ValueError("YARA-Meta object is neither YaraMeta nor dict: {obj}".format(obj=m))
 
-    def set_strings(self, strings, session=None):
-        for s in strings:
-            if isinstance(s, YaraString):
-                self.strings.append(YaraStringDB(s.identifier, s.value, type(s.value).__name__, s.type, s.modifiers))
-            elif isinstance(s, dict):
-                self.strings.append(YaraStringDB(**s))
-            else:
-                raise ValueError("YARA-String object is neither YaraString nor dict: {obj}".format(obj=s))
+    def set_strings(self, strings: List[Union[YaraString, dict]], session=None):
+        """
+        Replaces tags in the association table with the ones given.
+
+        :param strings:     List of string objects (YaraString or dict (see: YaraStringDB.as_dict)).
+        :param session:     If provided, check if row(s) already exist, to avoid dupe entries.
+        :return:
+        """
+        # Clear old rows.
+        self.strings = []
+
+        if session:
+            for s in strings:
+                if isinstance(s, YaraString):
+                    identifier = s.identifier
+                    value = s.value
+                    value_type = type(s.value).__name__
+                    string_type = s.type
+                    modifiers = s.modifiers
+                elif isinstance(s, dict):
+                    identifier = s["identifier"]
+                    value = s["value"]
+                    value_type = s["value_type"]
+                    string_type = s["string_type"]
+                    modifiers = s["modifiers"]
+                else:
+                    raise ValueError("YARA-String object is neither YaraString nor dict: {obj}".format(obj=s))
+
+                # Get row matching meta obj (if any).
+                associated_row_query: Query = session.query(
+                    YaraStringDB).join(
+                    yara_string_association_table).filter(
+                    (yara_string_association_table.c.string_id) &
+                    (yara_string_association_table.c.rule_id == self.id) &
+                    (YaraStringDB.identifier == identifier)
+                )
+
+                # Append existing if exist else append a new DB row.
+                if associated_row_query.scalar():
+                    self.strings.append(associated_row_query.one())
+                else:
+                    self.strings.append(YaraStringDB(identifier, value, value_type, string_type, modifiers))
+        else:
+            # If no session is given, no existence checks can be performed; Append new DB rows.
+            for s in strings:
+                if isinstance(s, YaraString):
+                    self.strings.append(YaraStringDB(s.identifier, s.value, type(s.value).__name__, s.type, s.modifiers))
+                elif isinstance(s, dict):
+                    self.strings.append(YaraStringDB(**s))
+                else:
+                    raise ValueError("YARA-String object is neither YaraString nor dict: {obj}".format(obj=s))
 
     def update_last_modified(self):
         self.last_modified = datetime.datetime.utcnow()
