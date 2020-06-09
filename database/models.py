@@ -259,14 +259,50 @@ class YaraRuleDB(Base):
 
         self.tags = new_tags
 
-    def set_meta(self, meta, session=None):
-        for m in meta:
-            if isinstance(m, YaraMeta):
-                self.meta.append(YaraMetaDB(m.identifier, m.data, m.type))
-            elif isinstance(m, dict):
-                self.meta.append(YaraMetaDB(**m))
-            else:
-                raise ValueError("YARA-Meta object is neither YaraMeta nor dict: {obj}".format(obj=m))
+    def set_meta(self, meta: List[Union[YaraMeta, dict]], session=None):
+        """
+        Replaces tags in the association table with the ones given.
+
+        :param meta:        List of meta objects (YaraMeta or dict).
+        :param session:     If provided, check if row(s) already exist, to avoid dupe entries.
+        :return:
+        """
+        new_tags = []
+
+        if session:
+            # Check if the attr row already exists in DB (avoid dupes)
+            for m in meta:
+                # Get all DB rows associated with self.
+                associated_rows_query = session.query(yara_meta_association_table).filter_by(rule_id=self.id)
+
+                meta_rows_query = session.query(YaraMetaDB)
+
+                joined_but_not_quite = session.query(YaraMetaDB).join(yara_meta_association_table)#.filter_by(rule_id=self.id)
+                # joined = session.query(YaraMetaDB).join(yara_meta_association_table.c.meta_id)#.filter_by(rule_id=self.id)
+
+                joined = session.query(YaraMetaDB).join(yara_meta_association_table).filter(
+                    (yara_meta_association_table.c.meta_id) & (yara_meta_association_table.c.rule_id == self.id )
+                )
+
+                # joined = session.query(YaraMetaDB).join(
+                #     (yara_meta_association_table) & (rule_id == self.id))
+
+                # common = associated_rows_query.union(meta_rows_query)
+                common = meta_rows_query.intersect(associated_rows_query)
+
+                print("debug breakpoint")
+
+                # Append existing if exist else append a new DB row.
+                new_tags.append(db_query.one()) if db_query.scalar() else new_tags.append(YaraTagDB(tag))
+        else:
+            # If no session is given, no existence checks can be performed; Append new DB rows.
+            for m in meta:
+                if isinstance(m, YaraMeta):
+                    self.meta.append(YaraMetaDB(m.identifier, m.data, m.type))
+                elif isinstance(m, dict):
+                    self.meta.append(YaraMetaDB(**m))
+                else:
+                    raise ValueError("YARA-Meta object is neither YaraMeta nor dict: {obj}".format(obj=m))
 
     def set_strings(self, strings, session=None):
         for s in strings:
