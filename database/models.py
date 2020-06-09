@@ -2,7 +2,7 @@ import datetime
 from typing import List, Union
 
 from sqlalchemy import Column, Integer, DateTime, VARCHAR, Boolean, Table, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, Query
 
 from database import Base
 from handlers.log_handler import create_logger
@@ -38,25 +38,25 @@ YARA_RULE_DB_RELATION_COLUMNS = ["tags", "meta", "strings"]
 log = create_logger(__name__)
 
 # Association tables that are used for many-to-many relationships.
-yara_tag_association_table = Table(
+yara_tag_association_table: Table = Table(
     'tag_association', Base.metadata,
     Column('tag_id', Integer, ForeignKey('tag.id'), primary_key=True),
     Column('rule_id', Integer, ForeignKey('rule.id'), primary_key=True)
 )
 
-yara_meta_association_table = Table(
+yara_meta_association_table: Table = Table(
     'meta_association', Base.metadata,
     Column('meta_id', Integer, ForeignKey('meta.id'), primary_key=True),
     Column('rule_id', Integer, ForeignKey('rule.id'), primary_key=True)
 )
 
-yara_string_association_table = Table(
+yara_string_association_table: Table = Table(
     'string_association', Base.metadata,
     Column('string_id', Integer, ForeignKey('string.id'), primary_key=True),
     Column('rule_id', Integer, ForeignKey('rule.id'), primary_key=True)
 )
 
-yara_string_modifier_association_table = Table(
+yara_string_modifier_association_table: Table = Table(
     'string_modifier_association', Base.metadata,
     Column('string_modifier_id', Integer, ForeignKey('string_modifier.id'), primary_key=True),
     Column('string_id', Integer, ForeignKey('string.id'), primary_key=True)
@@ -264,36 +264,40 @@ class YaraRuleDB(Base):
         Replaces tags in the association table with the ones given.
 
         :param meta:        List of meta objects (YaraMeta or dict).
+                            dict format: {"identifier", "value", "value_type"} (maps to YaraMetaDB constructor)
         :param session:     If provided, check if row(s) already exist, to avoid dupe entries.
         :return:
         """
-        new_tags = []
+        # Clear old rows.
+        self.meta = []
 
         if session:
-            # Check if the attr row already exists in DB (avoid dupes)
             for m in meta:
-                # Get all DB rows associated with self.
-                associated_rows_query = session.query(yara_meta_association_table).filter_by(rule_id=self.id)
+                if isinstance(m, YaraMeta):
+                    identifier = m.identifier
+                    value = m.data
+                    value_type = m.type
+                elif isinstance(m, dict):
+                    identifier = m["identifier"]
+                    value = m["value"]
+                    value_type = m["value_type"]
+                else:
+                    raise ValueError("YARA-Meta object is neither YaraMeta nor dict: {obj}".format(obj=m))
 
-                meta_rows_query = session.query(YaraMetaDB)
-
-                joined_but_not_quite = session.query(YaraMetaDB).join(yara_meta_association_table)#.filter_by(rule_id=self.id)
-                # joined = session.query(YaraMetaDB).join(yara_meta_association_table.c.meta_id)#.filter_by(rule_id=self.id)
-
-                joined = session.query(YaraMetaDB).join(yara_meta_association_table).filter(
-                    (yara_meta_association_table.c.meta_id) & (yara_meta_association_table.c.rule_id == self.id )
+                # Get row matching meta obj (if any).
+                associated_row_query: Query = session.query(
+                    YaraMetaDB).join(
+                    yara_meta_association_table).filter(
+                    (yara_meta_association_table.c.meta_id) &
+                    (yara_meta_association_table.c.rule_id == self.id) &
+                    (YaraMetaDB.identifier == identifier)
                 )
 
-                # joined = session.query(YaraMetaDB).join(
-                #     (yara_meta_association_table) & (rule_id == self.id))
-
-                # common = associated_rows_query.union(meta_rows_query)
-                common = meta_rows_query.intersect(associated_rows_query)
-
-                print("debug breakpoint")
-
                 # Append existing if exist else append a new DB row.
-                new_tags.append(db_query.one()) if db_query.scalar() else new_tags.append(YaraTagDB(tag))
+                if associated_row_query.scalar():
+                    self.meta.append(associated_row_query.one())
+                else:
+                    self.meta.append(YaraMetaDB(identifier, value, value_type))
         else:
             # If no session is given, no existence checks can be performed; Append new DB rows.
             for m in meta:
