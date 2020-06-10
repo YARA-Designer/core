@@ -25,6 +25,8 @@ MOD_RESTRICTIONS = {
     PRIVATE: []
 }
 
+VALID_DATA_TYPES = [str, bool, int]
+
 # YARA String types
 TEXT_TYPE = "text"
 HEX_TYPE = "hex"
@@ -120,7 +122,7 @@ def validate_modifiers(modifiers: list):
 class YaraString:
     modifiers = []
 
-    def __init__(self, identifier: str = None, value: str = None, string_type: str = TEXT_TYPE,
+    def __init__(self, identifier: str = None, value: str = None, value_type: str = None, string_type: str = TEXT_TYPE,
                  modifiers: list = None, from_dict: dict = None):
         """
         YARA String with optional modifiers.
@@ -138,6 +140,19 @@ class YaraString:
             self.create_from_dict(from_dict)
         else:
             self.determine_identifier(identifier)
+
+            # Set value by specified value_type argument.
+            if value_type:
+                if value_type == 'str' or value_type == str:
+                    value = str(value)
+                elif value_type == 'bool' or value_type == bool:
+                    value = value.lower() == "true"
+                elif value_type == 'int' or value_type == int:
+                    value = int(value)
+                else:
+                    raise ValueError("value_type set but '{vt}' is not one of [{vdt}]".format(
+                        vt=value_type, vdt=", ".join([x.__name__ for x in VALID_DATA_TYPES])))
+
             self.value = value
 
             if modifiers is not None and len(modifiers) > 0:

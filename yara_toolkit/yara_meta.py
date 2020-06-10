@@ -34,15 +34,29 @@ class YaraMeta:
     can not be used in the condition section, their only purpose is to store additional information about
     the rule.
     """
-    def __init__(self, identifier: str, data: Union[str, bool, int]):
+    def __init__(self, identifier: str, value: Union[str, bool, int], value_type: str = None):
         self.identifier = sanitize_identifier(identifier)
 
-        if type(data) in VALID_DATA_TYPES:
-            self.data = data
-            self.type = type(data).__name__
+        # Set value by specified value_type argument.
+        if value_type:
+            if value_type == 'str' or value_type == str:
+                value = str(value)
+            elif value_type == 'bool' or value_type == bool:
+                value = value.lower() == "true"
+            elif value_type == 'int' or value_type == int:
+                value = int(value)
+            else:
+                raise ValueError("value_type set but '{vt}' is not one of [{vdt}]".format(
+                    vt=value_type, vdt=", ".join([x.__name__ for x in VALID_DATA_TYPES])))
+
+        if type(value) in VALID_DATA_TYPES:
+            self.value = value
+            self.type = type(value).__name__
         else:
-            raise ValueError("Invalid data type {} (Valid types: {})!".format(
-                str(type(data)), ", ".join([str(x) for x in VALID_DATA_TYPES])))
+            raise ValueError("Invalid value type {} (Valid types: {})!".format(
+                str(type(value)), ", ".join([x.__name__ for x in VALID_DATA_TYPES])))
 
     def __str__(self):
-        return "{} = {}".format(self.identifier, delimiter_wrap_type(self.data, self.type))
+        return "{identifier} = {value}".format(
+            identifier=self.identifier,
+            value=delimiter_wrap_type(self.value, self.type) if isinstance(self.value, str) else str(self.value))

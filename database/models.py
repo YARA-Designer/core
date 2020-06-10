@@ -274,7 +274,7 @@ class YaraRuleDB(Base):
             for m in meta:
                 if isinstance(m, YaraMeta):
                     identifier = m.identifier
-                    value = m.data
+                    value = m.value
                     value_type = m.type
                 elif isinstance(m, dict):
                     identifier = m["identifier"]
@@ -301,7 +301,7 @@ class YaraRuleDB(Base):
             # If no session is given, no existence checks can be performed; Append new DB rows.
             for m in meta:
                 if isinstance(m, YaraMeta):
-                    self.meta.append(YaraMetaDB(m.identifier, m.data, m.type))
+                    self.meta.append(YaraMetaDB(m.identifier, m.value, m.type))
                 elif isinstance(m, dict):
                     self.meta.append(YaraMetaDB(**m))
                 else:
@@ -366,6 +366,7 @@ class YaraRuleDB(Base):
         return {
             "name": self.name,
             "title": self.title,
+            "description": self.description,
             "thehive_case_id": self.thehive_case_id,
             "namespace": self.namespace,
             "tags": [t.name for t in self.tags],

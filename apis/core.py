@@ -263,7 +263,8 @@ class RuleRequest(Resource):
     def get(self, id):
         """Returns a specific rule."""
         retv = jsonify(get_rule(thehive_case_id=id))
-        log.info("GET Rule '{id}' return JSON: {retv}".format(id=id, retv=json.dumps(retv.json, indent=4)))
+        log.info("GET '{route}/{id}' return JSON: {retv}".format(
+            route='/rule', id=id, retv=json.dumps(retv.json, indent=4)))
 
         return retv
 
@@ -272,7 +273,8 @@ class RuleRequest(Resource):
         """
         Takes a JSON containing the recipe for a YARA Rule, then returns the generated YARA Rule.
         """
-        log.debug("Received HTTP POST Request{mimetype}: {req_json}".format(
+        log.debug("Received HTTP POST '{route}' Request{mimetype}: {req_json}".format(
+            route='/rule',
             req_json=json.dumps(request.json, indent=4),
             mimetype=" ({})".format(request.headers['Content-Type']) if 'Content-Type' in request.headers else "")
         )
@@ -287,7 +289,8 @@ class RulesRequest(Resource):
         """Returns all rules."""
         rules = get_rules()
         retv = jsonify(rules)
-        log.info("GET rules return {num}x JSON{keys_list}:\n{js}".format(
+        log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(
+            route='/rules',
             num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
 
         return retv

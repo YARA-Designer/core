@@ -50,8 +50,8 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
         {
             name: str,
             tags: List[str],
-            meta: {identifier: value},
-            strings: [{identifier, value, type, modifiers}]
+            meta: {identifier, value, value_type},
+            strings: [{identifier, value, value_type, string_type, modifiers, modifier_str, str}]
             condition: str
         }.
     :return retv:
@@ -78,8 +78,12 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
     }
 
     # Create YaraRule from given dict.
-    rule = YaraRule.from_dict(yara_sources_dict)
-    retv["source"] = rule.__str__()
+    try:
+        rule = YaraRule.from_dict(yara_sources_dict)
+        retv["source"] = rule.__str__()
+    except Exception as exc:
+        log.exception("An unexpected exception occurred when creating YaraRule from yara_sources_dict!", exc_info=exc)
+        raise
     log.debug("source: \n{}".format(retv["source"]))
 
     # General catch-all try-block for any unforseen exceptions, in order to not kill backend on-exception.

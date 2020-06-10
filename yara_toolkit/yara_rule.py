@@ -176,17 +176,18 @@ class YaraRule:
                     {
                         name: str,
                         tags: List[str],
-                        meta: {identifier: value},
-                        strings: [{identifier, value, type, modifiers}]
+                        meta: {identifier, value, value_type},
+                        strings: [{identifier, value, value_type, string_type, modifiers, modifier_str, str}]
                         condition: str
                     }.
         :return:
         """
         return cls(name=dct["name"],
                    tags=dct["tags"],
-                   meta=[YaraMeta(identifier, value) for identifier, value in dct["meta"].items()],
+                   meta=[YaraMeta(ym["identifier"], ym["value"], ym["value_type"]) for ym in dct["meta"]],
                    strings=
-                   [YaraString(ys["identifier"], ys["value"], ys["type"], ys["modifiers"]) for ys in dct["strings"]],
+                   [YaraString(ys["identifier"], ys["value"], ys["value_type"], ys["string_type"], ys["modifiers"])
+                    for ys in dct["strings"]],
                    condition=dct["condition"])
 
     @classmethod
