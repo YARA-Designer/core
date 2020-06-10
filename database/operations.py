@@ -145,7 +145,11 @@ def get_rules() -> list:
     try:
         for rule in session.query(YaraRuleDB).all():
             rules.append(rule.as_dict())
-            log.debug("get_rules rule: {}".format(json.dumps(dict_to_json(rule.as_dict()), indent=4)))
+            log.debug("get_rules rule '{title} {rcid}': dict{keys_list}:\n{js}".format(
+                rcid=rule.thehive_case_id,
+                title=rule.title,
+                keys_list=str((list(rule.as_dict().keys()))),
+                js=json.dumps(dict_to_json(rule.as_dict()), indent=4)))
 
         # Commit transaction (NB: makes detached instances expire)
         session.commit()

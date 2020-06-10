@@ -36,22 +36,6 @@ def imd_to_dict(imd: ImmutableMultiDict):
     return dct
 
 
-def add_yara_filename(rule):
-    if rule["yara_file"] is not None:
-        rule["yara_filename"] = rule["yara_file"].split(os.path.sep)[-1]
-
-    return rule
-
-
-def add_yara_filenames(rules: list) -> list:
-    modified_rules = []
-
-    for rule in rules:
-        modified_rules.append(add_yara_filename(rule))
-
-    return modified_rules
-
-
 def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compiled=True) -> dict:
     """
     Generates a YARA Rule based on a given dict and stores

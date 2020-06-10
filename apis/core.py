@@ -6,7 +6,7 @@ from flask_restx import Namespace, Resource, fields, reqparse
 
 # from apis.custom_fields.list_data import ListData
 from apis import custom_fields
-from .handling import generate_yara_rule, add_yara_filenames, add_yara_filename
+from .handling import generate_yara_rule
 
 import handlers.git_handler as git
 from database.operations import update_rule, get_rule, get_rules
@@ -261,10 +261,7 @@ class RuleRequest(Resource):
     @api.response(200, "Success", model=db_rule_model)
     def get(self, id):
         """Returns a specific rule."""
-        rule = get_rule(thehive_case_id=id)
-        modified_rule = add_yara_filename(rule)
-
-        retv = jsonify(modified_rule)
+        retv = jsonify(get_rule(thehive_case_id=id))
         log.info("GET Rule '{id}' return JSON: {retv}".format(id=id, retv=json.dumps(retv.json, indent=4)))
 
         return retv
@@ -288,9 +285,8 @@ class RulesRequest(Resource):
     def get(self):
         """Returns all rules."""
         rules = get_rules()
-        rules_modified = add_yara_filenames(rules)
-
-        retv = jsonify(rules_modified)
-        log.info("GET rules return JSON: {}".format(json.dumps(retv.json, indent=4)))
+        retv = jsonify(rules)
+        log.info("GET rules return {num}x JSON{keys_list}:\n{js}".format(
+            num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
 
         return retv
