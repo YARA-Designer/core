@@ -84,6 +84,7 @@ yara_string_model = api.model("YARA-String", {
 
 db_rule_model = api.model('DB Rule', {
     "name": fields.String,
+    "title": fields.String,
     "thehive_case_id": fields.String,
     "namespace": fields.String,
     "tags": fields.List(fields.String),

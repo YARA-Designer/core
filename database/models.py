@@ -365,6 +365,7 @@ class YaraRuleDB(Base):
     def as_dict(self):
         return {
             "name": self.name,
+            "title": self.title,
             "thehive_case_id": self.thehive_case_id,
             "namespace": self.namespace,
             "tags": [t.name for t in self.tags],
