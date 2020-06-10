@@ -33,6 +33,8 @@ DEFAULT_CONFIG = {
 # Let's make sure we copy default config by value, not reference. So that it remains unmodified.
 CONFIG = copy.deepcopy(DEFAULT_CONFIG)
 
+CONFIG_OVERRIDES = {}
+
 
 def has_option(cfg: json, cfg_key: str):
     if cfg_key in cfg:
@@ -61,10 +63,13 @@ def update_sample_config(sample_config=SAMPLE_CONFIG_FILE):
 
 
 def set_custom_config_options(cfg: json):
-    global CONFIG
+    global CONFIG, CONFIG_OVERRIDES
 
     for key, value in cfg.items():
         CONFIG[key] = value
+
+        # Update record of what overrides have been applied.
+        CONFIG_OVERRIDES[key] = value
 
 
 def load_config(config_file=CONFIG_FILE):

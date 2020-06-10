@@ -78,7 +78,9 @@ if __name__ == "__main__":
     config = config_handler.load_config()
     log.info("Loaded configuration: '{}'.".format(
         config_handler.CONFIG_FILE if config_handler.has_custom_config() else 'default'))
-    log.debug("CONFIG:\n{}".format(json.dumps(config_handler.CONFIG, indent=4)))
+    log.debug("CONFIG (overrides: {overrides}):\n{js}".format(
+        overrides=config_handler.CONFIG_OVERRIDES,
+        js=json.dumps(config_handler.CONFIG, indent=4)))
 
     # Initialize database.
     init_db()
