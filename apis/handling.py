@@ -49,6 +49,8 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
     :param yara_sources_dict: dict on the form of:
         {
             name: str,
+            thehive_case_id" str,
+            namespace: str,
             tags: List[str],
             meta: {identifier, value, value_type},
             strings: [{identifier, value, value_type, string_type, modifiers, modifier_str, str}]
@@ -80,16 +82,16 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
     # Create YaraRule from given dict.
     try:
         rule = YaraRule.from_dict(yara_sources_dict)
-        retv["source"] = rule.__str__()
+        retv["source_code"] = rule.__str__()
     except Exception as exc:
         log.exception("An unexpected exception occurred when creating YaraRule from yara_sources_dict!", exc_info=exc)
         raise
-    log.debug("source: \n{}".format(retv["source"]))
+    log.debug("source code: \n{}".format(retv["source"]))
 
     # General catch-all try-block for any unforseen exceptions, in order to not kill backend on-exception.
     try:
         # Save rule source code to text file and store the returned filepath for use in frontend.
-        retv["generated_yara_source_file"] = rule.save_source()
+        retv["source_path"] = rule.save_source()
 
         # Compilation try-block to specifically catch syntax errors.
         try:
@@ -174,15 +176,15 @@ def reset_invalid_yara_rule(repo, filepath):
     repo.index.checkout([filepath], force=True)
 
 
-def generate_yara_rule(j: json):
-    log.debug("Received YARA Rule Dict: {}".format(j))
-    retv = {"in": j}
+def generate_yara_rule(yara_rule_json: json):
+    log.debug("Received YARA Rule Dict: {}".format(yara_rule_json))
+    retv = {"in": yara_rule_json}
 
     the_oracle_repo = git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
     # Processing status, return values and so forth.
     try:
 
-        retv["out"] = create_yara_file(j)
+        retv["out"] = create_yara_file(yara_rule_json)
         log.debug("Returned YARA Rule Dict: {}".format(retv))
 
         if not retv["out"]["success"]:
@@ -192,12 +194,12 @@ def generate_yara_rule(j: json):
 
     except Exception as exc:
         try:
-            if "name" in j:
+            if "name" in yara_rule_json:
                 log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
                 reset_invalid_yara_rule(the_oracle_repo, retv["out"]["generated_yara_source_file"])
             else:
                 log.error("Received JSON is missing VITAL key 'name', unable to git unstage!\nj = {}".format(
-                    json.dumps(j, indent=4)))
+                    json.dumps(yara_rule_json, indent=4)))
 
             retv["out"] = {
                 "success": False,

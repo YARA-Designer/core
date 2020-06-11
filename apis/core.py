@@ -2,10 +2,8 @@ import datetime
 import json
 
 from flask import make_response, jsonify, request
-from flask_restx import Namespace, Resource, fields, reqparse
+from flask_restx import Namespace, Resource, fields
 
-# from apis.custom_fields.list_data import ListData
-from apis import custom_fields
 from .handling import generate_yara_rule
 
 import handlers.git_handler as git
@@ -16,46 +14,6 @@ from handlers.log_handler import create_logger
 api = Namespace('core', description='Core API')
 
 log = create_logger(__name__)
-
-thehive_case_observables_model = api.model("TheHive-Case-Observables", {
-    "_id": fields.String,
-    "_parent": fields.String,
-    "_routing": fields.String,
-    "_type": fields.String,
-    "_version": fields.Integer,
-    "createdAt": fields.Integer,
-    "createdBy": fields.String,
-    "data": fields.String,
-    "dataType": fields.String,
-    "id": fields.String,
-    "ioc": fields.Boolean,
-    "message": fields.String,
-    "reports": fields.Raw(),
-    "sighted": fields.Boolean,
-    "startDate": fields.Integer,
-    "status": fields.String,
-    "tags": fields.List(fields.String),
-    "tlp": fields.Integer(min=0, max=3),
-    "updatedAt": fields.Integer,
-    "updatedBy": fields.String
-})
-
-thehive_case_model = api.model("TheHive-Case", {
-    "_id": fields.String,
-    "_parent": fields.String,
-    "_routing": fields.String,
-    "_type": fields.String,
-    "_version": fields.Integer,
-    "caseId": fields.Integer,
-    "createdAt": fields.Integer,
-    "createdBy": fields.String,
-    "customFields": fields.Raw(),
-    "description": fields.String,
-    "flag": fields.Boolean,
-    "id": fields.String,
-    "metrics": fields.Raw(),
-    "observables": fields.List(fields.Nested(thehive_case_observables_model))
-})
 
 yara_metadata_model = api.model("YARA-Metadata", {
     "identifier": fields.String(required=True, pattern=r"([a-zA-Z]([a-z0-9])+)"),
@@ -94,19 +52,65 @@ db_rule_model = api.model('DB Rule', {
     "added_on": fields.DateTime,
     "last_modified": fields.DateTime,
     "pending": fields.Boolean,
+    "compilable": fields.Boolean,
     "source_path": fields.String
 })
 
 db_rules_model = api.model('DB Rules', {
-    "": fields.List(fields.Nested(db_rule_model))
+    "rules": fields.List(fields.Nested(db_rule_model))
 })
 
-post_rule_model = api.model('POST Rule', {
+yara_rule_model = api.model('YARA-Rule', {
     "meta": fields.Nested(yara_metadata_model, required=True),
     "name": fields.String(required=True),
+    "namespace": fields.String,
     "tags": fields.List(fields.String, required=True),
     "strings": fields.List(fields.Nested(yara_string_model, required=True), required=True),
     "condition": fields.String(required=True)
+})
+
+error_or_warning_feedback_model = api.model('Warning or Error', {
+    "column_number": fields.Integer,
+    "line_number": fields.Integer,
+    "message": fields.String,
+    "type": fields.String,
+    "word": fields.String
+})
+
+post_yara_rule_output_model = api.model('POST YARA Rule Output', {
+    "compilable": fields.Boolean,
+    "success": fields.Boolean,
+    "source_code": fields.String,
+    "source_path": fields.String,
+    "error": fields.Nested(error_or_warning_feedback_model),
+    "has_warning": fields.Boolean,
+    "warning": fields.Nested(error_or_warning_feedback_model),
+})
+
+post_commit_input_model = api.model('POST Commit Input', {
+    "source_path": fields.String(required=True, description="Path to (YARA sourcecode) file to be commited."),
+    "name": fields.String(required=True, description="Name of YARA Rule (used in commit msg)."),
+    "thehive_case_id": fields.String(
+        required=True,
+        description="Used for fetching existing YARA Rule data from DB when performing an append operation.")
+})
+
+git_commit_model = api.model('Git Commit (Response)', {
+    "author_email": fields.String,
+    "author_username": fields.String,
+    "committed_date_custom": fields.String,
+    "committed_date_epoch": fields.Integer,
+    "committed_date_iso": fields.String,
+    "committer_email": fields.String,
+    "committer_username": fields.String,
+    "diff": fields.String,
+    "hexsha": fields.String,
+    "message": fields.String
+})
+
+post_commit_output_model = api.model('POST Commit Output', {
+    "commit": fields.Nested(git_commit_model, required=True),
+    "success": fields.Boolean(required=True)
 })
 
 # post_rule_model = api.schema_model('POST Rule', {
@@ -148,6 +152,8 @@ post_rule_model = api.model('POST Rule', {
 
 @api.route('/commit', methods=['POST'])
 class PostCommit(Resource):
+    @api.expect(post_commit_input_model)
+    @api.response(200, 'Success', model=post_commit_output_model)
     def post(self):
         """
 
@@ -168,7 +174,9 @@ class PostCommit(Resource):
                 }
             }
 
-        file_to_add = request.json["filepath"]
+        file_to_add = request.json["source_path"]
+        yara_rulename = request.json["name"]
+        thehive_case_id = request.json["thehive_case_id"]
 
         the_oracle_repo = git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
 
@@ -187,7 +195,7 @@ class PostCommit(Resource):
             log.debug("Tree differs: {}".format(tree_differs))
 
             if tree_differs:
-                commit_message = CONFIG["git_commit_msg_fmt"].format(rulename=request.json["rulename"])
+                commit_message = CONFIG["git_commit_msg_fmt"].format(rulename=yara_rulename)
                 git_author = git.Actor(CONFIG["git_username"], CONFIG["git_email"])
                 git_committer = git_author  # git.gitpy.Actor(config["git_username"], config["git_email"]
 
@@ -223,10 +231,19 @@ class PostCommit(Resource):
                     }
                 }
 
+                # Update rule in database:
+                # Get existing tags, meta and strings, in order to append instead of replace.
+                # existing_rule = get_rule()
+                existing_tags = None
+                existing_meta = None
+                existing_strings = None
+
+                # update_rule()
+
                 log.info("update_rule(case_id={cid}, "
-                         "yara_file={yara_filepath})".format(cid=request.json["case_id"],
-                                                             yara_filepath=request.json["filepath"]))
-                update_rule(request.json["case_id"], yara_file=request.json["filepath"], pending=False)
+                         "yara_file={yara_filepath})".format(cid=thehive_case_id,
+                                                             yara_filepath=file_to_add))
+                # update_rule(request.json["case_id"], yara_file=request.json["filepath"], pending=False)
             else:
                 log.warning("Git Commit ignored, file added to repo does not differ from working tree: '{fn}".format(
                     fn=file_to_add))
@@ -268,7 +285,8 @@ class RuleRequest(Resource):
 
         return retv
 
-    @api.response(200, "Success", model=post_rule_model)
+    @api.expect(yara_rule_model)
+    @api.response(200, "Success", model=post_yara_rule_output_model)
     def post(self):
         """
         Takes a JSON containing the recipe for a YARA Rule, then returns the generated YARA Rule.

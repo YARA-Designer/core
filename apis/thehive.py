@@ -1,7 +1,7 @@
 import json
 
 from flask import request, jsonify
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, fields
 from thehive4py.api import TheHiveApi
 
 from database.operations import has_row, update_rule, add_row
@@ -17,11 +17,68 @@ api = Namespace('thehive', description='TheHive and Cortex endpoint.')
 
 log = create_logger(__name__)
 
+thehive_case_observables_model = api.model("TheHive-Case-Observables", {
+    "_id": fields.String,
+    "_parent": fields.String,
+    "_routing": fields.String,
+    "_type": fields.String,
+    "_version": fields.Integer,
+    "createdAt": fields.Integer,
+    "createdBy": fields.String,
+    "data": fields.String,
+    "dataType": fields.String,
+    "id": fields.String,
+    "ioc": fields.Boolean,
+    "message": fields.String,
+    "reports": fields.Raw(),
+    "sighted": fields.Boolean,
+    "startDate": fields.Integer,
+    "status": fields.String,
+    "tags": fields.List(fields.String),
+    "tlp": fields.Integer(min=0, max=3),
+    "updatedAt": fields.Integer,
+    "updatedBy": fields.String
+})
+
+thehive_case_model = api.model("TheHive-Case", {
+    "_id": fields.String,
+    "_parent": fields.String,
+    "_routing": fields.String,
+    "_type": fields.String,
+    "_version": fields.Integer,
+    "caseId": fields.Integer,
+    "createdAt": fields.Integer,
+    "createdBy": fields.String,
+    "customFields": fields.Raw(),
+    "description": fields.String,
+    "flag": fields.Boolean,
+    "id": fields.String,
+    "metrics": fields.Raw()
+})
+
+thehive_case_with_observables_model = api.model("TheHive-Case (Modified to contain observables)", {
+    "_id": fields.String,
+    "_parent": fields.String,
+    "_routing": fields.String,
+    "_type": fields.String,
+    "_version": fields.Integer,
+    "caseId": fields.Integer,
+    "createdAt": fields.Integer,
+    "createdBy": fields.String,
+    "customFields": fields.Raw(),
+    "description": fields.String,
+    "flag": fields.Boolean,
+    "id": fields.String,
+    "metrics": fields.Raw(),
+    "observables": fields.List(fields.Nested(thehive_case_observables_model))
+})
+
 
 @api.route('/cortex-responder')
 class CortexResponder(Resource):
+    @api.expect(thehive_case_model)
     @api.response(400, 'Request data type mismatch')
-    @api.response(200, "JSON response")
+    @api.response(200, "JSON response", model=thehive_case_with_observables_model)
     def post(self):
         """Receives a thehive:case from a Cortex Responder in JSON format."""
         if request.form is None:

@@ -205,6 +205,7 @@ class YaraRuleDB(Base):
     namespace = Column(VARCHAR)
     pending = Column(Boolean)
     source_path = Column(VARCHAR)
+    compilable = Column(Boolean)
 
     def __init__(self,
                  name: str = None,
@@ -217,6 +218,7 @@ class YaraRuleDB(Base):
                  condition: str = None,
                  namespace: str = None,
                  source_path: str = None,
+                 compilable: bool = False,
                  pending: bool = True):
 
         self.added_on = datetime.datetime.utcnow()
@@ -233,6 +235,7 @@ class YaraRuleDB(Base):
         self.condition = condition
         self.namespace = namespace
         self.source_path = source_path
+        self.compilable = compilable
         self.pending = pending
 
     def set_tags(self, tags: List[str], session=None):
@@ -376,6 +379,7 @@ class YaraRuleDB(Base):
             "added_on": self.added_on,
             "last_modified": self.last_modified,
             "source_path": self.source_path,
+            "compilable": self.compilable,
             "pending": bool(self.pending)
         }
 
@@ -404,5 +408,6 @@ class YaraRuleDB(Base):
                "added_on='{added_on}, " \
                "last_modified='{last_modified}, " \
                "source_path='{source_path}, " \
+               "compilable='{compilable}, " \
                "pending='{pending})>".format(
                 class_name=self.__class__.__name__, id=self.id, **self.as_dict())

@@ -7,6 +7,9 @@ from database.models import YaraRuleDB, YARA_RULE_DB_RELATION_COLUMNS
 from handlers.log_handler import create_logger
 from utils import dict_to_json
 
+REPLACE_OP = 0
+APPEND_OP = 1
+
 log = create_logger(__name__)
 
 
