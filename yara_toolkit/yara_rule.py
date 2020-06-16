@@ -191,6 +191,50 @@ class YaraRule:
                    condition=dct["condition"])
 
     @classmethod
+    def from_source_file(cls, source_path=None):
+        """Initialize YaraRule from sourcecode."""
+        try:
+            # Compile the YARA source code (only way to get yara-python to parse the thing)
+            yar_compiled = yara.compile(filepath=source_path)
+            log.debug(yar_compiled)
+
+            # Get the parsed source code via yara.Rules.match
+            yar_src = yar_compiled.match(filepath=source_path)[0]
+
+            name = yar_src.rule
+            namespace = yar_src.namespace
+            tags = yar_src.tags
+            meta = [YaraMeta(identifier, value) for identifier, value in yar_src.meta.items()]
+            strings = [YaraString(identifier, value.decode('utf-8')) for offset, identifier, value in yar_src.strings]
+
+            # Get condition from the sourcecode file by hand due to it not being part of yara.Rules.
+            condition = None
+            this_is_the_condition = False
+            with open(source_path, 'r') as f:
+                for line in f.readlines():
+                    if this_is_the_condition:
+                        # Strip leading whitespace/indent.
+                        for i in range(len(line)):
+                            if line[i] == ' ':
+                                continue
+                            else:
+                                condition = line[i:]
+                                break
+                        break
+
+                    if 'condition' in line.lower():
+                        # Next line will contain the actual condition, this one just has the declaration.
+                        this_is_the_condition = True
+
+            log.debug(condition)
+
+            return cls(name, tags, meta, strings, condition, namespace=namespace)
+
+        except Exception as exc:
+            log.exception("YaraRule.from_source_file exc", exc_info=exc)
+            return None
+
+    @classmethod
     def from_compiled_file(cls, yara_rules: Union[yara.Rules, str],
                            source_filename=None, compiled_filepath=None,
                            condition: str = None, rules_dir=RULES_DIR, timeout=60):
