@@ -196,7 +196,6 @@ class YaraRule:
         try:
             # Compile the YARA source code (only way to get yara-python to parse the thing)
             yar_compiled = yara.compile(filepath=source_path)
-            log.debug(yar_compiled)
 
             # Get the parsed source code via yara.Rules.match
             yar_src = yar_compiled.match(filepath=source_path)[0]
