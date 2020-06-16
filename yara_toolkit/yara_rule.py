@@ -445,7 +445,9 @@ class YaraRule:
                     source=self.__str__(condition_as_lines=True), error_on_warning=error_on_warning, **kwargs)
 
             except yara.SyntaxError as yara_condition_newlined_exc:
-                log.info("Caught YARA Syntax Error with newlined condition", exc_info=yara_condition_newlined_exc)
+                log.info("Caught YARA Syntax Error with newlined condition, "
+                         "now determining the column (and range) that failed, "
+                         "then raising an improved Syntax Exception...", exc_info=yara_condition_newlined_exc)
                 splitline_number = int(str(e).split(':')[0].split(' ')[-1])
 
                 # Determine the column (and range) that failed,

@@ -1,3 +1,6 @@
+from typing import Union, List
+
+from handlers.log_handler import create_logger
 from yara_toolkit.utils import sanitize_identifier, delimiter_wrap_type
 
 YARA_VAR_SYMBOL = "$"
@@ -54,6 +57,16 @@ class YaraStringModifierInvalidKeyword(Exception):
         return self.message
 
 
+class YaraStringModifierInvalidModifierType(Exception):
+    def __init__(self, message: str, modifier=None):
+        super().__init__(message)
+        self.message = message
+        self.modifier = modifier
+
+    def __str__(self):
+        return self.message
+
+
 class YaraStringModifier:
     def __init__(self, keyword, data=None):
         """
@@ -95,35 +108,36 @@ class YaraStringModifier:
         return "YaraStringModifier(type={mod_keyword}, data={data})".format(mod_keyword=self.keyword, data=self.data)
 
 
-def validate_modifiers(modifiers: list):
+def validate_modifiers(modifier_objects: list):
     """
-    Validates modifiers by checking that keyowrd restriction are upheld.
+    Validates modifiers by checking that keyword restriction are upheld.
 
     If not valid, raise a YaraModifierRestrictionError exception.
 
-    :param modifiers:
+    :param modifier_objects:
     :return:
     """
     restrictions = []
 
     # Build a list of restricted keywords to compare against every type.
-    for modifier in modifiers:
+    for modifier_obj in modifier_objects:
         # Update restrictions list
-        restrictions.extend(MOD_RESTRICTIONS[modifier["keyword"]])
+        restrictions.extend(MOD_RESTRICTIONS[modifier_obj.keyword])
 
-    for modifier in modifiers:
-        if modifier["keyword"] in restrictions:
+    for modifier_obj in modifier_objects:
+        if modifier_obj.keyword in restrictions:
             raise YaraStringModifierRestrictionError(
-                "Cannot use YARA String modifier {mod_keyword} with modifiers: {items}"
-                "".format(mod_keyword=modifier["keyword"], items=", ".join(MOD_RESTRICTIONS[modifier["keyword"]])),
-                modifiers)
+                "Cannot use YARA String modifier {mod_keyword} with modifiers: {items}".format(
+                    mod_keyword=modifier_obj.keyword,
+                    items=", ".join(MOD_RESTRICTIONS[modifier_obj.keyword])
+                ), modifier_objects)
 
 
 class YaraString:
     modifiers = []
 
     def __init__(self, identifier: str = None, value: str = None, value_type: str = None, string_type: str = TEXT_TYPE,
-                 modifiers: list = None, from_dict: dict = None):
+                 modifiers: List[Union[str, dict, YaraStringModifier]] = None, from_dict: dict = None):
         """
         YARA String with optional modifiers.
 
@@ -134,6 +148,7 @@ class YaraString:
                                 Valid modifiers: nocase, wide, ascii, xor, base64, base64wide, fullword or private.
         :param from_dict:       Define YARA String from a dict instead of individual values.
         """
+        self.log = create_logger(__name__)
         self.identifier = None
 
         if from_dict is not None:
@@ -141,6 +156,7 @@ class YaraString:
         else:
             self.determine_identifier(identifier)
 
+            self.value_type = value_type
             # Set value by specified value_type argument.
             if value_type:
                 if value_type == 'str' or value_type == str:
@@ -156,12 +172,36 @@ class YaraString:
             self.value = value
 
             if modifiers is not None and len(modifiers) > 0:
-                # Throws exception if not valid.
-                validate_modifiers(modifiers)
-
+                # Ensure modifiers are instances of YaraStringModifier
+                yara_string_modifier_objects = []
                 for modifier in modifiers:
-                    data = modifier["data"] if "data" in modifier else None
-                    self.modifiers.append(YaraStringModifier(modifier["keyword"], data))
+                    if isinstance(modifier, str):
+                        self.log.info("Converting YARA String modifier keyword='{keyword}', type='str' "
+                                      "to YaraStringModifier object...".format(keyword=modifier))
+
+                        yara_string_modifier_objects.append(YaraStringModifier(modifier))
+                    elif isinstance(modifier, dict):
+                        self.log.info("Converting YARA String modifier keyword='{keyword}', data={data}, type='dict' "
+                                      "to YaraStringModifier object...".format(
+                                        keyword=modifier["keyword"], data=modifier["data"]))
+
+                        yara_string_modifier_objects.append(YaraStringModifier(modifier["keyword"], modifier["data"]))
+                    elif isinstance(modifier, YaraStringModifier):
+                        self.log.debug("Appending YaraStringModifier object to list: '{obj}'".format(obj=modifier))
+
+                        yara_string_modifier_objects.append(modifier)
+                    else:
+                        raise YaraStringModifierInvalidModifierType(
+                            "Got modifier '{modifier}' of invalid type "
+                            "(must be either str, dict or YaraStringModifier)!".format(modifier=modifier),
+                            modifier
+                        )
+
+                # Throws exception if not valid.
+                validate_modifiers(yara_string_modifier_objects)
+
+                # If no exception was thrown store the valid modifiers list.
+                self.modifiers = yara_string_modifier_objects
 
         if string_type is None:
             self.determine_type()
@@ -171,7 +211,11 @@ class YaraString:
     def __str__(self):
         modifiers = " {}".format(" ".join([str(modifier) for modifier in self.modifiers])) if self.modifiers else ""
 
-        value = delimiter_wrap_type(self.value, self.type)
+        # Only wrap str types.
+        if self.value_type == 'str' or self.value_type == str:
+            value = delimiter_wrap_type(self.value, self.type)
+        else:
+            value = self.value
 
         return '{var_sym}{identifier} = {value}{modifiers}'.format(var_sym=YARA_VAR_SYMBOL, identifier=self.identifier,
                                                                    value=value, modifiers=modifiers)
