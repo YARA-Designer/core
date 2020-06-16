@@ -183,7 +183,6 @@ def generate_yara_rule(yara_rule_json: json):
     the_oracle_repo = git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
     # Processing status, return values and so forth.
     try:
-
         retv["out"] = create_yara_file(yara_rule_json)
         log.debug("Returned YARA Rule Dict: {}".format(retv))
 
@@ -195,8 +194,16 @@ def generate_yara_rule(yara_rule_json: json):
     except Exception as exc:
         try:
             if "name" in yara_rule_json:
-                log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
-                reset_invalid_yara_rule(the_oracle_repo, retv["out"]["generated_yara_source_file"])
+                if "out" in retv:
+                    if "generated_yara_source_file" in retv["out"]:
+                        log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
+                        reset_invalid_yara_rule(the_oracle_repo, retv["out"]["generated_yara_source_file"])
+                    else:
+                        log.info("Unable to reset invalid changed file to avoid git-within-git changelist issues: "
+                                 "'generated_yara_source_file' not in retv[\"out\"]!")
+                else:
+                    log.info("Unable to reset invalid changed file to avoid git-within-git changelist issues: "
+                             "'out' not in retv!")
             else:
                 log.error("Received JSON is missing VITAL key 'name', unable to git unstage!\nj = {}".format(
                     json.dumps(yara_rule_json, indent=4)))
@@ -220,6 +227,8 @@ def generate_yara_rule(yara_rule_json: json):
                 }
             }
             log.error("Exception occurred git checkout: {}".format(retv), exc_info=exc2)
+        finally:
+            return retv
 
     return retv
 
