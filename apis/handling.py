@@ -138,7 +138,7 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
                 "word": syn_exc.word
             }
 
-            log.exception("YaraRuleSyntaxError Exception!", exc_info=syn_exc)
+            log.exception("Caught (improved) YaraRuleSyntaxError Exception; returning!", exc_info=syn_exc)
 
             return retv
 
@@ -183,21 +183,26 @@ def generate_yara_rule(yara_rule_json: json):
     retv = {"in": yara_rule_json}
 
     the_oracle_repo = git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
-    # Processing status, return values and so forth.
+
+    # Try to create a YARA file.
     try:
         retv["out"] = create_yara_file(yara_rule_json)
         log.debug("Returned YARA Rule Dict: {}".format(retv))
+    except Exception as create_yara_file_exc:
+        log.exception("Unexpected Exception occurred when creating YARA file!", exc_info=create_yara_file_exc)
+        raise
 
+    # Try to git unstage if creation of YARA file was not successful.
+    try:
         if not retv["out"]["success"]:
             if not retv["out"]["compilable"]:
                 log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
-                reset_invalid_yara_rule(the_oracle_repo, retv["out"]["generated_yara_source_file"])
-
+                reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
     except Exception as exc:
         try:
             if "name" in yara_rule_json:
                 if "out" in retv:
-                    if "generated_yara_source_file" in retv["out"]:
+                    if "source_path" in retv["out"]:
                         log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
                         reset_invalid_yara_rule(the_oracle_repo, retv["out"]["generated_yara_source_file"])
                     else:
