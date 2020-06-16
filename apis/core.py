@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 
 from flask import make_response, jsonify, request
 from flask_restx import Namespace, Resource, fields
@@ -333,3 +334,4 @@ class RulesRequest(Resource):
             num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
 
         return retv
+

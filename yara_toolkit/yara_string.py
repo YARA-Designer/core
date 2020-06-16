@@ -107,6 +107,9 @@ class YaraStringModifier:
     def __repr__(self):
         return "YaraStringModifier(type={mod_keyword}, data={data})".format(mod_keyword=self.keyword, data=self.data)
 
+    def as_dict(self):
+        return {"keyword": self.keyword, "data": self.data}
+
 
 def validate_modifiers(modifier_objects: list):
     """
@@ -208,9 +211,10 @@ class YaraString:
         else:
             self.type = string_type
 
-    def __str__(self):
-        modifiers = " {}".format(" ".join([str(modifier) for modifier in self.modifiers])) if self.modifiers else ""
+    def modifiers_str(self):
+        return " {}".format(" ".join([str(modifier) for modifier in self.modifiers])) if self.modifiers else ""
 
+    def __str__(self):
         # Convert non-str values to strings before wrapping.
         if self.value_type != 'str' or self.value_type != str:
             value = delimiter_wrap_type(str(self.value), self.type)
@@ -218,7 +222,7 @@ class YaraString:
             value = delimiter_wrap_type(self.value, self.type)
 
         return '{var_sym}{identifier} = {value}{modifiers}'.format(var_sym=YARA_VAR_SYMBOL, identifier=self.identifier,
-                                                                   value=value, modifiers=modifiers)
+                                                                   value=value, modifiers=self.modifiers_str())
 
     def __repr__(self):
         return "YaraString(identifier={identifier}, value={value}, modifiers={modifiers})".format(
@@ -231,9 +235,6 @@ class YaraString:
         else:
             self.identifier = sanitize_identifier(identifier)
 
-    def determine_type(self):
-        pass
-
     def create_from_dict(self, from_dict):
         self.determine_identifier(from_dict.keys()[0])
         self.value = from_dict["observable"]
@@ -245,3 +246,20 @@ class YaraString:
             for modifier in from_dict["modifiers"]:
                 data = modifier["data"] if "data" in modifier else None
                 self.modifiers.append(YaraStringModifier(modifier["keyword"], data))
+
+    def as_dict(self):
+        d = {
+            "identifier": self.identifier,
+            "value": self.value,
+            "value_type": self.value_type,
+            "string_type": self.type,
+            "modifiers": [m.as_dict() for m in self.modifiers],
+            "modifier_str": self.modifiers_str(),
+            "str": self.__str__()
+        }
+
+        return d
+
+    def determine_type(self):
+        # FIXME: Implement
+        pass

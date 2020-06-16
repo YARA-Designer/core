@@ -61,3 +61,6 @@ class YaraMeta:
         return "{identifier} = {value}".format(
             identifier=self.identifier,
             value=delimiter_wrap_type(self.value, self.type) if isinstance(self.value, str) else str(self.value))
+
+    def as_dict(self):
+        return {"identifier": self.identifier, "value": self.value, "value_type": self.value_type}
