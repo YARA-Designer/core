@@ -211,11 +211,11 @@ class YaraString:
     def __str__(self):
         modifiers = " {}".format(" ".join([str(modifier) for modifier in self.modifiers])) if self.modifiers else ""
 
-        # Only wrap str types.
-        if self.value_type == 'str' or self.value_type == str:
-            value = delimiter_wrap_type(self.value, self.type)
+        # Convert non-str values to strings before wrapping.
+        if self.value_type != 'str' or self.value_type != str:
+            value = delimiter_wrap_type(str(self.value), self.type)
         else:
-            value = self.value
+            value = delimiter_wrap_type(self.value, self.type)
 
         return '{var_sym}{identifier} = {value}{modifiers}'.format(var_sym=YARA_VAR_SYMBOL, identifier=self.identifier,
                                                                    value=value, modifiers=modifiers)

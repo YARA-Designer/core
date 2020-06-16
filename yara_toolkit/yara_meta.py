@@ -37,6 +37,7 @@ class YaraMeta:
     def __init__(self, identifier: str, value: Union[str, bool, int], value_type: str = None):
         self.identifier = sanitize_identifier(identifier)
 
+        self.value_type = value_type
         # Set value by specified value_type argument.
         if value_type:
             if value_type == 'str' or value_type == str:
