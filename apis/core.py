@@ -297,7 +297,28 @@ class RuleRequest(Resource):
             mimetype=" ({})".format(request.headers['Content-Type']) if 'Content-Type' in request.headers else "")
         )
 
-        return jsonify(generate_yara_rule(request.json))
+        retv = {
+            "in": request.json,
+            "out": {}
+        }
+        try:
+            retv = generate_yara_rule(request.json)
+        except Exception as exc:
+            retv["out"] = {
+                "source": None,
+                "success": False,
+                "has_warning": False,
+                "compilable": False,
+                "error": {
+                    "type": "Exception",
+                    "message": str(exc),
+                    "line_number": None,
+                    "column_number": None,
+                    "word": None
+                }
+            }
+
+        return jsonify(retv)
 
 
 @api.route('/rules', methods=['GET'])
