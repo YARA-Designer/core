@@ -306,7 +306,7 @@ class RulesRequest(Resource):
     def get(self):
         """Returns all rules."""
         rules = get_rules()
-        retv = jsonify(rules)
+        retv = jsonify({"rules": rules})
         log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(
             route='/rules',
             num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
