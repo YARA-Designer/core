@@ -84,7 +84,9 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
         rule = YaraRule.from_dict(yara_sources_dict)
         retv["source_code"] = rule.__str__()
     except Exception as exc:
-        log.exception("An unexpected exception occurred when creating YaraRule from yara_sources_dict!", exc_info=exc)
+        log.exception(
+            "An unexpected exception occurred when creating YaraRule from yara_sources_dict! Raising to parent.",
+            exc_info=exc)
         raise
     log.debug("source code: \n{}".format(retv["source"]))
 
