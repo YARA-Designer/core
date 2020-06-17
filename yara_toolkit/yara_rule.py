@@ -217,7 +217,7 @@ class YaraRule:
                             if line[i] == ' ':
                                 continue
                             else:
-                                condition = line[i:]
+                                condition = line[i:].strip('\n')
                                 break
                         break
 
