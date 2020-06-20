@@ -97,7 +97,6 @@ class RulesOracleRequest(Resource):
     def get(self):
         """Returns all rules."""
         theoracle_rules_dir = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"])
-        print(CONFIG["theoracle_repo_rules_dir"])
         yara_files = os.listdir(theoracle_rules_dir)
         retv = jsonify({"files": yara_files})
         # log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(

@@ -95,12 +95,22 @@ class YaraStringModifier:
         self.keyword = keyword
         self.data = data
 
+    def wrapped_data(self):
+        """
+        Wraps certain data based on keyword to adhere to YARA syntax.
+        :return:
+        """
+        if self.keyword == BASE64 or self.keyword == BASE64_WIDE:
+            return '"{data}"'.format(data=self.data)
+        else:
+            return self.data
+
     def __str__(self):
         """
         :return: type or type(data)
         """
         if self.data is not None:
-            return "{mod_keyword}({data})".format(mod_keyword=self.keyword, data=self.data)
+            return "{mod_keyword}({data})".format(mod_keyword=self.keyword, data=self.wrapped_data())
         else:
             return self.keyword
 
