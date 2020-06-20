@@ -1,3 +1,4 @@
+import copy
 import os
 import re
 from pathlib import Path
@@ -192,7 +193,185 @@ class YaraRule:
 
     @classmethod
     def from_source_file(cls, source_path=None):
-        """Initialize YaraRule from sourcecode."""
+        """Initialize YaraRule from sourcecode using own custom written parser."""
+        try:
+            source_code = None
+            with open(source_path, 'r') as f:
+                source_code = f.read()
+
+            log.debug(source_code)
+
+            constructor_line_pattern = re.compile(
+                r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)(?P<tag_body>(?P<tag_delimiter>:)\s+(?P<tags>[\s+\w]+))?\{(?P<rule_body>.*)\}",
+                re.MULTILINE | re.DOTALL)
+
+            constructor_line_match = constructor_line_pattern.search(source_code)
+
+            rule_pattern = re.compile(
+                r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)"
+                r"(?P<tag_body>(?P<tag_delimiter>:)\s+(?P<tags>[\s+\w]+))?"
+                r"\{(?P<body>.*(?P<meta_body>(?P<meta_constructor>meta:)\s+(?P<meta_content>.*\w))?\s+"
+                r"(?P<strings_body>(?P<strings_constructor>strings:)\s+(?P<strings_content>.*[\w\}\)]))?.*)"
+                r"(?P<condition_body>(?P<condition_constructor>condition:)\s+(?P<condition_content>.*)).*\}",
+                re.MULTILINE | re.DOTALL
+            )
+
+            rule_match = constructor_line_pattern.search(source_code)
+
+            log.debug(rule_match.groupdict())
+
+            name = rule_match.groupdict()["rule_identifier"]
+            tags = rule_match.groupdict()["tags"]
+            # condition = rule_match.groupdict()["condition_content"]
+            condition = None
+
+            body = rule_match.groupdict()["rule_body"]
+
+            log.debug("body:\n{}".format(body))
+
+            ####### Seek thru the whole shebang until you match keyword.
+            # Split on whitespace to eliminate it as a factor.
+            body_items = []
+            for item in body.split(' '):
+                if item != '':
+                    body_items.append(item)
+
+            log.info(body_items)
+
+            # Create a copy of body to break down in order to find the true meta and string keywords
+            modified_body = copy.deepcopy(body)
+            log.info("modified body:\n{}".format(modified_body))
+            # modified_body = re.sub(r"\".*\"")
+
+            # Make a pass to replace all string values with placeholders.
+            inside_quoted_string = False
+            inside_regex_string = False
+            inside_hex_string = False
+            inside_escape_sequence = False
+            inside_multichar_escape_sequence = False
+            inside_comment_line = False
+            comment_line = ""
+            comment_lines = []
+            inside_comment_block = False
+            comment_block = ""
+            comment_blocks = []
+            string_safe_body = ""
+            escape_terminators = ['\\', '"', 't', 'n']
+            escape_chars_not_to_replace = ['\n', '\t', '\r', '\b', '\f']
+            chars_not_to_replace = escape_chars_not_to_replace
+            chars_not_to_replace.extend(' ')
+            separators = [' ', '\n', '\t']
+
+            def is_hex_esc_sequence(s):
+                """Takes a string 's' and determines if it is a hex escape sequence."""
+                p = re.compile(r"^\\x[0-9][0-9]$")
+                m = p.match(s)
+                if m:
+                    return True
+                else:
+                    return False
+
+            last_line_start_index = 0
+            line = ""
+            for i in range(len(modified_body)):
+                c = modified_body[i]  # Helps on readability.
+                line += c
+                if c == '\n':
+                    log.info("line: {}".format(modified_body[last_line_start_index:i]))
+                    last_line_start_index = i+1
+                    line = ""
+
+                if inside_quoted_string:
+                    if inside_escape_sequence:
+                        if inside_multichar_escape_sequence:
+                            if is_hex_esc_sequence(modified_body[i-3:i+1]):
+                                inside_escape_sequence = False
+                                inside_multichar_escape_sequence = False
+                        else:
+                            if c in escape_terminators:
+                                inside_escape_sequence = False
+                            else:
+                                # If the char after \ isn't a terminator, then this is a hex/multichar escape sequence.
+                                inside_multichar_escape_sequence = True
+                    else:
+                        if c == '\\':
+                            inside_escape_sequence = True
+                        elif c == '"':
+                            inside_quoted_string = False
+
+                    # Replace current char with safe placeholder.
+                    string_safe_body += '#'
+                elif inside_regex_string:
+                    if c == '/' and modified_body[i+1] in separators:
+                        inside_regex_string = False
+
+                    # Replace current char with safe placeholder.
+                    string_safe_body += '~'
+                elif inside_hex_string:
+                    if c == '}' and modified_body[i + 1] in separators:
+                        inside_hex_string = False
+
+                    # Replace current char with safe placeholder.
+                    string_safe_body += '¤'
+                elif inside_comment_line:
+                    comment_line += c
+
+                    if c == '\n':
+                        string_safe_body += c
+                        log.info("comment line: {}".format(comment_line))
+                        comment_lines.append(comment_line)
+                        comment_line = ""
+                        inside_comment_line = False
+                    else:
+                        string_safe_body += '@'
+                elif inside_comment_block:
+                    comment_block += c
+
+                    if c == '/' and modified_body[i-1] == '*':
+                        string_safe_body += '%'
+                        inside_comment_block = False
+                    else:
+                        log.info("comment block: {}".format(comment_block))
+                        comment_blocks.append(comment_block)
+                        comment_block = ""
+                        string_safe_body += '%' if c not in chars_not_to_replace else c
+                else:
+                    if c == '"':
+                        inside_quoted_string = True
+                        string_safe_body += '#'
+                    elif c == '/' and modified_body[i+1] != '/' and modified_body[i+1] != '*':
+                        inside_regex_string = True
+                    elif c == '{':
+                        inside_hex_string = True
+                    elif c == '/' and modified_body[i+1] == '/':
+                        inside_comment_line = True
+                        comment_line += c
+                        string_safe_body += '@'
+                    elif c == '/' and modified_body[i+1] == '*':
+                        inside_comment_block = True
+                        string_safe_body += '%'
+                    else:
+                        string_safe_body += c
+
+            log.info(string_safe_body)
+
+            # Make a second pass with a pattern that doesn't use dotall, in order to better parse each sub-body,
+            meta = None
+            strings = None
+
+            log.debug("name={}, tags={}, meta={}, strings={}, condition={}".format(name, tags, meta, strings, condition))
+
+            return None
+
+            return cls(name, tags, meta, strings, condition)
+
+        except Exception as exc:
+            log.exception("YaraRule.from_source_file exc", exc_info=exc)
+            return None
+
+    @classmethod
+    def from_source_file_yara_python(cls, source_path=None):
+        """Initialize YaraRule from sourcecode using the limited yara-python API."""
         try:
             # Compile the YARA source code (only way to get yara-python to parse the thing)
             yar_compiled = yara.compile(filepath=source_path)
@@ -230,7 +409,7 @@ class YaraRule:
             return cls(name, tags, meta, strings, condition, namespace=namespace)
 
         except Exception as exc:
-            log.exception("YaraRule.from_source_file exc", exc_info=exc)
+            log.exception("YaraRule.from_source_file_yara_python exc", exc_info=exc)
             return None
 
     @classmethod
