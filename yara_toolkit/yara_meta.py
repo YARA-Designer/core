@@ -64,3 +64,11 @@ class YaraMeta:
 
     def as_dict(self):
         return {"identifier": self.identifier, "value": self.value, "value_type": self.value_type}
+
+    def __repr__(self):
+        return "<{class_name}(" \
+               "identifier='{identifier}', " \
+               "value='{value}', " \
+               "value_type='{value_type}" \
+               ")>".format(
+                class_name=self.__class__.__name__, **self.as_dict())
