@@ -424,7 +424,6 @@ class YaraRule:
 
                     meta.append(YaraMeta(identifier, value, value_type))
 
-                # meta = [YaraMeta(d["identifier"], d["value"], determine_value_type(d["value"])) for d in match_dicts]
                 log.info("Parsed YaraMeta objects:\n{}".format(json.dumps([repr(o) for o in meta], indent=4)))
 
             if strings_index > -1:
@@ -433,7 +432,7 @@ class YaraRule:
 
                 # Parse strings body items into a list of regex match group dicts.:
                 p = re.compile(
-                    r"\s*(?P<full>(?P<identifier>\w+)\s*=\s*(?P<value>\".*\"|true|false|[0-9]*)).*",
+                    r"\s*(?P<item>(?P<identifier>\w+)\s*=\s*(?P<value>\".*\"|true|false|[0-9]*)).*",
                     re.MULTILINE)
 
                 # Use finditer() to get a sequence of match objects, in order to get the groupdict for each match.
@@ -445,7 +444,14 @@ class YaraRule:
 
             # FIXME: Insert condition parsing here.
 
-            log.debug("name={}, tags={}, meta={}, strings={}, condition={}".format(name, tags, meta, strings, condition))
+            parsed_source = {
+                "name": name,
+                "tags": tags,
+                "meta": [repr(o) for o in meta] if isinstance(meta, list) else None,
+                "strings": [repr(o) for o in strings] if isinstance(strings, list) else None,
+                "condition": condition
+            }
+            log.info("parsed_source:\n{}".format(json.dumps(parsed_source, indent=4)))
 
             return None
 
