@@ -455,7 +455,8 @@ class YaraRule:
                         # So we'll have to check for that the string ends in '")' followed by a separator.
                         if c == ')' and modified_body[i-1] == '"' and modified_body[i+1] in separators:
                             if len(modifier_string) > 0:
-                                add_modifier(modifier_string, modifier_payload_string, modifiers)
+                                # [1:-1]: Skip first and last index which are the redundant quotes.
+                                add_modifier(modifier_string, modifier_payload_string[1:-1], modifiers)
                                 modifier_string = ""
                                 modifier_payload_string = ""
                             inside_base64_modifier_payload_segment = False
