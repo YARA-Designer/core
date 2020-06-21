@@ -350,7 +350,6 @@ class YaraRule:
         inside_comment_line = False
         inside_comment_block = False
         inside_possible_modifiers_segment = False
-        inside_modifier_payload_segment = False
         inside_base64_modifier_payload_segment = False
         inside_xor_modifier_payload_segment = False
 
@@ -358,7 +357,6 @@ class YaraRule:
         comment_lines = []
         comment_block = ""
         comment_blocks = []
-        string_safe_body = ""
         escape_terminators = ['\\', '"', 't', 'n']
         escape_chars_not_to_replace = ['\n', '\t', '\r', '\b', '\f']
         chars_not_to_replace = escape_chars_not_to_replace
@@ -376,10 +374,6 @@ class YaraRule:
         has_processed_at_least_one_item = False
         last_line_start_index = 0
         line = ""
-
-        # def clear_modifier_string(s):
-        #     """"Destructively clear string s"""
-        #     s = ""
 
         def add_modifier(kw, data, mod_list):
             mod_list.append({
@@ -489,9 +483,8 @@ class YaraRule:
                             # be in the modifier payload segment (saving us from accidentally going out of range).
                             if i > len(keyword):
                                 backtracked_keyword = modified_body[i-len(keyword):i]
-                                print(backtracked_keyword)
                                 if backtracked_keyword == keyword:
-                                    inside_modifier_payload_segment = True
+                                    # log.debug("matched backtracked keyword: {}".format(backtracked_keyword))
 
                                     # Different modifier payload needs different handling,
                                     # especially in terms of how to recognise terminator.
@@ -502,9 +495,8 @@ class YaraRule:
                                     else:
                                         raise ValueError(
                                             "Invalid backtracked modifier payload segment: {}".format(keyword))
-
                     # Make sure there exists more characters ahead, before attempting inner lookahead logic.
-                    if len(modified_body) > i+1:
+                    elif len(modified_body) > i+1:
                         # Check that we're not actually inside a comment segment
                         # or other such things that exist in the void.
                         if c == '/' and modified_body[i + 1] == '/':
@@ -528,11 +520,6 @@ class YaraRule:
                         # condition that needs to be triggered when c == YARA_VAR_SYMBOL.
                         if modified_body[i+1] == YARA_VAR_SYMBOL:
                             if len(modifier_string) > 0:
-                                # modifiers.append({
-                                #     "keyword": modifier_string,
-                                #     "data": None
-                                # })
-                                #
                                 add_modifier(modifier_string, None, modifiers)
                                 modifier_string = ""
 
@@ -550,11 +537,6 @@ class YaraRule:
                             modifier_string += c
 
                         if len(modifier_string) > 0:
-                            # modifiers.append({
-                            #     "keyword": modifier_string,
-                            #     "data": None
-                            # })
-                            #
                             add_modifier(modifier_string, None, modifiers)
                             modifier_string = ""
 
@@ -751,7 +733,7 @@ class YaraRule:
             }
             log.info("parsed_source:\n{}".format(json.dumps(parsed_source, indent=4)))
 
-            return None
+            # return None
 
             return cls(name, tags, meta, strings, condition)
 
