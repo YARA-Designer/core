@@ -10,9 +10,9 @@ from yara import WarningError as YaraWarningError
 from yara import TimeoutError as YaraTimeoutError
 
 from handlers.log_handler import create_logger
-from yara_toolkit.utils import sanitize_identifier, determine_value_type
+from yara_toolkit.utils import sanitize_identifier, determine_value_type, is_hex_esc_sequence
 from yara_toolkit.yara_meta import YaraMeta
-from yara_toolkit.yara_string import YaraString
+from yara_toolkit.yara_string import YaraString, TEXT_TYPE, HEX_TYPE, REGEX_TYPE
 from yara_toolkit.keywords import KEYWORDS
 from handlers.config_handler import CONFIG
 
@@ -230,15 +230,6 @@ class YaraRule:
         chars_not_to_replace.extend(' ')
         separators = [' ', '\n', '\t']
 
-        def is_hex_esc_sequence(s):
-            """Takes a string 's' and determines if it is a hex escape sequence."""
-            p = re.compile(r"^\\x[0-9][0-9]$")
-            m = p.match(s)
-            if m:
-                return True
-            else:
-                return False
-
         last_line_start_index = 0
         line = ""
         for i in range(len(modified_body)):
@@ -323,6 +314,166 @@ class YaraRule:
                     string_safe_body += c
 
         return string_safe_body
+
+    @staticmethod
+    def parse_strings_body(strings_body):
+        """
+        Generate a string safe copy of the body, which won't contain irrelevant extra ':' chars etc.
+
+        This function takes a source body and replaces various parts with safe placeholders, in order to avoid
+        parsing issues with unpredictable wildcard content in strings and whatnot.
+
+        :param strings_body:
+        :return:
+        """
+        # Create a copy of body to break down in order to find the true meta and string keywords
+        modified_body = copy.deepcopy(strings_body)
+
+        inside_identifier = False
+        inside_quoted_string = False
+        inside_regex_string = False
+        inside_hex_string = False
+        inside_escape_sequence = False
+        inside_multichar_escape_sequence = False
+        inside_comment_line = False
+        inside_comment_block = False
+        inside_possible_modifiers_segment = False
+
+        comment_line = ""
+        comment_lines = []
+        comment_block = ""
+        comment_blocks = []
+        string_safe_body = ""
+        escape_terminators = ['\\', '"', 't', 'n']
+        escape_chars_not_to_replace = ['\n', '\t', '\r', '\b', '\f']
+        chars_not_to_replace = escape_chars_not_to_replace
+        chars_not_to_replace.extend(' ')
+        separators = [' ', '\n', '\t']
+
+        identifier = ""
+        value = ""
+        string_type = ""
+        modifiers = ""
+        strings = []
+
+        has_processed_at_least_one_item = False
+        last_line_start_index = 0
+        line = ""
+        for i in range(len(modified_body)):
+            c = modified_body[i]  # Helps on readability.
+            line += c
+            if c == '\n':
+                log.debug("line: {}".format(modified_body[last_line_start_index:i]))
+                last_line_start_index = i + 1
+                line = ""
+
+            if inside_identifier:
+                if c in separators or c == '=':
+                    # If there is any sort of spacing or we get the assignment operator,
+                    # then we know for sure that the identifier has terminated.
+                    inside_identifier = False
+                else:
+                    identifier += c
+            elif inside_quoted_string:
+                if inside_escape_sequence:
+                    if inside_multichar_escape_sequence:
+                        if is_hex_esc_sequence(modified_body[i - 3:i + 1]):
+                            inside_escape_sequence = False
+                            inside_multichar_escape_sequence = False
+                    else:
+                        if c in escape_terminators:
+                            inside_escape_sequence = False
+                        else:
+                            # If the char after \ isn't a terminator, then this is a hex/multichar escape sequence.
+                            inside_multichar_escape_sequence = True
+                else:
+                    if c == '\\':
+                        inside_escape_sequence = True
+                    elif c == '"':
+                        inside_quoted_string = False
+                        # continue  # continue to avoid adding redundant end quote
+
+                if inside_quoted_string:
+                    # Omit the single case where c == '"' to avoid adding redundant end quote.
+                    value += c
+            elif inside_regex_string:
+                if c == '/' and modified_body[i + 1] in separators:
+                    inside_regex_string = False
+                else:
+                    value += c
+            elif inside_hex_string:
+                if c == '}' and modified_body[i + 1] in separators:
+                    inside_hex_string = False
+                else:
+                    value += c
+            elif inside_comment_line:
+                comment_line += c
+
+                if c == '\n':
+                    # string_safe_body += c
+                    log.info("comment line: {}".format(comment_line))
+                    comment_lines.append(comment_line)
+                    comment_line = ""
+                    inside_comment_line = False
+                # else:
+                #     string_safe_body += COMMENT_LINE_PLACEHOLDER
+            elif inside_comment_block:
+                comment_block += c
+
+                if c == '/' and modified_body[i - 1] == '*':
+                    log.info("comment block:\n{}".format(comment_block))
+                    # string_safe_body += COMMENT_BLOCK_PLACEHOLDER
+                    comment_blocks.append(comment_block)
+                    comment_block = ""
+                    inside_comment_block = False
+                # else:
+                #     string_safe_body += COMMENT_BLOCK_PLACEHOLDER if c not in chars_not_to_replace else c
+            else:
+                if c == YARA_VAR_SYMBOL:
+                    if has_processed_at_least_one_item:
+                        # If this isn't the first item, add the previous to the list
+                        _ = {
+                            "identifier": identifier,
+                            "value": value,
+                            "string_type": string_type,
+                            "modifiers": modifiers
+                        }
+
+                        log.info("Adding YARA String '{identifier}':\n{js}".format(
+                            identifier=identifier, js=json.dumps(_, indent=4)))
+
+                        strings.append(_)
+
+                        # Reset per-item variables.
+                        identifier, value, string_type, modifiers = "", "", "", ""
+                    else:
+                        # Technically not entirely true (yet), but the only way to tell that
+                        # you hit the boundary is when you hit the next YARA_VAR_SYMBOL.
+                        has_processed_at_least_one_item = True
+
+                    inside_identifier = True
+                elif c == '"':
+                    inside_quoted_string = True
+                    string_type = TEXT_TYPE
+                    # value += c # Skip reason: don't want redundant quotes.
+                elif c == '/' and modified_body[i + 1] != '/' and modified_body[i + 1] != '*':
+                    inside_regex_string = True
+                    string_type = REGEX_TYPE
+                elif c == '{':
+                    inside_hex_string = True
+                    string_type = HEX_TYPE
+                elif c == '/' and modified_body[i + 1] == '/':
+                    inside_comment_line = True
+                    comment_line += c
+                    # string_safe_body += COMMENT_LINE_PLACEHOLDER
+                elif c == '/' and modified_body[i + 1] == '*':
+                    inside_comment_block = True
+                    comment_block += c
+                    # string_safe_body += COMMENT_BLOCK_PLACEHOLDER
+                # else:
+                #     string_safe_body += c
+
+        return strings
 
     @classmethod
     def from_source_file(cls, source_path=None):
@@ -430,14 +581,18 @@ class YaraRule:
                 strings_body = body[strings_index+len("strings:"):condition_index]
                 log.info("strings body:\n{}".format(strings_body))
 
+                # Parse strings programmatically (wildcard content makes regex approach exceedingly hard)
+                strings = cls.parse_strings_body(strings_body)
+                log.info("Parsed YARA strings:\n{}".format(json.dumps(strings, indent=4)))
+
                 # Parse strings body items into a list of regex match group dicts.:
-                p = re.compile(
-                    r"\s*(?P<item>(?P<identifier>\w+)\s*=\s*(?P<value>\".*\"|true|false|[0-9]*)).*",
-                    re.MULTILINE)
+                # p = re.compile(
+                #     r"\s*(?P<item>(?P<identifier>\w+)\s*=\s*(?P<value>\".*\"|true|false|[0-9]*)).*",
+                #     re.MULTILINE)
 
                 # Use finditer() to get a sequence of match objects, in order to get the groupdict for each match.
-                match_dicts = [m.groupdict() for m in p.finditer(strings_body)]
-                log.info("strings body match dict:\n{}".format(json.dumps(match_dicts, indent=4)))
+                # match_dicts = [m.groupdict() for m in p.finditer(strings_body)]
+                # log.info("strings body match dict:\n{}".format(json.dumps(match_dicts, indent=4)))
 
                 # Parse matched dicts into a list of YaraMeta objects.
                 # strings = [YaraString(d["identifier"], d["value"]) for d in match_dicts]

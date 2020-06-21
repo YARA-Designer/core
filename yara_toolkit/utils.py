@@ -150,3 +150,13 @@ def determine_value_type(v):
             return str
     else:
         return str
+
+
+def is_hex_esc_sequence(s):
+    """Takes a string 's' and determines if it is a hex escape sequence."""
+    p = re.compile(r"^\\x[0-9][0-9]$")
+    m = p.match(s)
+    if m:
+        return True
+    else:
+        return False
