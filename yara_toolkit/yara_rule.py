@@ -612,7 +612,7 @@ class YaraRule:
             log.debug(source_code)
 
             constructor_line_pattern = re.compile(
-                r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)(?P<tag_body>(?P<tag_delimiter>:)\s+(?P<tags>[\s+\w]+))?\{(?P<rule_body>.*)\}",
+                r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)\s*(?P<tag_body>(?P<tag_delimiter>:)\s*(?P<tags>[\s+\w]+))?\{(?P<rule_body>.*)\}",
                 re.MULTILINE | re.DOTALL)
 
             constructor_line_match = constructor_line_pattern.search(source_code)
@@ -627,6 +627,10 @@ class YaraRule:
             )
 
             rule_match = constructor_line_pattern.search(source_code)
+
+            log.debug(rule_match)
+            if not rule_match:
+                raise ValueError("Rule did not match!\n{source}\n{match}".format(source=source_code, match=rule_match))
 
             log.debug(rule_match.groupdict())
 
