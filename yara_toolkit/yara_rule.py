@@ -1,4 +1,5 @@
 import copy
+import json
 import os
 import re
 from pathlib import Path
@@ -9,7 +10,7 @@ from yara import WarningError as YaraWarningError
 from yara import TimeoutError as YaraTimeoutError
 
 from handlers.log_handler import create_logger
-from yara_toolkit.utils import sanitize_identifier
+from yara_toolkit.utils import sanitize_identifier, determine_value_type
 from yara_toolkit.yara_meta import YaraMeta
 from yara_toolkit.yara_string import YaraString
 from yara_toolkit.keywords import KEYWORDS
@@ -24,6 +25,11 @@ CONDITION_INDENT_LENGTH = 8
 SOURCE_FILE_EXTENSION = ".yar"
 COMPILED_FILE_EXTENSION = ".bin"
 RULES_DIR = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"])
+STRING_PLACEHOLDER = "#"
+REGEX_PLACEHOLDER = "~"
+HEXADECIMAL_PLACEHOLDER = "¤"
+COMMENT_LINE_PLACEHOLDER = "@"
+COMMENT_BLOCK_PLACEHOLDER = "%"
 
 
 class YaraRuleSyntaxError(Exception):
@@ -191,6 +197,133 @@ class YaraRule:
                     for ys in dct["strings"]],
                    condition=dct["condition"])
 
+    @staticmethod
+    def abstract_source_body(body):
+        """
+        Generate a string safe copy of the body, which won't contain irrelevant extra ':' chars etc.
+
+        This function takes a source body and replaces various parts with safe placeholders, in order to avoid
+        parsing issues with unpredictable wildcard content in strings and whatnot.
+
+        :param body:
+        :return:
+        """
+        # Create a copy of body to break down in order to find the true meta and string keywords
+        modified_body = copy.deepcopy(body)
+
+        # Make a pass to replace all string values with placeholders.
+        inside_quoted_string = False
+        inside_regex_string = False
+        inside_hex_string = False
+        inside_escape_sequence = False
+        inside_multichar_escape_sequence = False
+        inside_comment_line = False
+        comment_line = ""
+        comment_lines = []
+        inside_comment_block = False
+        comment_block = ""
+        comment_blocks = []
+        string_safe_body = ""
+        escape_terminators = ['\\', '"', 't', 'n']
+        escape_chars_not_to_replace = ['\n', '\t', '\r', '\b', '\f']
+        chars_not_to_replace = escape_chars_not_to_replace
+        chars_not_to_replace.extend(' ')
+        separators = [' ', '\n', '\t']
+
+        def is_hex_esc_sequence(s):
+            """Takes a string 's' and determines if it is a hex escape sequence."""
+            p = re.compile(r"^\\x[0-9][0-9]$")
+            m = p.match(s)
+            if m:
+                return True
+            else:
+                return False
+
+        last_line_start_index = 0
+        line = ""
+        for i in range(len(modified_body)):
+            c = modified_body[i]  # Helps on readability.
+            line += c
+            if c == '\n':
+                # log.debug("line: {}".format(modified_body[last_line_start_index:i]))
+                last_line_start_index = i + 1
+                line = ""
+
+            if inside_quoted_string:
+                if inside_escape_sequence:
+                    if inside_multichar_escape_sequence:
+                        if is_hex_esc_sequence(modified_body[i - 3:i + 1]):
+                            inside_escape_sequence = False
+                            inside_multichar_escape_sequence = False
+                    else:
+                        if c in escape_terminators:
+                            inside_escape_sequence = False
+                        else:
+                            # If the char after \ isn't a terminator, then this is a hex/multichar escape sequence.
+                            inside_multichar_escape_sequence = True
+                else:
+                    if c == '\\':
+                        inside_escape_sequence = True
+                    elif c == '"':
+                        inside_quoted_string = False
+
+                # Replace current char with safe placeholder.
+                string_safe_body += STRING_PLACEHOLDER
+            elif inside_regex_string:
+                if c == '/' and modified_body[i + 1] in separators:
+                    inside_regex_string = False
+
+                # Replace current char with safe placeholder.
+                string_safe_body += REGEX_PLACEHOLDER
+            elif inside_hex_string:
+                if c == '}' and modified_body[i + 1] in separators:
+                    inside_hex_string = False
+
+                # Replace current char with safe placeholder.
+                string_safe_body += HEXADECIMAL_PLACEHOLDER
+            elif inside_comment_line:
+                comment_line += c
+
+                if c == '\n':
+                    string_safe_body += c
+                    log.info("comment line: {}".format(comment_line))
+                    comment_lines.append(comment_line)
+                    comment_line = ""
+                    inside_comment_line = False
+                else:
+                    string_safe_body += COMMENT_LINE_PLACEHOLDER
+            elif inside_comment_block:
+                comment_block += c
+
+                if c == '/' and modified_body[i - 1] == '*':
+                    log.info("comment block:\n{}".format(comment_block))
+                    string_safe_body += COMMENT_BLOCK_PLACEHOLDER
+                    comment_blocks.append(comment_block)
+                    comment_block = ""
+                    inside_comment_block = False
+                else:
+                    string_safe_body += COMMENT_BLOCK_PLACEHOLDER if c not in chars_not_to_replace else c
+            else:
+                if c == '"':
+                    inside_quoted_string = True
+                    string_safe_body += STRING_PLACEHOLDER
+                elif c == '/' and modified_body[i + 1] != '/' and modified_body[i + 1] != '*':
+                    inside_regex_string = True
+                elif c == '{':
+                    inside_hex_string = True
+                elif c == '/' and modified_body[i + 1] == '/':
+                    inside_comment_line = True
+                    comment_line += c
+                    string_safe_body += COMMENT_LINE_PLACEHOLDER
+                elif c == '/' and modified_body[i + 1] == '*':
+                    inside_comment_block = True
+                    comment_block += c
+                    string_safe_body += COMMENT_BLOCK_PLACEHOLDER
+                else:
+                    string_safe_body += c
+
+        return string_safe_body
+
     @classmethod
     def from_source_file(cls, source_path=None):
         """Initialize YaraRule from sourcecode using own custom written parser."""
@@ -229,136 +362,84 @@ class YaraRule:
 
             log.debug("body:\n{}".format(body))
 
-            ####### Seek thru the whole shebang until you match keyword.
-            # Split on whitespace to eliminate it as a factor.
-            body_items = []
-            for item in body.split(' '):
-                if item != '':
-                    body_items.append(item)
+            # ###### Seek thru the whole shebang until you match keyword.
 
-            log.info(body_items)
+            # Generate a string safe copy of the body, which won't contain irrelevant extra ':' chars etc.
+            string_safe_body = cls.abstract_source_body(body)
 
-            # Create a copy of body to break down in order to find the true meta and string keywords
-            modified_body = copy.deepcopy(body)
-            log.info("modified body:\n{}".format(modified_body))
-            # modified_body = re.sub(r"\".*\"")
+            log.info("string-safe body:\n{}".format(string_safe_body))
 
-            # Make a pass to replace all string values with placeholders.
-            inside_quoted_string = False
-            inside_regex_string = False
-            inside_hex_string = False
-            inside_escape_sequence = False
-            inside_multichar_escape_sequence = False
-            inside_comment_line = False
-            comment_line = ""
-            comment_lines = []
-            inside_comment_block = False
-            comment_block = ""
-            comment_blocks = []
-            string_safe_body = ""
-            escape_terminators = ['\\', '"', 't', 'n']
-            escape_chars_not_to_replace = ['\n', '\t', '\r', '\b', '\f']
-            chars_not_to_replace = escape_chars_not_to_replace
-            chars_not_to_replace.extend(' ')
-            separators = [' ', '\n', '\t']
+            # # Split on whitespace to eliminate it as a factor.
+            # string_safe_body_items = []
+            # for item in string_safe_body.split(' '):
+            #     if item != '':
+            #         string_safe_body_items.append(item)
+            #
+            # log.info("string-safe body items:\n{}".format(string_safe_body_items))
 
-            def is_hex_esc_sequence(s):
-                """Takes a string 's' and determines if it is a hex escape sequence."""
-                p = re.compile(r"^\\x[0-9][0-9]$")
-                m = p.match(s)
-                if m:
-                    return True
-                else:
-                    return False
+            # Get index of meta and strings (if either is present)
+            meta_index = string_safe_body.find("meta:")
+            strings_index = string_safe_body.find("strings:")
+            condition_index = string_safe_body.find("condition:")
 
-            last_line_start_index = 0
-            line = ""
-            for i in range(len(modified_body)):
-                c = modified_body[i]  # Helps on readability.
-                line += c
-                if c == '\n':
-                    log.info("line: {}".format(modified_body[last_line_start_index:i]))
-                    last_line_start_index = i+1
-                    line = ""
-
-                if inside_quoted_string:
-                    if inside_escape_sequence:
-                        if inside_multichar_escape_sequence:
-                            if is_hex_esc_sequence(modified_body[i-3:i+1]):
-                                inside_escape_sequence = False
-                                inside_multichar_escape_sequence = False
-                        else:
-                            if c in escape_terminators:
-                                inside_escape_sequence = False
-                            else:
-                                # If the char after \ isn't a terminator, then this is a hex/multichar escape sequence.
-                                inside_multichar_escape_sequence = True
-                    else:
-                        if c == '\\':
-                            inside_escape_sequence = True
-                        elif c == '"':
-                            inside_quoted_string = False
-
-                    # Replace current char with safe placeholder.
-                    string_safe_body += '#'
-                elif inside_regex_string:
-                    if c == '/' and modified_body[i+1] in separators:
-                        inside_regex_string = False
-
-                    # Replace current char with safe placeholder.
-                    string_safe_body += '~'
-                elif inside_hex_string:
-                    if c == '}' and modified_body[i + 1] in separators:
-                        inside_hex_string = False
-
-                    # Replace current char with safe placeholder.
-                    string_safe_body += '¤'
-                elif inside_comment_line:
-                    comment_line += c
-
-                    if c == '\n':
-                        string_safe_body += c
-                        log.info("comment line: {}".format(comment_line))
-                        comment_lines.append(comment_line)
-                        comment_line = ""
-                        inside_comment_line = False
-                    else:
-                        string_safe_body += '@'
-                elif inside_comment_block:
-                    comment_block += c
-
-                    if c == '/' and modified_body[i-1] == '*':
-                        log.info("comment block:\n{}".format(comment_block))
-                        string_safe_body += '%'
-                        comment_blocks.append(comment_block)
-                        comment_block = ""
-                        inside_comment_block = False
-                    else:
-                        string_safe_body += '%' if c not in chars_not_to_replace else c
-                else:
-                    if c == '"':
-                        inside_quoted_string = True
-                        string_safe_body += '#'
-                    elif c == '/' and modified_body[i+1] != '/' and modified_body[i+1] != '*':
-                        inside_regex_string = True
-                    elif c == '{':
-                        inside_hex_string = True
-                    elif c == '/' and modified_body[i+1] == '/':
-                        inside_comment_line = True
-                        comment_line += c
-                        string_safe_body += '@'
-                    elif c == '/' and modified_body[i+1] == '*':
-                        inside_comment_block = True
-                        comment_block += c
-                        string_safe_body += '%'
-                    else:
-                        string_safe_body += c
-
-            log.info(string_safe_body)
+            log.info("Meta @ {m}, Strings @ {s}, Condition @ {c}".format(
+                m=meta_index, s=strings_index, c=condition_index))
 
             # Make a second pass with a pattern that doesn't use dotall, in order to better parse each sub-body,
+            # FIXME: Check if meta can go after string in a rule (read: more headache if-spaghetti needed if so...)
             meta = None
             strings = None
+            if meta_index > -1:
+                if strings_index > -1:
+                    # If we have strings, then that is our body part cutoff.
+                    meta_body = body[meta_index+len("meta:"):strings_index]
+                    log.info("meta body:\n{}".format(meta_body))
+                else:
+                    # If we don't have strings then condition will be our body part cutoff.
+                    meta_body = body[meta_index+len("meta:"):condition_index]
+                    log.info("meta body:\n{}".format(meta_body))
+
+                # Parse meta body items into a list of regex match group dicts.:
+                p = re.compile(
+                    r"\s*(?P<full>(?P<identifier>\w+)\s*=\s*(?P<value>\".*\"|true|false|[0-9]*)).*",
+                    re.MULTILINE)
+
+                # Use finditer() to get a sequence of match objects, in order to get the groupdict for each match.
+                match_dicts = [m.groupdict() for m in p.finditer(meta_body)]
+                log.info("meta body match dict:\n{}".format(json.dumps(match_dicts, indent=4)))
+
+                # Parse matched dicts into a list of YaraMeta objects.
+                meta = []
+                for d in match_dicts:
+                    identifier = d["identifier"]
+                    value = d["value"]
+                    value_type = determine_value_type(value)
+
+                    if value_type is str:
+                        # If value type is a string, strip the redundant quotes,
+                        # which will just make a mess of things.
+                        value = value[1:-1]
+
+                    meta.append(YaraMeta(identifier, value, value_type))
+
+                # meta = [YaraMeta(d["identifier"], d["value"], determine_value_type(d["value"])) for d in match_dicts]
+                log.info("Parsed YaraMeta objects:\n{}".format(json.dumps([repr(o) for o in meta], indent=4)))
+
+            if strings_index > -1:
+                strings_body = body[strings_index+len("strings:"):condition_index]
+                log.info("strings body:\n{}".format(strings_body))
+
+                # Parse strings body items into a list of regex match group dicts.:
+                p = re.compile(
+                    r"\s*(?P<full>(?P<identifier>\w+)\s*=\s*(?P<value>\".*\"|true|false|[0-9]*)).*",
+                    re.MULTILINE)
+
+                # Use finditer() to get a sequence of match objects, in order to get the groupdict for each match.
+                match_dicts = [m.groupdict() for m in p.finditer(strings_body)]
+                log.info("strings body match dict:\n{}".format(json.dumps(match_dicts, indent=4)))
+
+                # Parse matched dicts into a list of YaraMeta objects.
+                # strings = [YaraString(d["identifier"], d["value"]) for d in match_dicts]
 
             log.debug("name={}, tags={}, meta={}, strings={}, condition={}".format(name, tags, meta, strings, condition))
 
