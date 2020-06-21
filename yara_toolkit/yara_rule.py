@@ -168,6 +168,8 @@ class YaraRule:
 
         if tags is not None:
             self.tags: list = [sanitize_identifier(x) for x in tags]
+        else:
+            self.tags = None
 
         self.meta: List[YaraMeta] = meta
         self.strings: List[YaraString] = strings
@@ -605,7 +607,6 @@ class YaraRule:
     def from_source_file(cls, source_path=None):
         """Initialize YaraRule from sourcecode using own custom written parser."""
         try:
-            source_code = None
             with open(source_path, 'r') as f:
                 source_code = f.read()
 
@@ -614,8 +615,6 @@ class YaraRule:
             constructor_line_pattern = re.compile(
                 r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)\s*(?P<tag_body>(?P<tag_delimiter>:)\s*(?P<tags>[\s+\w]+))?\{(?P<rule_body>.*)\}",
                 re.MULTILINE | re.DOTALL)
-
-            constructor_line_match = constructor_line_pattern.search(source_code)
 
             rule_pattern = re.compile(
                 r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)"
@@ -637,17 +636,17 @@ class YaraRule:
             name = rule_match.groupdict()["rule_identifier"]
 
             # Only add valid tags to tags list (apply some sanitation on the matched string).
-            tags = []
-            for tag in rule_match.groupdict()["tags"].strip('\n').replace('\t', ' ').split(' '):
-                if tag != ' ' and tag != '':
-                    tags.append(tag)
+            if rule_match.groupdict()["tags"]:
+                tags = []
+                for tag in rule_match.groupdict()["tags"].strip('\n').replace('\t', ' ').split(' '):
+                    if tag != ' ' and tag != '':
+                        tags.append(tag)
 
-            # If no tags were added, set it to None for a more clean approach.
-            if len(tags) == 0:
+                # If no tags were added, set it to None for a more clean approach.
+                if len(tags) == 0:
+                    tags = None
+            else:
                 tags = None
-
-            # condition = rule_match.groupdict()["condition_content"]
-            condition = None
 
             body = rule_match.groupdict()["rule_body"]
 

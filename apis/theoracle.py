@@ -114,22 +114,23 @@ def get_rule(filepath):
     thehive_case_id = None
     added_on = None
 
-    for meta in rule.meta:
-        if meta.identifier == "title":
-            title = meta.value
-        if meta.identifier == "thehive_case_id":
-            thehive_case_id = meta.value
-        if meta.identifier == "added_on":
-            added_on = meta.value
+    if rule.meta:
+        for meta in rule.meta:
+            if meta.identifier == "title":
+                title = meta.value
+            if meta.identifier == "thehive_case_id":
+                thehive_case_id = meta.value
+            if meta.identifier == "added_on":
+                added_on = meta.value
 
     rule_json_retv = {
         "name": rule.name,
         "title": title,
         "thehive_case_id": thehive_case_id,
         "namespace": rule.namespace,
-        "tags": rule.tags,
-        "meta": [meta.as_dict() for meta in rule.meta],
-        "strings": [ys.as_dict() for ys in rule.strings],
+        "tags": rule.tags if rule.tags else [],
+        "meta": [meta.as_dict() for meta in rule.meta] if rule.meta else [],
+        "strings": [ys.as_dict() for ys in rule.strings] if rule.strings else [],
         "condition": rule.condition,
         "added_on": added_on,
         "last_modified": datetime.isoformat(datetime.fromtimestamp(os.stat(filepath).st_mtime)),
