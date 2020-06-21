@@ -422,10 +422,13 @@ class YaraRule:
                     elif c == '"':
                         inside_quoted_string = False
 
-                        # We're now in a segment where modifiers may exist, but we're not really sure.
-                        # So we'll run the code for modifier parsing and have it be terminated by the next
-                        # YARA_VAR_SYMBOL.
-                        inside_possible_modifiers_segment = True
+                        # Make sure there exists more characters ahead.
+                        # If not then there can't be any modifier segment, can there?
+                        if len(modified_body) > i + 1:
+                            # We're now in a segment where modifiers may exist, but we're not really sure.
+                            # So we'll run the code for modifier parsing and have it be terminated by the next
+                            # YARA_VAR_SYMBOL.
+                            inside_possible_modifiers_segment = True
 
                 if inside_quoted_string:
                     # Omit the single case where c == '"' to avoid adding redundant end quote.
@@ -502,6 +505,22 @@ class YaraRule:
 
                     # Make sure there exists more characters ahead, before attempting inner lookahead logic.
                     if len(modified_body) > i+1:
+                        # Check that we're not actually inside a comment segment
+                        # or other such things that exist in the void.
+                        if c == '/' and modified_body[i + 1] == '/':
+                            comment_line += c
+                            inside_comment_line = True
+                            inside_possible_modifiers_segment = False
+
+                            continue
+                        elif c == '/' and modified_body[i + 1] == '*':
+                            comment_block += c
+                            inside_comment_block = True
+                            inside_possible_modifiers_segment = False
+
+                            continue
+
+                        # We're now sure that we're *actually* inside the modifier segment.
                         if c not in separators and c != '':
                             modifier_string += c
 
