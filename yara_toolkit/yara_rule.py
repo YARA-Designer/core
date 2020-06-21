@@ -707,22 +707,37 @@ class YaraRule:
                 log.info("strings body:\n{}".format(strings_body))
 
                 # Parse strings programmatically (wildcard content makes regex approach exceedingly hard)
-                strings = cls.parse_strings_body(strings_body)
-                log.info("Parsed YARA strings:\n{}".format(json.dumps(strings, indent=4)))
+                parsed_string_dicts = cls.parse_strings_body(strings_body)
+                log.info("Parsed YARA string dicts:\n{}".format(json.dumps(parsed_string_dicts, indent=4)))
 
-                # Parse strings body items into a list of regex match group dicts.:
-                # p = re.compile(
-                #     r"\s*(?P<item>(?P<identifier>\w+)\s*=\s*(?P<value>\".*\"|true|false|[0-9]*)).*",
-                #     re.MULTILINE)
+                # Parse parsed YARA string dicts into a list of YaraString objects.
+                strings = [
+                    YaraString(d["identifier"], d["value"], determine_value_type(d["value"]), d["string_type"],
+                               d["modifiers"]) for d in parsed_string_dicts
+                ]
 
-                # Use finditer() to get a sequence of match objects, in order to get the groupdict for each match.
-                # match_dicts = [m.groupdict() for m in p.finditer(strings_body)]
-                # log.info("strings body match dict:\n{}".format(json.dumps(match_dicts, indent=4)))
+            # Parse raw condition gathered from abstraction.
+            # Strip leading and trailing whitespace and offset the start past the constructor,
+            # in order to avoid false positives when searching for non-separator chars.
+            raw_condition = body[condition_index:].lstrip()[len("condition:"):].rstrip()
 
-                # Parse matched dicts into a list of YaraMeta objects.
-                # strings = [YaraString(d["identifier"], d["value"]) for d in match_dicts]
+            separators = [' ', '\n', '\t']
+            uniform_separator = ' '
+            condition = ""
+            inside_condition_content = False
 
-            # FIXME: Insert condition parsing here.
+            # Sanitize the raw condition which can have unpredictable spacing/indent.
+            for i in range(len(raw_condition)):
+                # Seek until we get an actual non-separator character.
+                if not inside_condition_content and raw_condition[i] not in separators:
+                    condition += raw_condition[i]
+                    inside_condition_content = True
+                elif inside_condition_content:
+                    if raw_condition[i] in separators and raw_condition[i-1] not in separators:
+                        # If this is a separator and there is no separator behind us, then add a uniform one.
+                        condition += uniform_separator
+                    elif raw_condition[i] not in separators:
+                        condition += raw_condition[i]
 
             parsed_source = {
                 "name": name,
@@ -732,8 +747,6 @@ class YaraRule:
                 "condition": condition
             }
             log.info("parsed_source:\n{}".format(json.dumps(parsed_source, indent=4)))
-
-            # return None
 
             return cls(name, tags, meta, strings, condition)
 
