@@ -328,12 +328,12 @@ class YaraRule:
                     comment_block += c
 
                     if c == '/' and modified_body[i-1] == '*':
+                        log.info("comment block:\n{}".format(comment_block))
                         string_safe_body += '%'
-                        inside_comment_block = False
-                    else:
-                        log.info("comment block: {}".format(comment_block))
                         comment_blocks.append(comment_block)
                         comment_block = ""
+                        inside_comment_block = False
+                    else:
                         string_safe_body += '%' if c not in chars_not_to_replace else c
                 else:
                     if c == '"':
@@ -349,6 +349,7 @@ class YaraRule:
                         string_safe_body += '@'
                     elif c == '/' and modified_body[i+1] == '*':
                         inside_comment_block = True
+                        comment_block += c
                         string_safe_body += '%'
                     else:
                         string_safe_body += c
