@@ -12,7 +12,8 @@ from yara import TimeoutError as YaraTimeoutError
 from handlers.log_handler import create_logger
 from yara_toolkit.utils import sanitize_identifier, determine_value_type, is_hex_esc_sequence
 from yara_toolkit.yara_meta import YaraMeta
-from yara_toolkit.yara_string import YaraString, TEXT_TYPE, HEX_TYPE, REGEX_TYPE
+from yara_toolkit.yara_string import YaraString, TEXT_TYPE, HEX_TYPE, REGEX_TYPE, VALID_MOD_KEYWORDS, MODS_WITH_PAYLOAD, \
+    XOR, BASE64, BASE64_WIDE
 from yara_toolkit.keywords import KEYWORDS
 from handlers.config_handler import CONFIG
 
@@ -338,6 +339,9 @@ class YaraRule:
         inside_comment_line = False
         inside_comment_block = False
         inside_possible_modifiers_segment = False
+        inside_modifier_payload_segment = False
+        inside_base64_modifier_payload_segment = False
+        inside_xor_modifier_payload_segment = False
 
         comment_line = ""
         comment_lines = []
@@ -353,7 +357,8 @@ class YaraRule:
         identifier = ""
         value = ""
         string_type = ""
-        modifiers = ""
+        modifier_string = ""
+        modifiers = []
         strings = []
 
         has_processed_at_least_one_item = False
@@ -411,18 +416,86 @@ class YaraRule:
                 else:
                     value += c
             elif inside_possible_modifiers_segment:
-                # Make sure there exists more characters ahead.
-                if len(modified_body) > i+1:
-                    # Look ahead one char in order to not block the vital 'else'
-                    # condition that needs to be triggered when c == YARA_VAR_SYMBOL.
-                    if modified_body[i+1] == YARA_VAR_SYMBOL:
-                        modifiers += c
-                        inside_possible_modifiers_segment = False
+                if inside_xor_modifier_payload_segment:
+                    if c == ')':
+                        inside_xor_modifier_payload_segment = False
+                elif inside_base64_modifier_payload_segment:
+                    # Make sure there exists more characters ahead, before attempting inner lookahead logic.
+                    if len(modified_body) > i + 1:
+                        # Base64 has a custom alphabet which makes determining the true termination rather tricky..
+                        # So we'll have to check for that the string ends in '")' followed by a separator.
+                        if c == ')' and modified_body[i-1] == '"' and modified_body[i+1] in separators:
+                            inside_base64_modifier_payload_segment = False
+                    else:
+                        # In this case there exists no separator to check for ahead, but since we're at the end,
+                        # it's pretty certain that this is the terminating char after all.
+                        if c == ')' and modified_body[i-1] == '"':
+                            inside_base64_modifier_payload_segment = False
                 else:
-                    # If we're at the end, then we can safely assume
-                    # that the modifiers segment ends on this char.
-                    modifiers += c
-                    inside_possible_modifiers_segment = False
+                    if c == '(':
+                        # Perform check for possible payload segment.
+                        for keyword in MODS_WITH_PAYLOAD:
+                            # Knowing that we need an identifier, assignment op and value in front,
+                            # we can safely assume that i needs to be longer than keyword for us to
+                            # be in the modifier payload segment (saving us from accidentally going out of range).
+                            if i > len(keyword):
+                                backtracked_keyword = modified_body[i-len(keyword):i]
+                                print(backtracked_keyword)
+                                if backtracked_keyword == keyword:
+                                    inside_modifier_payload_segment = True
+
+                                    # Different modifier payload needs different handling,
+                                    # especially in terms of how to recognise terminator.
+                                    if keyword == XOR:
+                                        inside_xor_modifier_payload_segment = True
+                                    elif keyword == BASE64 or keyword == BASE64_WIDE:
+                                        inside_base64_modifier_payload_segment = True
+                                    else:
+                                        raise ValueError(
+                                            "Invalid backtracked modifier payload segment: {}".format(keyword))
+
+                    # Make sure there exists more characters ahead, before attempting inner lookahead logic.
+                    if len(modified_body) > i+1:
+                        if c not in separators and c != '':
+                            modifier_string += c
+
+                        # Look ahead one char in order to not block the vital 'else'
+                        # condition that needs to be triggered when c == YARA_VAR_SYMBOL.
+                        if modified_body[i+1] == YARA_VAR_SYMBOL:
+                            if len(modifier_string) > 0:
+                                modifiers.append({
+                                    "keyword": modifier_string,
+                                    "data": None
+                                })
+
+                                modifier_string = ""
+
+                            inside_possible_modifiers_segment = False
+                        elif modified_body[i+1] in separators:
+                            # Modifier item boundary reached
+                            # (but more may exist ahead as we're still in the modifiers segment)
+                            if len(modifier_string) > 0:
+                                modifiers.append({
+                                    "keyword": modifier_string,
+                                    "data": None
+                                })
+
+                                modifier_string = ""
+                    else:
+                        # If we're at the end, then we can safely assume
+                        # that the modifiers segment ends on this char.
+                        if c not in separators and c != '':
+                            modifier_string += c
+
+                        if len(modifier_string) > 0:
+                            modifiers.append({
+                                "keyword": modifier_string,
+                                "data": None
+                            })
+
+                            modifier_string = ""
+
+                        inside_possible_modifiers_segment = False
 
             elif inside_comment_line:
                 comment_line += c
@@ -457,7 +530,7 @@ class YaraRule:
                         strings.append(_)
 
                         # Reset per-item variables.
-                        identifier, value, string_type, modifiers = "", "", "", ""
+                        identifier, value, string_type, modifier_string, modifiers = "", "", "", "", []
                     else:
                         # Technically not entirely true (yet), but the only way to tell that
                         # you hit the boundary is when you hit the next YARA_VAR_SYMBOL.
