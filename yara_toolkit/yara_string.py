@@ -262,7 +262,7 @@ class YaraString:
         d = {
             "identifier": self.identifier,
             "value": self.value,
-            "value_type": self.value_type,
+            "value_type": self.value_type if isinstance(self.value_type, str) else self.value_type.__name__,
             "string_type": self.type,
             "modifiers": [m.as_dict() for m in self.modifiers],
             "modifier_str": self.modifiers_str(),

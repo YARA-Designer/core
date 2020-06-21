@@ -63,7 +63,10 @@ class YaraMeta:
             value=delimiter_wrap_type(self.value, self.type) if isinstance(self.value, str) else str(self.value))
 
     def as_dict(self):
-        return {"identifier": self.identifier, "value": self.value, "value_type": self.value_type}
+        return {
+            "identifier": self.identifier,
+            "value": self.value,
+            "value_type": self.value_type if isinstance(self.value_type, str) else self.value_type.__name__}
 
     def __repr__(self):
         return "<{class_name}(" \
