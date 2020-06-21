@@ -131,3 +131,22 @@ def delimiter_wrap_type(value: str, string_type: str):
         retv += indent + STRING_TYPE_DELIMITERS[string_type]["end"]
 
     return retv
+
+
+def determine_value_type(v):
+    """
+    Takes a value v of unknown type and returns which YARA compatible type it is.
+
+    NB: If all else fails, it will assume it's a string.
+    :param v:
+    :return:
+    """
+    if is_number(v):
+        return int
+    elif isinstance(v, str):
+        if v.lower() == "false" or v.lower() == "true":
+            return bool
+        else:
+            return str
+    else:
+        return str
