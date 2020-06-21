@@ -354,7 +354,17 @@ class YaraRule:
             log.debug(rule_match.groupdict())
 
             name = rule_match.groupdict()["rule_identifier"]
-            tags = rule_match.groupdict()["tags"]
+
+            # Only add valid tags to tags list (apply some sanitation on the matched string).
+            tags = []
+            for tag in rule_match.groupdict()["tags"].strip('\n').replace('\t', ' ').split(' '):
+                if tag != ' ' and tag != '':
+                    tags.append(tag)
+
+            # If no tags were added, set it to None for a more clean approach.
+            if len(tags) == 0:
+                tags = None
+
             # condition = rule_match.groupdict()["condition_content"]
             condition = None
 
@@ -368,14 +378,6 @@ class YaraRule:
             string_safe_body = cls.abstract_source_body(body)
 
             log.info("string-safe body:\n{}".format(string_safe_body))
-
-            # # Split on whitespace to eliminate it as a factor.
-            # string_safe_body_items = []
-            # for item in string_safe_body.split(' '):
-            #     if item != '':
-            #         string_safe_body_items.append(item)
-            #
-            # log.info("string-safe body items:\n{}".format(string_safe_body_items))
 
             # Get index of meta and strings (if either is present)
             meta_index = string_safe_body.find("meta:")
@@ -440,6 +442,8 @@ class YaraRule:
 
                 # Parse matched dicts into a list of YaraMeta objects.
                 # strings = [YaraString(d["identifier"], d["value"]) for d in match_dicts]
+
+            # FIXME: Insert condition parsing here.
 
             log.debug("name={}, tags={}, meta={}, strings={}, condition={}".format(name, tags, meta, strings, condition))
 
