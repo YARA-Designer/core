@@ -72,6 +72,17 @@ class YaraRuleSyntaxError(Exception):
         return self.message
 
 
+class YaraRuleParserSyntaxError(Exception):
+    def __init__(self, message: str, line=None):
+        super().__init__(message)
+
+        self.message = message
+        self.line = line
+
+    def __str__(self):
+        return self.message
+
+
 class YaraMatchCallback:
     """
     Class to use with yara.Rules.match in order to avoid messy globals that has issues if more than one
@@ -358,12 +369,26 @@ class YaraRule:
         value = ""
         string_type = ""
         modifier_string = ""
+        modifier_payload_string = ""
         modifiers = []
         strings = []
 
         has_processed_at_least_one_item = False
         last_line_start_index = 0
         line = ""
+
+        # def clear_modifier_string(s):
+        #     """"Destructively clear string s"""
+        #     s = ""
+
+        def add_modifier(kw, data, mod_list):
+            mod_list.append({
+                "keyword": kw,
+                "data": data
+            })
+
+            # kw = ""
+
         for i in range(len(modified_body)):
             c = modified_body[i]  # Helps on readability.
             line += c
@@ -418,19 +443,40 @@ class YaraRule:
             elif inside_possible_modifiers_segment:
                 if inside_xor_modifier_payload_segment:
                     if c == ')':
+                        if len(modifier_string) > 0:
+                            add_modifier(modifier_string, modifier_payload_string, modifiers)
+                            modifier_string = ""
+                            modifier_payload_string = ""
                         inside_xor_modifier_payload_segment = False
+                    else:
+                        # We're still inside the XOR payload segment.
+                        modifier_payload_string += c
                 elif inside_base64_modifier_payload_segment:
                     # Make sure there exists more characters ahead, before attempting inner lookahead logic.
                     if len(modified_body) > i + 1:
                         # Base64 has a custom alphabet which makes determining the true termination rather tricky..
                         # So we'll have to check for that the string ends in '")' followed by a separator.
                         if c == ')' and modified_body[i-1] == '"' and modified_body[i+1] in separators:
+                            if len(modifier_string) > 0:
+                                add_modifier(modifier_string, modifier_payload_string, modifiers)
+                                modifier_string = ""
+                                modifier_payload_string = ""
                             inside_base64_modifier_payload_segment = False
+                        else:
+                            # We're still inside the BASE64 payload segment.
+                            modifier_payload_string += c
                     else:
                         # In this case there exists no separator to check for ahead, but since we're at the end,
                         # it's pretty certain that this is the terminating char after all.
                         if c == ')' and modified_body[i-1] == '"':
+                            if len(modifier_string) > 0:
+                                add_modifier(modifier_string, modifier_payload_string, modifiers)
+                                modifier_string = ""
+                                modifier_payload_string = ""
                             inside_base64_modifier_payload_segment = False
+                        else:
+                            raise YaraRuleParserSyntaxError(
+                                "Unterminated YARA string modifier payload on this line: {}".format(line), line=line)
                 else:
                     if c == '(':
                         # Perform check for possible payload segment.
@@ -463,11 +509,12 @@ class YaraRule:
                         # condition that needs to be triggered when c == YARA_VAR_SYMBOL.
                         if modified_body[i+1] == YARA_VAR_SYMBOL:
                             if len(modifier_string) > 0:
-                                modifiers.append({
-                                    "keyword": modifier_string,
-                                    "data": None
-                                })
-
+                                # modifiers.append({
+                                #     "keyword": modifier_string,
+                                #     "data": None
+                                # })
+                                #
+                                add_modifier(modifier_string, None, modifiers)
                                 modifier_string = ""
 
                             inside_possible_modifiers_segment = False
@@ -475,11 +522,7 @@ class YaraRule:
                             # Modifier item boundary reached
                             # (but more may exist ahead as we're still in the modifiers segment)
                             if len(modifier_string) > 0:
-                                modifiers.append({
-                                    "keyword": modifier_string,
-                                    "data": None
-                                })
-
+                                add_modifier(modifier_string, None, modifiers)
                                 modifier_string = ""
                     else:
                         # If we're at the end, then we can safely assume
@@ -488,11 +531,12 @@ class YaraRule:
                             modifier_string += c
 
                         if len(modifier_string) > 0:
-                            modifiers.append({
-                                "keyword": modifier_string,
-                                "data": None
-                            })
-
+                            # modifiers.append({
+                            #     "keyword": modifier_string,
+                            #     "data": None
+                            # })
+                            #
+                            add_modifier(modifier_string, None, modifiers)
                             modifier_string = ""
 
                         inside_possible_modifiers_segment = False
