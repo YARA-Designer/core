@@ -391,7 +391,11 @@ class YaraRule:
                         inside_escape_sequence = True
                     elif c == '"':
                         inside_quoted_string = False
-                        # continue  # continue to avoid adding redundant end quote
+
+                        # We're now in a segment where modifiers may exist, but we're not really sure.
+                        # So we'll run the code for modifier parsing and have it be terminated by the next
+                        # YARA_VAR_SYMBOL.
+                        inside_possible_modifiers_segment = True
 
                 if inside_quoted_string:
                     # Omit the single case where c == '"' to avoid adding redundant end quote.
@@ -406,28 +410,36 @@ class YaraRule:
                     inside_hex_string = False
                 else:
                     value += c
+            elif inside_possible_modifiers_segment:
+                # Make sure there exists more characters ahead.
+                if len(modified_body) > i+1:
+                    # Look ahead one char in order to not block the vital 'else'
+                    # condition that needs to be triggered when c == YARA_VAR_SYMBOL.
+                    if modified_body[i+1] == YARA_VAR_SYMBOL:
+                        modifiers += c
+                        inside_possible_modifiers_segment = False
+                else:
+                    # If we're at the end, then we can safely assume
+                    # that the modifiers segment ends on this char.
+                    modifiers += c
+                    inside_possible_modifiers_segment = False
+
             elif inside_comment_line:
                 comment_line += c
 
                 if c == '\n':
-                    # string_safe_body += c
                     log.info("comment line: {}".format(comment_line))
                     comment_lines.append(comment_line)
                     comment_line = ""
                     inside_comment_line = False
-                # else:
-                #     string_safe_body += COMMENT_LINE_PLACEHOLDER
             elif inside_comment_block:
                 comment_block += c
 
                 if c == '/' and modified_body[i - 1] == '*':
                     log.info("comment block:\n{}".format(comment_block))
-                    # string_safe_body += COMMENT_BLOCK_PLACEHOLDER
                     comment_blocks.append(comment_block)
                     comment_block = ""
                     inside_comment_block = False
-                # else:
-                #     string_safe_body += COMMENT_BLOCK_PLACEHOLDER if c not in chars_not_to_replace else c
             else:
                 if c == YARA_VAR_SYMBOL:
                     if has_processed_at_least_one_item:
@@ -455,7 +467,6 @@ class YaraRule:
                 elif c == '"':
                     inside_quoted_string = True
                     string_type = TEXT_TYPE
-                    # value += c # Skip reason: don't want redundant quotes.
                 elif c == '/' and modified_body[i + 1] != '/' and modified_body[i + 1] != '*':
                     inside_regex_string = True
                     string_type = REGEX_TYPE
@@ -465,13 +476,9 @@ class YaraRule:
                 elif c == '/' and modified_body[i + 1] == '/':
                     inside_comment_line = True
                     comment_line += c
-                    # string_safe_body += COMMENT_LINE_PLACEHOLDER
                 elif c == '/' and modified_body[i + 1] == '*':
                     inside_comment_block = True
                     comment_block += c
-                    # string_safe_body += COMMENT_BLOCK_PLACEHOLDER
-                # else:
-                #     string_safe_body += c
 
         return strings
 
