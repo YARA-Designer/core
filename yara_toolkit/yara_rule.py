@@ -610,12 +610,9 @@ class YaraRule:
         return strings
 
     @classmethod
-    def from_source_file(cls, source_path):
+    def from_source_code(cls, source_code):
         """Initialize YaraRule from sourcecode using own custom written parser."""
         try:
-            with open(source_path, 'r') as f:
-                source_code = f.read()
-
             log.debug(source_code)
 
             constructor_line_pattern = re.compile(
@@ -755,6 +752,14 @@ class YaraRule:
         except Exception as exc:
             log.exception("YaraRule.from_source_file exc", exc_info=exc)
             return None
+
+    @classmethod
+    def from_source_file(cls, source_path):
+        """Helper function that translates file contents to string and then calls sourcecode parser."""
+        with open(source_path, 'r') as f:
+            source_code = f.read()
+
+        return cls.from_source_code(source_code)
 
     @classmethod
     def from_source_file_yara_python(cls, source_path=None):
