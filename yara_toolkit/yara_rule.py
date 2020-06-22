@@ -332,10 +332,9 @@ class YaraRule:
     @staticmethod
     def parse_strings_body(strings_body):
         """
-        Generate a string safe copy of the body, which won't contain irrelevant extra ':' chars etc.
+        Programmatically parse YARA strings body.
 
-        This function takes a source body and replaces various parts with safe placeholders, in order to avoid
-        parsing issues with unpredictable wildcard content in strings and whatnot.
+        Due to YARA strings complexity it has to be parsed programmatically looping through char-by-char.
 
         :param strings_body:
         :return:
@@ -373,7 +372,6 @@ class YaraRule:
         modifiers = []
         strings = []
 
-        has_processed_at_least_one_item = False
         last_line_start_index = 0
         line = ""
 
@@ -612,7 +610,7 @@ class YaraRule:
         return strings
 
     @classmethod
-    def from_source_file(cls, source_path=None):
+    def from_source_file(cls, source_path):
         """Initialize YaraRule from sourcecode using own custom written parser."""
         try:
             with open(source_path, 'r') as f:
@@ -621,17 +619,9 @@ class YaraRule:
             log.debug(source_code)
 
             constructor_line_pattern = re.compile(
-                r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)\s*(?P<tag_body>(?P<tag_delimiter>:)\s*(?P<tags>[\s+\w]+))?\{(?P<rule_body>.*)\}",
+                r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)\s*"
+                r"(?P<tag_body>(?P<tag_delimiter>:)\s*(?P<tags>[\s+\w]+))?\{(?P<rule_body>.*)\}",
                 re.MULTILINE | re.DOTALL)
-
-            rule_pattern = re.compile(
-                r"(?P<rule_keyword>rule)\s+(?P<rule_identifier>\w+)"
-                r"(?P<tag_body>(?P<tag_delimiter>:)\s+(?P<tags>[\s+\w]+))?"
-                r"\{(?P<body>.*(?P<meta_body>(?P<meta_constructor>meta:)\s+(?P<meta_content>.*\w))?\s+"
-                r"(?P<strings_body>(?P<strings_constructor>strings:)\s+(?P<strings_content>.*[\w\}\)]))?.*)"
-                r"(?P<condition_body>(?P<condition_constructor>condition:)\s+(?P<condition_content>.*)).*\}",
-                re.MULTILINE | re.DOTALL
-            )
 
             rule_match = constructor_line_pattern.search(source_code)
 
@@ -639,7 +629,7 @@ class YaraRule:
             if not rule_match:
                 raise ValueError("Rule did not match!\n{source}\n{match}".format(source=source_code, match=rule_match))
 
-            log.debug(rule_match.groupdict())
+            log.debug("rule_match groupdict:\n{}".format(rule_match.groupdict()))
 
             name = rule_match.groupdict()["rule_identifier"]
 
@@ -660,7 +650,7 @@ class YaraRule:
 
             log.debug("body:\n{}".format(body))
 
-            # ###### Seek thru the whole shebang until you match keyword.
+            # Seek thru the whole shebang until you match keyword:
 
             # Generate a string safe copy of the body, which won't contain irrelevant extra ':' chars etc.
             string_safe_body = cls.abstract_source_body(body)
