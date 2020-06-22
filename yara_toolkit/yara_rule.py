@@ -762,7 +762,7 @@ class YaraRule:
         return cls.from_source_code(source_code)
 
     @classmethod
-    def from_source_file_yara_python(cls, source_path=None):
+    def _legacy_from_source_file_yara_python(cls, source_path=None):
         """Initialize YaraRule from sourcecode using the limited yara-python API."""
         try:
             # Compile the YARA source code (only way to get yara-python to parse the thing)
