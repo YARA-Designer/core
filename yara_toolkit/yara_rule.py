@@ -175,6 +175,9 @@ class YaraRule:
         self.meta: List[YaraMeta] = meta
         self.strings: List[YaraString] = strings
 
+        if isinstance(condition, str):
+            condition = YaraCondition(condition)
+
         self.condition = condition
 
         self.namespace = namespace

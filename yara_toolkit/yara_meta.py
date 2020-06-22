@@ -43,7 +43,8 @@ class YaraMeta:
             if value_type == 'str' or value_type == str:
                 value = str(value)
             elif value_type == 'bool' or value_type == bool:
-                value = value.lower() == "true"
+                if isinstance(value, str):
+                    value = value.lower() == "true"
             elif value_type == 'int' or value_type == int:
                 value = int(value)
             else:
