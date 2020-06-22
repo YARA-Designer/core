@@ -179,7 +179,7 @@ def reset_invalid_yara_rule(repo, filepath):
 
 
 def generate_yara_rule(yara_rule_json: json):
-    log.debug("Received YARA Rule Dict: {}".format(yara_rule_json))
+    log.debug("Received YARA Rule Dict:\n{}".format(json.dumps(yara_rule_json, indent=4)))
     retv = {"in": yara_rule_json}
 
     the_oracle_repo = git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])

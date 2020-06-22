@@ -881,7 +881,7 @@ class YaraRule:
         :return: Returns dict of strings that are referenced in the conditional statement.
         """
         # Find all occurrences of words starting with $ (i.e. variable names)
-        r = re.compile(r'\$[\w]*\b\S+')
+        r = re.compile(r'[$#][\w]*\b\S+')
         matched_condition_strings = r.findall(str(self.condition))
 
         # Get rid of mismatches by making a list of items that only matches the actual strings/vars list.
