@@ -204,7 +204,7 @@ def generate_yara_rule(yara_rule_json: json):
                 if "out" in retv:
                     if "source_path" in retv["out"]:
                         log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
-                        reset_invalid_yara_rule(the_oracle_repo, retv["out"]["generated_yara_source_file"])
+                        reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
                     else:
                         log.info("Unable to reset invalid changed file to avoid git-within-git changelist issues: "
                                  "'generated_yara_source_file' not in retv[\"out\"]!")
