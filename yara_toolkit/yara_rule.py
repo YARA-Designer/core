@@ -342,7 +342,7 @@ class YaraRule:
         """
         # Create a copy of body to break down in order to find the true meta and string keywords
         modified_body = copy.deepcopy(strings_body)
-
+        has_pending_string = False
         inside_identifier = False
         inside_quoted_string = False
         inside_regex_string = False
@@ -383,7 +383,18 @@ class YaraRule:
                 "data": data
             })
 
-            # kw = ""
+        def add_string(t_identifier, t_value, t_string_type, t_modifiers):
+            _ = {
+                "identifier": t_identifier,
+                "value": t_value,
+                "string_type": t_string_type,
+                "modifiers": t_modifiers
+            }
+
+            log.info("Adding YARA String '{identifier}':\n{js}".format(
+                identifier=identifier, js=json.dumps(_, indent=4)))
+
+            strings.append(_)
 
         for i in range(len(modified_body)):
             c = modified_body[i]  # Helps on readability.
@@ -563,27 +574,16 @@ class YaraRule:
                     inside_comment_block = False
             else:
                 if c == YARA_VAR_SYMBOL:
-                    if has_processed_at_least_one_item:
+                    if has_pending_string:
                         # If this isn't the first item, add the previous to the list
-                        _ = {
-                            "identifier": identifier,
-                            "value": value,
-                            "string_type": string_type,
-                            "modifiers": modifiers
-                        }
-
-                        log.info("Adding YARA String '{identifier}':\n{js}".format(
-                            identifier=identifier, js=json.dumps(_, indent=4)))
-
-                        strings.append(_)
+                        add_string(identifier, value, string_type, modifiers)
 
                         # Reset per-item variables.
                         identifier, value, string_type, modifier_string, modifiers = "", "", "", "", []
                     else:
-                        # Technically not entirely true (yet), but the only way to tell that
-                        # you hit the boundary is when you hit the next YARA_VAR_SYMBOL.
-                        has_processed_at_least_one_item = True
+                        has_pending_string = True
 
+                    log.debug("Rest of body from this identifier:\n{}".format(strings_body[i:]))
                     inside_identifier = True
                 elif c == '"':
                     inside_quoted_string = True
@@ -600,6 +600,14 @@ class YaraRule:
                 elif c == '/' and modified_body[i + 1] == '*':
                     inside_comment_block = True
                     comment_block += c
+
+            # If we're at the end of body, do some necessary operations.
+            if len(modified_body)-1 == i:
+                # Check if there is any pending string, since there won't be any
+                # YARA_VAR_SYMBOL to indicate end of string for the last one.
+                if has_pending_string:
+                    # Add any remaining pending string to the strings list.
+                    add_string(identifier, value, string_type, modifiers)
 
         return strings
 
