@@ -583,7 +583,7 @@ class YaraRule:
                     else:
                         has_pending_string = True
 
-                    log.debug("Rest of body from this identifier:\n{}".format(strings_body[i:]))
+                    # log.debug("Rest of body from this identifier:\n{}".format(strings_body[i:]))
                     inside_identifier = True
                 elif c == '"':
                     inside_quoted_string = True
