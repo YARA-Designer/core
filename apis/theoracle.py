@@ -141,7 +141,8 @@ def get_rule(filepath):
         "pending": False,
         "compilable": None,
         # "source_path": os.path.abspath(filepath),
-        "source_path": filepath,
+        # "source_path": filepath,
+        "source_path": filepath.split(os.sep)[-1],
         "source_filename": os.path.basename(filepath),
         "source_path_sha256sum": sha256(filepath.encode('utf-8')).hexdigest(),
         "processing_time": elapsed_time
