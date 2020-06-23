@@ -1,6 +1,9 @@
+import json
 import re
 
 # YARA String types
+from handlers.log_handler import create_logger
+
 TEXT_TYPE = "text"
 HEX_TYPE = "hex"
 REGEX_TYPE = "regex"
@@ -42,6 +45,8 @@ STRING_TYPE_DELIMITERS = {
 
 SOURCE_FILE_EXTENSION = ".yar"
 COMPILED_FILE_EXTENSION = ".bin"
+
+log = create_logger(__name__)
 
 
 def get_string_type(string_type) -> str:
@@ -111,26 +116,36 @@ def delimiter_wrap_type(value: str, string_type: str):
     :param string_type:
     :return:
     """
-    # Support a bit more flexible string types using a lookup to determine the likely type match.
-    if string_type not in STRING_TYPES:
-        string_type = get_string_type(string_type)
+    try:
+        # Support a bit more flexible string types using a lookup to determine the likely type match.
+        if string_type not in STRING_TYPES:
+            string_type = get_string_type(string_type)
 
-    # Hexadecimals have a spacing between value and delimiter for readability.
-    indent = " " if string_type == HEX_TYPE else ""
-    retv = ""
+        # Hexadecimals have a spacing between value and delimiter for readability.
+        indent = " " if string_type == HEX_TYPE else ""
+        retv = ""
 
-    # If value does not start with its delimiter, add it
-    if value[0] != STRING_TYPE_DELIMITERS[string_type]["start"]:
-        retv += STRING_TYPE_DELIMITERS[string_type]["start"] + indent
+        if len(value) > 0:
+            # If value does not start with its delimiter, add it
+            if value[0] != STRING_TYPE_DELIMITERS[string_type]["start"]:
+                retv += STRING_TYPE_DELIMITERS[string_type]["start"] + indent
 
-    # Add the value string.
-    retv += value
+            # Add the value string.
+            retv += value
 
-    # If value does not end with its delimiter, add it
-    if value[-1] != STRING_TYPE_DELIMITERS[string_type]["end"]:
-        retv += indent + STRING_TYPE_DELIMITERS[string_type]["end"]
+            # If value does not end with its delimiter, add it
+            if value[-1] != STRING_TYPE_DELIMITERS[string_type]["end"]:
+                retv += indent + STRING_TYPE_DELIMITERS[string_type]["end"]
+        else:
+            # If value has no contents.
+            retv = STRING_TYPE_DELIMITERS[string_type]["start"] + indent \
+                   + indent + STRING_TYPE_DELIMITERS[string_type]["end"]
 
-    return retv
+        return retv
+    except Exception as exc:
+        log.exception("Got unexpected exception while trying to delimiter wrap the following:\n{}".format(
+            json.dumps({"value": value, "string_type": string_type}, indent=4)), exc_info=exc)
+        raise
 
 
 def determine_value_type(v):
