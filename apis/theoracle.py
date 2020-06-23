@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from datetime import datetime
 
 from flask import request, jsonify
@@ -107,7 +108,9 @@ class RulesOracleRequest(Resource):
 
 
 def get_rule(filepath):
+    start_time = time.time_ns()
     rule: YaraRule = YaraRule.from_source_file(filepath)
+    elapsed_time = time.time_ns() - start_time
     log.debug(rule)
 
     title = rule.name
@@ -140,7 +143,8 @@ def get_rule(filepath):
         # "source_path": os.path.abspath(filepath),
         "source_path": filepath,
         "source_filename": os.path.basename(filepath),
-        "source_path_sha256sum": sha256(filepath.encode('utf-8')).hexdigest()
+        "source_path_sha256sum": sha256(filepath.encode('utf-8')).hexdigest(),
+        "processing_time": elapsed_time
     }
 
     return rule_json_retv
@@ -178,6 +182,16 @@ class RulesOracleRequest(Resource):
 
             # Append the JSON/Model
             rules.append(rule)
+
+        # Track stats
+        time_stats = "Processing Time\tRule name\n"
+        time_total = 0
+        for r in rules:
+            t = r["processing_time"]
+            time_total += t
+            time_stats += "{time}s:\t{name}\n".format(name=r["name"], time=t/1000000000)
+
+        log.info("TheOracle Rule processing times:\n{}\n\nTotal: {}s".format(time_stats, time_total/1000000000))
 
         retv = jsonify({"rules": rules})
         log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(
