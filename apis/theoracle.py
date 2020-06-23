@@ -10,6 +10,7 @@ from hashlib import sha256
 
 from handlers.log_handler import create_logger
 from handlers.config_handler import CONFIG
+from handlers import git_handler as git
 from yara_toolkit.yara_meta import YaraMeta
 from yara_toolkit.yara_rule import YaraRule
 from yara_toolkit.yara_string import YaraString
@@ -140,8 +141,6 @@ def get_rule(filepath):
         "last_modified": datetime.isoformat(datetime.fromtimestamp(os.stat(filepath).st_mtime)),
         "pending": False,
         "compilable": None,
-        # "source_path": os.path.abspath(filepath),
-        # "source_path": filepath,
         "source_path": filepath.split(os.sep)[-1],
         "source_filename": os.path.basename(filepath),
         "source_path_sha256sum": sha256(filepath.encode('utf-8')).hexdigest(),
@@ -174,6 +173,25 @@ class RulesOracleRequest(Resource):
     def get(self):
         """Returns all rules."""
         theoracle_rules_dir = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"])
+
+        # Do a git pull to get latest revision
+        try:
+            log.info("Git pull theoracle repo.")
+            git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
+        except Exception as exc:
+            log.exception("Caught exception when trying to git.clone_if_not_exist!\nurl={url}\npath={path}".format(
+                url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"]), exc_info=exc)
+            return {
+                "rules": [],
+                "success": False,
+                "error": {
+                    "message": str(exc),
+                    "type": "exception",
+                    "level": "error"
+                }
+            }
+
+        # Get listing of YARA files in rules dir.
         yara_files = os.listdir(theoracle_rules_dir)
         yara_files_path = [os.path.join(theoracle_rules_dir, f) for f in yara_files]
 
@@ -194,7 +212,7 @@ class RulesOracleRequest(Resource):
 
         log.info("TheOracle Rule processing times:\n{}\n\nTotal: {}s".format(time_stats, time_total/1000000000))
 
-        retv = jsonify({"rules": rules})
+        retv = jsonify({"rules": rules, "success": True, "error": {"message": None, "type": None, "level": None}})
         log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(
             route='/rules',
             num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
