@@ -4,9 +4,11 @@
 ### Git repository
 The following Git repository must be set up and available.
 - TheOracle (YARA rules git repository)
-### Projects
-The following projects must be running and available over network.
+### Components
+The following components must be set up on Cortex/TheHive:
 - yara-designer-responder (Cortex responder)
+
+The following components must be running and available over network:
 - yara-designer-web (Web GUI, frontend)
 
 ## Setup
@@ -38,6 +40,8 @@ The following projects must be running and available over network.
 2. Use the Cortex responder on a case in TheHive, which will populate core's database.
 
 ## API
+NB/FIXME: Models are not entirely up to date!
+ 
 For documentation on the API start the server and visit `http://<host>:<port>/api/v1/`
 
 ## Workflow
