@@ -93,7 +93,12 @@ class CortexResponder(Resource):
             log.info("thehive_case: {}".format(json.dumps(case, indent=4)))
 
             # Instantiate TheHive4py API
-            hive_api = TheHiveApi('http://{}:{}'.format(CONFIG["hive_server"], CONFIG["hive_port"]), CONFIG["hive_api_key"])
+            hive_api = TheHiveApi(
+                '{proto}://{host}:{port}'.format(
+                    proto=("https" if CONFIG["hive_server_use_ssl"] else "http"),
+                    host=CONFIG["hive_server"],
+                    port=CONFIG["hive_port"]
+                ), CONFIG["hive_api_key"])
 
             # Retrieve Observables in a separate API call (as they're not included in responder)
             observables_response = hive_api.get_case_observables(case_id)
