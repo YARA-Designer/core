@@ -188,7 +188,7 @@ class PostCommit(Resource):
 
             # 2. Git Add the YARA rule file.
             log.info("Git Add file to repo '{repo}': {fn}".format(repo=the_oracle_repo.git_dir, fn=file_to_add))
-            the_oracle_repo.index.add(file_to_add)
+            the_oracle_repo.index.add(file_to_add, force=CONFIG["git_add_forcibly"])
 
             # 3. Git Commit
             # Only commit if working tree differs (i.e. there is an actual change).
