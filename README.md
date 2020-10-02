@@ -1,6 +1,8 @@
 # YARA-Designer Core (backend)
 
 ## Dependencies
+### Python
+Python 3.6.8
 ### Git repository
 The following Git repository must be set up and available.
 - TheOracle (YARA rules git repository)

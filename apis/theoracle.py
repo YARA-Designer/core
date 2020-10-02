@@ -109,9 +109,9 @@ class RulesOracleRequest(Resource):
 
 
 def get_rule(filepath):
-    start_time = time.time_ns()
+    start_time = time.time()
     rule: YaraRule = YaraRule.from_source_file(filepath)
-    elapsed_time = time.time_ns() - start_time
+    elapsed_time = time.time() - start_time
     log.debug(rule)
 
     title = rule.name
