@@ -213,8 +213,8 @@ class RulesOracleRequest(Resource):
         log.info("TheOracle Rule processing times:\n{}\n\nTotal: {}s".format(time_stats, time_total/1000000000))
 
         retv = jsonify({"rules": rules, "success": True, "error": {"message": None, "type": None, "level": None}})
-        log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(
-            route='/rules',
-            num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
+        # log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format( # FIXME: Breaks in prod due to list index oob!
+        #     route='/rules',
+        #     num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
 
         return retv
