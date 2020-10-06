@@ -10,3 +10,13 @@ def dict_to_json(d: dict):
 
     # Convert it into a JSON object (avoids TypeErrors with things like datetime)
     return json.loads(rule_json_str)
+
+
+def list_keys(li: list):
+    """
+    Takes a list of JSON objects and returns a list of keys.
+    """
+    if len(li) == 0:
+        return li
+    else:
+        return list(li[0].keys())

@@ -5,6 +5,7 @@ import os
 from flask import make_response, jsonify, request
 from flask_restx import Namespace, Resource, fields
 
+from utils import list_keys
 from .handling import generate_yara_rule
 
 import handlers.git_handler as git
@@ -331,7 +332,7 @@ class RulesRequest(Resource):
         retv = jsonify({"rules": rules})
         log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(
             route='/rules',
-            num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
+            num=len(rules), keys_list=str(list_keys(rules)), js=json.dumps(retv.json, indent=4)))
 
         return retv
 

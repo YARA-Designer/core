@@ -11,6 +11,7 @@ from hashlib import sha256
 from handlers.log_handler import create_logger
 from handlers.config_handler import CONFIG
 from handlers import git_handler as git
+from utils import list_keys
 from yara_toolkit.yara_meta import YaraMeta
 from yara_toolkit.yara_rule import YaraRule
 from yara_toolkit.yara_string import YaraString
@@ -101,9 +102,9 @@ class RulesOracleRequest(Resource):
         theoracle_rules_dir = os.path.join(CONFIG["theoracle_local_path"], CONFIG["theoracle_repo_rules_dir"])
         yara_files = os.listdir(theoracle_rules_dir)
         retv = jsonify({"files": yara_files})
-        # log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(
-        #     route='/rules',
-        #     num=len(rules), keys_list=str((list(rules[0].keys()))), js=json.dumps(retv.json, indent=4)))
+        log.info("HTTP GET '{route}' returning {num}x JSON{keys_list}:\n{js}".format(
+            route='/rules',
+            num=len(yara_files), keys_list=str(list_keys(yara_files)), js=json.dumps(retv.json, indent=4)))
 
         return retv
 
