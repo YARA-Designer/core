@@ -29,7 +29,7 @@ DEFAULT_CONFIG = {
     "theoracle_server": "127.0.0.1",
     "theoracle_port": 22,
     "theoracle_user": "git",
-    "theoracle_remote_repo": "",
+    "theoracle_repo": "",
     "theoracle_local_path": "the-oracle",
     "theoracle_repo_rules_dir": "rules",
     "hive_case_meta_fields": ["createdBy", "owner", "description", "id", "title", "pap", "tlp"],
