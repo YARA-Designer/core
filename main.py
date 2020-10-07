@@ -11,6 +11,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import apis.handling
 from apis import blueprint as api
 from database.operations import get_rules
+from flask_helpers import ReverseProxied
 from handlers import config_handler
 from handlers.log_handler import create_logger
 import handlers.git_handler as git
@@ -95,7 +96,9 @@ if __name__ == "__main__":
     # app.config["SERVER_NAME"] = config["listener_server_name"]
     # app.config["APPLICATION_ROOT"] = config["listener_application_root"] # FIXME: Sub-root support!
     # Make Flask serve all files in the specified protocol, not just some.
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+    # app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+    # Make Flask app support reverse proxy with sub-path.
+    app.wsgi_app = ReverseProxied(app.wsgi_app)
     log.info("Configured Flask app.")
     CORS(app)
 
