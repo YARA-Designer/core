@@ -87,6 +87,7 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
         log.exception(
             "An unexpected exception occurred when creating YaraRule from yara_sources_dict! Raising to parent.",
             exc_info=exc)
+        log.error("yara_sources_dict:\n{}".format(json.dumps(yara_sources_dict, indent=4)))
         raise
     log.debug("source code: \n{}".format(retv["source"]))
 
