@@ -246,6 +246,10 @@ class YaraString:
         else:
             self.identifier = sanitize_identifier(identifier)
 
+    def denominated_identifier(self):
+        """Returns identifier prefixed by var denominator, ex: $my_name """
+        return "{var_sym}{identifier}".format(var_sym=YARA_VAR_SYMBOL, identifier=self.identifier)
+
     def create_from_dict(self, from_dict):
         self.determine_identifier(from_dict.keys()[0])
         self.value = from_dict["observable"]
