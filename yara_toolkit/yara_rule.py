@@ -875,22 +875,40 @@ class YaraRule:
 
     def get_referenced_strings(self) -> List[YaraString]:
         """
-        In YARA it is a SyntaxError to have unreferenced strings/vars,
-        so these need to be rinsed out before rule compilation.
+        In YARA it is a SyntaxError to have defined strings that are not referenced in
+        the condition, so these need to be rinsed out before rule compilation.
 
-        :return: Returns dict of strings that are referenced in the conditional statement.
+        :return: Returns list of strings that are referenced in the conditional statement.
         """
         # Find all occurrences of words starting with $ (i.e. variable names)
         r = re.compile(r'[$#][\w]*\b\S+')
         matched_condition_strings = r.findall(str(self.condition))
 
-        # Get rid of mismatches by making a list of items that only matches the actual strings/vars list.
-        confirmed_items = []
-        for matched_condition_identifier, yara_string in zip(matched_condition_strings, self.strings):
-            if sanitize_identifier(matched_condition_identifier[1:]) == yara_string.identifier:
-                confirmed_items.append(yara_string)
+        # Create a dict of own YaraString objects by identifier.
+        my_strings_by_identifier = {x.identifier: x for x in self.strings}
 
-        return confirmed_items
+        log.debug("My identifiers: {}".format(my_strings_by_identifier.keys()))
+        log.debug("Matched YARA strings in condition: {}".format([x[1:] for x in matched_condition_strings]))
+
+        # Get rid of mismatches by making a list of items that only matches the actual strings/vars list.
+        referenced_yara_strings = []
+        # List of matched identifiers to avoid needing to loop through each YaraString in the above list.
+        matched_identifiers = []
+        for matched_condition_string in matched_condition_strings:
+            # Strip the var/count/etc denominator symbol to match my_idents entry format.
+            identifier = matched_condition_string[1:]
+
+            if identifier in my_strings_by_identifier.keys():
+                # Avoid duplicate entries.
+                if identifier not in matched_identifiers:
+                    # Append the string identified by this identifier to the list of confirmed YaraString objects.
+                    referenced_yara_strings.append(my_strings_by_identifier[identifier])
+                    # Append the identifier to list used for duplication check.
+                    matched_identifiers.append(identifier)
+
+        log.debug("referenced identifiers: {}".format([x.identifier for x in referenced_yara_strings]))
+
+        return referenced_yara_strings
 
     def condition_as_lines(self) -> str:
         """
