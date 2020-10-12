@@ -5,19 +5,27 @@ import os
 CONFIG_FILE = "config.json"
 SAMPLE_CONFIG_FILE = "config.json.sample"
 DEFAULT_CONFIG = {
+    # Debug
     "debug": False,
+    # Logging
     "log_to_file": False,
     "log_level": 1,
     "logging_port": 19995,
     "logging_dir": "logs/",
+    # TheHive
     "hive_server": "127.0.0.1",
     "hive_port": 9000,
     "hive_api_key": "SuGd5Aj4NNudH8unh5CpWLm4U/MYDeVc",
+    "hive_case_meta_fields": ["createdBy", "owner", "description", "id", "title", "pap", "tlp"],
+    "hive_case_string_fields": [],
+    # Own Flask server
     "listener_bind_host": "0.0.0.0",
     "listener_server_name": "localhost:5001",
     "listener_application_root": "/",
     "listener_bind_port": 5001,
+    # Utils
     "datetime_format": "%Y-%m-%d %H:%M:%SZ",
+    # Git (wrapped GitPy)
     "git_username": "",
     "git_email": "",
     "git_commit_msg_fmt": "Update YARA Rule: {rulename}",
@@ -26,14 +34,13 @@ DEFAULT_CONFIG = {
     "git_checkout_forcibly": True,
     "git_push_forcibly": False,
     "git_pull_forcibly": False,
+    # TheOracle Git repository
     "theoracle_server": "127.0.0.1",
     "theoracle_port": 22,
     "theoracle_user": "git",
     "theoracle_repo": "",
     "theoracle_local_path": "the-oracle",
-    "theoracle_repo_rules_dir": "rules",
-    "hive_case_meta_fields": ["createdBy", "owner", "description", "id", "title", "pap", "tlp"],
-    "hive_case_string_fields": []
+    "theoracle_repo_rules_dir": "rules"
 }
 
 # Let's make sure we copy default config by value, not reference. So that it remains unmodified.
