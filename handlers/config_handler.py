@@ -12,6 +12,8 @@ DEFAULT_CONFIG = {
     "log_level": 1,
     "logging_port": 19995,
     "logging_dir": "logs/",
+    # YARA
+    "yara_ignore_compiler_errors": False,
     # TheHive
     "hive_server": "127.0.0.1",
     "hive_port": 9000,

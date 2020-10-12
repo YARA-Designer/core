@@ -96,6 +96,26 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
         # Save rule source code to text file and store the returned filepath for use in frontend.
         retv["source_path"] = rule.save_source()
 
+        if CONFIG["yara_ignore_compiler_errors"]:
+            log.warning("Proceeding with ignoring compiler errors (specified by config)!")
+            try:
+                rule.compile(save_file=verify_compiled, error_on_warning=False)
+            except Exception as e:  # TODO: Look into supporting the various specific exceptions
+                log.warning("IGNORING YARA Rule Compilation '{}' exception!".format(str(e)), exc_info=e)
+                retv["error"] = {
+                    "type": "Syntax",
+                    "message": str(e),
+                    "line_number": None,
+                    "column_number": None,
+                    "column_range": None,
+                    "word": None
+                }
+            finally:
+                retv["compilable"] = False  # If unknown, assume False.
+                retv["success"] = True  # As we've been told to ignore compiler errors, this is technically a success.
+
+                return retv
+
         # Compilation try-block to specifically catch syntax errors.
         try:
             # Compile and save file to verify the validity of the YARA code.
