@@ -126,25 +126,32 @@ def delimiter_wrap_type(value: str, string_type: str):
         retv = ""
 
         if len(value) > 0:
-            # If value did not start or end with its string type delimiters, set flag for adding them.
-            # Check for both sides in order to handle edge cases like 'example"', where it looks like
-            # it ends delimited, but it doesn't really.
-            if value[0] == STRING_TYPE_DELIMITERS[string_type]["start"] and \
-                    value[-1] == STRING_TYPE_DELIMITERS[string_type]["end"]:
-                delimited = True
+            # If value contains at least two chars.
+            if len(value) > 1:
+                # If value did not start or end with its string type delimiters, set flag for adding them.
+                # Check for both sides in order to handle edge cases like 'example"', where it looks like
+                # it ends delimited, but it doesn't really.
+                if value[0] == STRING_TYPE_DELIMITERS[string_type]["start"] and \
+                        value[-1] == STRING_TYPE_DELIMITERS[string_type]["end"]:
+                    delimited = True
+                else:
+                    delimited = False
+
+                # If value does not start with its delimiter, add it
+                if not delimited:
+                    retv += STRING_TYPE_DELIMITERS[string_type]["start"] + indent
+
+                # Add the value string.
+                retv += value
+
+                # If value does not end with its delimiter, and  add it
+                if not delimited:
+                    retv += indent + STRING_TYPE_DELIMITERS[string_type]["end"]
             else:
-                delimited = False
-
-            # If value does not start with its delimiter, add it
-            if not delimited:
-                retv += STRING_TYPE_DELIMITERS[string_type]["start"] + indent
-
-            # Add the value string.
-            retv += value
-
-            # If value does not end with its delimiter, and  add it
-            if not delimited:
-                retv += indent + STRING_TYPE_DELIMITERS[string_type]["end"]
+                # Handle single character cases separately due to edge cases with quotes and esc sequences.
+                retv = STRING_TYPE_DELIMITERS[string_type]["start"] \
+                       + indent + value + indent \
+                       + STRING_TYPE_DELIMITERS[string_type]["end"]
         else:
             # If value has no contents.
             retv = STRING_TYPE_DELIMITERS[string_type]["start"] + indent \
