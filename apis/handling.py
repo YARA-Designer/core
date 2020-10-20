@@ -103,7 +103,7 @@ def create_yara_file(yara_sources_dict: dict, keep_compiled=False, verify_compil
             except Exception as e:  # TODO: Look into supporting the various specific exceptions
                 log.warning("IGNORING YARA Rule Compilation '{}' exception!".format(str(e)), exc_info=e)
                 retv["error"] = {
-                    "type": "Syntax",
+                    "type": e.__class__.__name__,
                     "message": str(e),
                     "line_number": None,
                     "column_number": None,
