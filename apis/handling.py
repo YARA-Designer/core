@@ -3,6 +3,7 @@ import json
 import os
 
 import handlers.git_handler as git
+from handlers.git_handler.gitpy.exc import CheckoutError
 from flask import request, jsonify, make_response
 from thehive4py.api import TheHiveApi
 from werkzeug.datastructures import ImmutableMultiDict
@@ -218,14 +219,26 @@ def generate_yara_rule(yara_rule_json: json):
         if not retv["out"]["success"]:
             if not retv["out"]["compilable"]:
                 log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
-                reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
+                try:
+                    reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
+                except CheckoutError as e:
+                    log.warning("FAILED (exc: {exc_type}) Resetting invalid changed file "
+                                "to avoid git-within-git changelist issues.".format(exc_type=e.__class__.__name__),
+                                exc_info=e)
+
     except Exception as exc:
         try:
             if "name" in yara_rule_json:
                 if "out" in retv:
                     if "source_path" in retv["out"]:
                         log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
-                        reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
+                        try:
+                            reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
+                        except CheckoutError as e:
+                            log.warning("FAILED (exc: {exc_type}) Resetting invalid changed file "
+                                        "to avoid git-within-git changelist issues."
+                                        "".format(exc_type=e.__class__.__name__),
+                                        exc_info=e)
                     else:
                         log.info("Unable to reset invalid changed file to avoid git-within-git changelist issues: "
                                  "'generated_yara_source_file' not in retv[\"out\"]!")
