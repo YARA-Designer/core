@@ -2,8 +2,7 @@ import datetime
 import json
 import os
 
-import handlers.git_handler as git
-import git.exc
+from handlers import git_handler
 from flask import request, jsonify, make_response
 from thehive4py.api import TheHiveApi
 from werkzeug.datastructures import ImmutableMultiDict
@@ -204,7 +203,7 @@ def generate_yara_rule(yara_rule_json: json):
     log.debug("Received YARA Rule Dict:\n{}".format(json.dumps(yara_rule_json, indent=4)))
     retv = {"in": yara_rule_json}
 
-    the_oracle_repo = git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
+    the_oracle_repo = git_handler.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
 
     # Try to create a YARA file.
     try:
@@ -221,7 +220,7 @@ def generate_yara_rule(yara_rule_json: json):
                 log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
                 try:
                     reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
-                except git.exc.CheckoutError as e:
+                except git_handler.exc.CheckoutError as e:
                     log.warning("FAILED (exc: {exc_type}) Resetting invalid changed file "
                                 "to avoid git-within-git changelist issues.".format(exc_type=e.__class__.__name__),
                                 exc_info=e)
@@ -234,7 +233,7 @@ def generate_yara_rule(yara_rule_json: json):
                         log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
                         try:
                             reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
-                        except git.exc.CheckoutError as e:
+                        except git_handler.exc.CheckoutError as e:
                             log.warning("FAILED (exc: {exc_type}) Resetting invalid changed file "
                                         "to avoid git-within-git changelist issues."
                                         "".format(exc_type=e.__class__.__name__),
@@ -272,6 +271,3 @@ def generate_yara_rule(yara_rule_json: json):
             return retv
 
     return retv
-
-
-

@@ -2,9 +2,8 @@ import os
 import sys
 from pathlib import Path
 
-import git as gitpy
-import git.exc as exc
-from git import Repo, Remote
+import git
+from git import Repo, Remote, exc
 from git.objects import Blob, Commit, TagObject, Tree, Submodule
 from git.util import Actor
 
@@ -22,9 +21,9 @@ def is_repo(path):
     :return:        Boolean.
     """
     try:
-        _ = gitpy.Repo(path).git_dir
+        _ = git.Repo(path).git_dir
         return True
-    except gitpy.exc.InvalidGitRepositoryError:
+    except git.exc.InvalidGitRepositoryError:
         return False
 
 
@@ -32,7 +31,7 @@ def get_repo_dir(repo: Repo, strict=True) -> str:
     return str(Path(repo.git_dir).parent.resolve(strict=strict))
 
 
-def get_or_init_repo(path: str) -> gitpy.Repo:
+def get_or_init_repo(path: str) -> git.Repo:
     """
     Gets a Git repo, if one doesn't already exist inits one and returns that.
 
@@ -43,14 +42,14 @@ def get_or_init_repo(path: str) -> gitpy.Repo:
     if is_repo(path):
         # An existing repo as a base.
         log.info("'{}' is already a Git repository, skipping init.".format(path))
-        return gitpy.Repo(path)
+        return git.Repo(path)
     else:
         # An empty repo as a base.
         log.info("Initializing Git repository: '{}'.".format(path))
-        return gitpy.Repo.init(path)
+        return git.Repo.init(path)
 
 
-def add_remote(remote_name: str, repo: gitpy.Repo, url: str) -> gitpy.Remote:
+def add_remote(remote_name: str, repo: git.Repo, url: str) -> git.Remote:
     """
     Adds a remote to a Git repository.
 
@@ -87,7 +86,7 @@ def add_remote(remote_name: str, repo: gitpy.Repo, url: str) -> gitpy.Remote:
     return remote
 
 
-def pull(remote: gitpy.Remote):
+def pull(remote: git.Remote):
     """
     Performs a Git pull from a given remote repository.
 
@@ -97,13 +96,13 @@ def pull(remote: gitpy.Remote):
     log.info("Pulling data from remote '{}'...".format(remote))
     try:
         remote.pull()
-    except gitpy.exc.GitCommandError as git_exc:
+    except git.exc.GitCommandError as git_exc:
         log.exception("Failed to pull from remote '{}'!".format(remote), exc_info=git_exc)
         sys.stderr.write("Failed to pull from remote '{}', "
                          "check that git host is online, then restart or perform a manual pull!".format(remote))
 
 
-def clone_if_not_exist(url: str, path: str) -> gitpy.Repo:
+def clone_if_not_exist(url: str, path: str) -> git.Repo:
     """
     Sets up and clones a Git repository of Repo and/or remote "origin" does not exist,
     else it performs a Git pull on an existing one.

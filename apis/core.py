@@ -8,7 +8,7 @@ from flask_restx import Namespace, Resource, fields
 from utils import list_keys
 from .handling import generate_yara_rule
 
-import handlers.git_handler as git
+from handlers import git_handler
 from database.operations import update_rule, get_rule, get_rules
 from handlers.config_handler import CONFIG
 from handlers.log_handler import create_logger
@@ -180,7 +180,7 @@ class PostCommit(Resource):
         yara_rulename = request.json["name"]
         thehive_case_id = request.json["thehive_case_id"]
 
-        the_oracle_repo = git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
+        the_oracle_repo = git_handler.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
 
         try:
             # 1. Git Pull (Make sure we're in sync with remote/origin).
@@ -198,7 +198,7 @@ class PostCommit(Resource):
 
             if tree_differs:
                 commit_message = CONFIG["git_commit_msg_fmt"].format(rulename=yara_rulename)
-                git_author = git.Actor(CONFIG["git_username"], CONFIG["git_email"])
+                git_author = git_handler.Actor(CONFIG["git_username"], CONFIG["git_email"])
                 git_committer = git_author  # git.gitpy.Actor(config["git_username"], config["git_email"]
 
                 log.info("Git Commit.")

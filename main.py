@@ -9,7 +9,7 @@ from apis import blueprint as api
 from flask_helpers import ReverseProxied
 from handlers import config_handler
 from handlers.log_handler import create_logger
-import handlers.git_handler as git
+from handlers import git_handler
 from database import init_db
 
 log = create_logger(__name__)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     log.info("Initialized database.")
 
     # Set up TheOracle Git.
-    git.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
+    git_handler.clone_if_not_exist(url=config["theoracle_repo"], path=config["theoracle_local_path"])
 
     # Set up Flask.
     app = MyFlask(__name__)

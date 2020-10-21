@@ -10,7 +10,7 @@ from hashlib import sha256
 
 from handlers.log_handler import create_logger
 from handlers.config_handler import CONFIG
-from handlers import git_handler as git
+from handlers import git_handler
 from utils import list_keys
 from yara_toolkit.yara_meta import YaraMeta
 from yara_toolkit.yara_rule import YaraRule
@@ -181,7 +181,7 @@ class RulesOracleRequest(Resource):
         # Do a git pull to get latest revision
         try:
             log.info("Git pull theoracle repo.")
-            git.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
+            git_handler.clone_if_not_exist(url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"])
         except Exception as exc:
             log.exception("Caught exception when trying to git.clone_if_not_exist!\nurl={url}\npath={path}".format(
                 url=CONFIG["theoracle_repo"], path=CONFIG["theoracle_local_path"]), exc_info=exc)
