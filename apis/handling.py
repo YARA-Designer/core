@@ -3,7 +3,7 @@ import json
 import os
 
 import handlers.git_handler as git
-from handlers.git_handler.gitpy.exc import CheckoutError
+import git.exc
 from flask import request, jsonify, make_response
 from thehive4py.api import TheHiveApi
 from werkzeug.datastructures import ImmutableMultiDict
@@ -221,7 +221,7 @@ def generate_yara_rule(yara_rule_json: json):
                 log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
                 try:
                     reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
-                except CheckoutError as e:
+                except git.exc.CheckoutError as e:
                     log.warning("FAILED (exc: {exc_type}) Resetting invalid changed file "
                                 "to avoid git-within-git changelist issues.".format(exc_type=e.__class__.__name__),
                                 exc_info=e)
@@ -234,7 +234,7 @@ def generate_yara_rule(yara_rule_json: json):
                         log.info("Resetting invalid changed file to avoid git-within-git changelist issues.")
                         try:
                             reset_invalid_yara_rule(the_oracle_repo, retv["out"]["source_path"])
-                        except CheckoutError as e:
+                        except git.exc.CheckoutError as e:
                             log.warning("FAILED (exc: {exc_type}) Resetting invalid changed file "
                                         "to avoid git-within-git changelist issues."
                                         "".format(exc_type=e.__class__.__name__),

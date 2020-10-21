@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import git as gitpy
+import git.exc as exc
 from git import Repo, Remote
 from git.objects import Blob, Commit, TagObject, Tree, Submodule
 from git.util import Actor
