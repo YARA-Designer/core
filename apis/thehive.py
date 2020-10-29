@@ -74,6 +74,11 @@ thehive_case_with_observables_model = api.model("TheHive-Case (Modified to conta
 })
 
 
+def sanitize_case_property(s):
+    """Removes problematic characters from a string"""
+    return repr(s)[1:-1]
+
+
 @api.route('/cortex-responder')
 class CortexResponder(Resource):
     @api.expect(thehive_case_model)
@@ -128,8 +133,8 @@ class CortexResponder(Resource):
             all_unique_tags = list(set(all_tags))
 
             rule = YaraRuleDB(
-                title=case["title"],
-                description=case["description"],
+                title=sanitize_case_property(case["title"]),
+                description=sanitize_case_property(case["description"]),
                 thehive_case_id=case_id,
                 tags=all_unique_tags,
                 meta=[YaraMeta(field, case[field]) for field in CONFIG["hive_case_meta_fields"]],
